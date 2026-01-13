@@ -257,7 +257,7 @@ const Countries = () => {
             {success}
           </CAlert>
         )}
-        <CCard className="mb-4">
+        <CCard className="mb-4 card-hover animate-fade-in">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
               <h5 className="mb-0">
@@ -268,7 +268,7 @@ const Countries = () => {
             <div>
               <CButton
                 color="primary"
-                className="me-2"
+                className="me-2 btn-animated"
                 onClick={() => {
                   handleReset()
                   setShowModal(true)
@@ -277,7 +277,7 @@ const Countries = () => {
                 <CIcon icon={cilPlus} className="me-2" />
                 Add Country
               </CButton>
-              <CButton color="secondary" variant="outline" onClick={fetchCountries}>
+              <CButton color="secondary" variant="outline" className="btn-animated" onClick={fetchCountries}>
                 <CIcon icon={cilReload} />
               </CButton>
             </div>
@@ -339,8 +339,8 @@ const Countries = () => {
                       </CTableDataCell>
                     </CTableRow>
                   ) : (
-                    filteredCountries.map((country) => (
-                      <CTableRow key={country._id || country.id}>
+                    filteredCountries.map((country, index) => (
+                      <CTableRow key={country._id || country.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                         <CTableDataCell className="text-center">
                           {country.image ? (
                             <img
@@ -391,7 +391,7 @@ const Countries = () => {
                             color="primary"
                             variant="outline"
                             size="sm"
-                            className="me-2"
+                            className="me-2 btn-animated"
                             onClick={() => handleEdit(country)}
                           >
                             <CIcon icon={cilPencil} />
@@ -400,6 +400,7 @@ const Countries = () => {
                             color="danger"
                             variant="outline"
                             size="sm"
+                            className="btn-animated"
                             onClick={() => handleDeleteClick(country)}
                           >
                             <CIcon icon={cilTrash} />
@@ -415,7 +416,7 @@ const Countries = () => {
         </CCard>
 
         {/* Add Country Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)}>
+        <CModal visible={showModal} onClose={() => setShowModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>Add New Country</CModalTitle>
           </CModalHeader>
@@ -539,7 +540,7 @@ const Countries = () => {
               >
                 Cancel
               </CButton>
-              <CButton color="primary" type="submit">
+              <CButton color="primary" type="submit" className="btn-animated">
                 {editingId ? 'Update Country' : 'Add Country'}
               </CButton>
             </CModalFooter>
@@ -547,7 +548,7 @@ const Countries = () => {
         </CModal>
 
         {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>Confirm Delete</CModalTitle>
           </CModalHeader>
@@ -558,7 +559,7 @@ const Countries = () => {
             <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete}>
+            <CButton color="danger" onClick={handleDelete} className="btn-animated">
               Delete
             </CButton>
           </CModalFooter>

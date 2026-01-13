@@ -276,7 +276,7 @@ const Coupons = () => {
             {success}
           </CAlert>
         )}
-        <CCard className="mb-4">
+        <CCard className="mb-4 card-hover animate-fade-in">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
               <h5 className="mb-0">
@@ -287,7 +287,7 @@ const Coupons = () => {
             <div>
               <CButton
                 color="primary"
-                className="me-2"
+                className="me-2 btn-animated"
                 onClick={() => {
                   handleReset()
                   setShowModal(true)
@@ -296,7 +296,7 @@ const Coupons = () => {
                 <CIcon icon={cilPlus} className="me-2" />
                 Add Coupon
               </CButton>
-              <CButton color="secondary" variant="outline" onClick={fetchCoupons}>
+              <CButton color="secondary" variant="outline" className="btn-animated" onClick={fetchCoupons}>
                 <CIcon icon={cilReload} />
               </CButton>
             </div>
@@ -345,8 +345,8 @@ const Coupons = () => {
                       </CTableDataCell>
                     </CTableRow>
                   ) : (
-                    filteredCoupons.map((coupon) => (
-                      <CTableRow key={coupon._id || coupon.id}>
+                    filteredCoupons.map((coupon, index) => (
+                      <CTableRow key={coupon._id || coupon.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                         <CTableDataCell className="text-center">
                           <CBadge color="info">{coupon.code?.charAt(0) || 'C'}</CBadge>
                         </CTableDataCell>
@@ -395,7 +395,7 @@ const Coupons = () => {
                             color="primary"
                             variant="outline"
                             size="sm"
-                            className="me-2"
+                            className="me-2 btn-animated"
                             onClick={() => handleEdit(coupon)}
                             title="Edit Coupon"
                           >
@@ -405,6 +405,7 @@ const Coupons = () => {
                             color="danger"
                             variant="outline"
                             size="sm"
+                            className="btn-animated"
                             onClick={() => handleDeleteClick(coupon)}
                             title="Delete Coupon"
                           >
@@ -421,7 +422,7 @@ const Coupons = () => {
         </CCard>
 
         {/* Add/Edit Coupon Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg">
+        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg" className="modal-animate">
           <CModalHeader>
             <CModalTitle>{editingId ? 'Edit Coupon' : 'Add New Coupon'}</CModalTitle>
           </CModalHeader>
@@ -608,7 +609,7 @@ const Coupons = () => {
               >
                 Cancel
               </CButton>
-              <CButton color="primary" type="submit" disabled={loading}>
+              <CButton color="primary" type="submit" disabled={loading} className="btn-animated">
                 {loading ? (
                   <>
                     <CSpinner size="sm" className="me-2" />
@@ -625,7 +626,7 @@ const Coupons = () => {
         </CModal>
 
         {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>Confirm Delete</CModalTitle>
           </CModalHeader>
@@ -642,7 +643,7 @@ const Coupons = () => {
             >
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete} disabled={loading}>
+            <CButton color="danger" onClick={handleDelete} disabled={loading} className="btn-animated">
               {loading ? (
                 <>
                   <CSpinner size="sm" className="me-2" />

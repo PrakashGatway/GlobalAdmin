@@ -178,7 +178,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <CRow className="mb-4">
+      <CRow className="mb-4 animate-fade-in">
         <CCol xs={12}>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div>
@@ -187,7 +187,7 @@ const Dashboard = () => {
               </h4>
               <small className="text-body-secondary">Overview of your system and analytics</small>
             </div>
-            <CButton color="secondary" variant="outline">
+            <CButton color="secondary" variant="outline" className="btn-animated">
               <CIcon icon={cilCloudDownload} className="me-2" />
               Export
             </CButton>
@@ -195,9 +195,9 @@ const Dashboard = () => {
         </CCol>
       </CRow>
 
-      <WidgetsDropdown className="mb-4" />
+      <WidgetsDropdown className="mb-4 animate-stagger" />
       
-      <CCard className="mb-4">
+      <CCard className="mb-4 card-hover animate-fade-in" style={{ animationDelay: '0.2s' }}>
         <CCardHeader className="d-flex justify-content-between align-items-center">
           <div>
             <h5 className="mb-0">
@@ -359,7 +359,7 @@ const Dashboard = () => {
                 </CTableHead>
                 <CTableBody>
                   {tableExample.map((item, index) => (
-                    <CTableRow key={index}>
+                    <CTableRow key={index} className="table-row-hover" style={{ animationDelay: `${index * 0.1}s` }}>
                       <CTableDataCell className="text-center">
                         <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
                       </CTableDataCell>

@@ -39,8 +39,9 @@ const WidgetsDropdown = (props) => {
 
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3} className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <CWidgetStatsA
+          className="card-hover"
           color="primary"
           value={
             <>
@@ -129,8 +130,9 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3} className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
         <CWidgetStatsA
+          className="card-hover"
           color="info"
           value={
             <>
@@ -218,8 +220,9 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3} className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
         <CWidgetStatsA
+          className="card-hover"
           color="warning"
           value={
             <>
@@ -290,8 +293,9 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
-      <CCol sm={6} xl={4} xxl={3}>
+      <CCol sm={6} xl={4} xxl={3} className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
         <CWidgetStatsA
+          className="card-hover"
           color="danger"
           value={
             <>

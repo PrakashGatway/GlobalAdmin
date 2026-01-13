@@ -75,6 +75,9 @@ exports.sendOTP = async (req, res) => {
     // Generate 6-digit OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
 
+    // Log OTP to console (for development/testing)
+    console.log(`\n📧 OTP Generated for ${email} (${role}): ${otpCode}\n`)
+
     // Delete any existing OTPs for this email and role
     await OTP.deleteMany({ email, role, isUsed: false })
 
@@ -90,12 +93,13 @@ exports.sendOTP = async (req, res) => {
     try {
       await sendOTPEmail(email, otpCode, role)
     } catch (emailError) {
-      // If email fails in development, still return success with OTP in response
+      // If email fails, log error but don't return OTP in response
+      console.error('Failed to send OTP email:', emailError.message)
       if (process.env.NODE_ENV === 'development') {
+        // In development, return success message but don't include OTP in response
         return res.json({
           success: true,
-          message: 'OTP sent successfully (check console for OTP)',
-          otp: otpCode, // Only in development
+          message: 'OTP generated (check terminal/console for OTP)',
         })
       }
       throw emailError

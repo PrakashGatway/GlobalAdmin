@@ -30,14 +30,6 @@ const defaultUsers = [
     role: 'counsellor',
     status: 'Active',
   },
-  {
-    name: 'Regular User',
-    email: 'user@gateway.com',
-    phone: '+1234567893',
-    password: 'user123',
-    role: 'user',
-    status: 'Active',
-  },
 ]
 
 const seedUsers = async () => {

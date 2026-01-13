@@ -195,7 +195,7 @@ const UserList = () => {
             {success}
           </CAlert>
         )}
-        <CCard className="mb-4">
+        <CCard className="mb-4 card-hover animate-fade-in">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
               <h5 className="mb-0">
@@ -265,8 +265,8 @@ const UserList = () => {
                       </CTableDataCell>
                     </CTableRow>
                   ) : (
-                    filteredUsers.map((user) => (
-                      <CTableRow key={user._id || user.id}>
+                    filteredUsers.map((user, index) => (
+                      <CTableRow key={user._id || user.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                         <CTableDataCell className="text-center">
                           {user.profileImage ? (
                             <img
@@ -316,7 +316,7 @@ const UserList = () => {
                             color="primary"
                             variant="outline"
                             size="sm"
-                            className="me-2"
+                            className="me-2 btn-animated"
                             onClick={() => handleEdit(user)}
                             title="Edit User"
                           >
@@ -326,6 +326,7 @@ const UserList = () => {
                             color="danger"
                             variant="outline"
                             size="sm"
+                            className="btn-animated"
                             onClick={() => handleDeleteClick(user)}
                             title="Delete User"
                           >
@@ -342,7 +343,7 @@ const UserList = () => {
         </CCard>
 
         {/* Edit User Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg">
+        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg" className="modal-animate">
           <CModalHeader>
             <CModalTitle>{editingId ? 'Edit User' : 'Add New User'}</CModalTitle>
           </CModalHeader>
@@ -467,7 +468,7 @@ const UserList = () => {
         </CModal>
 
         {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>Confirm Delete</CModalTitle>
           </CModalHeader>
@@ -484,7 +485,7 @@ const UserList = () => {
             >
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete} disabled={loading}>
+            <CButton color="danger" onClick={handleDelete} disabled={loading} className="btn-animated">
               {loading ? (
                 <>
                   <CSpinner size="sm" className="me-2" />

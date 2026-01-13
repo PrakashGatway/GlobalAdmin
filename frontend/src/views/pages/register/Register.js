@@ -84,98 +84,182 @@ const Register = () => {
   }
 
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center position-relative" style={{ 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-50%',
+        right: '-50%',
+        width: '200%',
+        height: '200%',
+        background: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+        backgroundSize: '50px 50px',
+        animation: 'float 20s ease-in-out infinite',
+        opacity: 0.3
+      }}></div>
+      
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={9} lg={7} xl={6}>
-            <CCard className="mx-4">
-              <CCardBody className="p-4">
+            <CCard className="mx-4 border-0 shadow-lg animate-fade-in" style={{ 
+              borderRadius: '20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <CCardBody className="p-5">
                 <CForm onSubmit={handleSubmit}>
-                  <h1>Register</h1>
-                  <p className="text-body-secondary">Create your account</p>
+                  <div className="text-center mb-4">
+                    <div className="mb-3" style={{ fontSize: '3rem' }}>👋</div>
+                    <h1 className="mb-2" style={{ fontWeight: '700', color: '#2c3e50' }}>Create Account</h1>
+                    <p className="text-body-secondary mb-0">Fill in your details to get started</p>
+                  </div>
 
                   {error && (
-                    <CAlert color="danger" className="mb-3">
-                      {error}
+                    <CAlert color="danger" className="mb-3 animate-fade-in" dismissible onClose={() => setError('')}>
+                      <strong>Error:</strong> {error}
                     </CAlert>
                   )}
 
-                  <CInputGroup className="mb-3">
-                    <CInputGroupText>
-                      <CIcon icon={cilUser} />
+                  <CInputGroup className="mb-3" style={{ borderRadius: '10px', overflow: 'hidden' }}>
+                    <CInputGroupText style={{ backgroundColor: '#f8f9fa', borderRight: 'none' }}>
+                      <CIcon icon={cilUser} style={{ color: '#667eea' }} />
                     </CInputGroupText>
                     <CFormInput
-                      placeholder="Full Name"
+                      placeholder="Enter your full name"
                       autoComplete="name"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       required
+                      style={{ 
+                        borderLeft: 'none',
+                        padding: '12px 15px',
+                        fontSize: '1rem'
+                      }}
+                      className="form-control-lg"
                     />
                   </CInputGroup>
-                  <CInputGroup className="mb-3">
-                    <CInputGroupText>@</CInputGroupText>
+                  
+                  <CInputGroup className="mb-3" style={{ borderRadius: '10px', overflow: 'hidden' }}>
+                    <CInputGroupText style={{ backgroundColor: '#f8f9fa', borderRight: 'none' }}>
+                      <span style={{ color: '#667eea', fontWeight: 'bold' }}>@</span>
+                    </CInputGroupText>
                     <CFormInput
                       type="email"
-                      placeholder="Email"
+                      placeholder="Enter your email address"
                       autoComplete="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
+                      style={{ 
+                        borderLeft: 'none',
+                        padding: '12px 15px',
+                        fontSize: '1rem'
+                      }}
+                      className="form-control-lg"
                     />
                   </CInputGroup>
-                  <CInputGroup className="mb-3">
-                    <CInputGroupText>
-                      <CIcon icon={cilPhone} />
+                  
+                  <CInputGroup className="mb-3" style={{ borderRadius: '10px', overflow: 'hidden' }}>
+                    <CInputGroupText style={{ backgroundColor: '#f8f9fa', borderRight: 'none' }}>
+                      <CIcon icon={cilPhone} style={{ color: '#667eea' }} />
                     </CInputGroupText>
                     <CFormInput
                       type="tel"
-                      placeholder="Phone Number"
+                      placeholder="Enter your phone number"
                       autoComplete="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
                       required
+                      style={{ 
+                        borderLeft: 'none',
+                        padding: '12px 15px',
+                        fontSize: '1rem'
+                      }}
+                      className="form-control-lg"
                     />
                   </CInputGroup>
-                  <CInputGroup className="mb-3">
-                    <CInputGroupText>
-                      <CIcon icon={cilLockLocked} />
+                  
+                  <CInputGroup className="mb-3" style={{ borderRadius: '10px', overflow: 'hidden' }}>
+                    <CInputGroupText style={{ backgroundColor: '#f8f9fa', borderRight: 'none' }}>
+                      <CIcon icon={cilLockLocked} style={{ color: '#667eea' }} />
                     </CInputGroupText>
                     <CFormInput
                       type="password"
-                      placeholder="Password"
+                      placeholder="Create a password (min. 6 characters)"
                       autoComplete="new-password"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
                       required
+                      style={{ 
+                        borderLeft: 'none',
+                        padding: '12px 15px',
+                        fontSize: '1rem'
+                      }}
+                      className="form-control-lg"
                     />
                   </CInputGroup>
-                  <CInputGroup className="mb-4">
-                    <CInputGroupText>
-                      <CIcon icon={cilLockLocked} />
+                  
+                  <CInputGroup className="mb-4" style={{ borderRadius: '10px', overflow: 'hidden' }}>
+                    <CInputGroupText style={{ backgroundColor: '#f8f9fa', borderRight: 'none' }}>
+                      <CIcon icon={cilLockLocked} style={{ color: '#667eea' }} />
                     </CInputGroupText>
                     <CFormInput
                       type="password"
-                      placeholder="Confirm Password"
+                      placeholder="Confirm your password"
                       autoComplete="new-password"
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
+                      style={{ 
+                        borderLeft: 'none',
+                        padding: '12px 15px',
+                        fontSize: '1rem'
+                      }}
+                      className="form-control-lg"
                     />
                   </CInputGroup>
+                  
                   <div className="d-grid mb-3">
-                    <CButton color="success" type="submit" disabled={loading}>
-                      {loading ? <CSpinner size="sm" /> : 'Create Account'}
+                    <CButton 
+                      color="success" 
+                      type="submit" 
+                      disabled={loading} 
+                      className="btn-animated"
+                      style={{ 
+                        padding: '12px',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                        border: 'none'
+                      }}
+                    >
+                      {loading ? (
+                        <>
+                          <CSpinner size="sm" className="me-2" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        'Create Account'
+                      )}
                     </CButton>
                   </div>
+                  
                   <div className="text-center">
-                    <Link to="/login">
-                      <CButton color="link">Already have an account? Login</CButton>
-                    </Link>
+                    <p className="text-body-secondary mb-2">
+                      Already have an account?{' '}
+                      <Link to="/login" style={{ color: '#667eea', fontWeight: '600', textDecoration: 'none' }}>
+                        Login here
+                      </Link>
+                    </p>
                   </div>
                 </CForm>
               </CCardBody>

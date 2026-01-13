@@ -257,7 +257,7 @@ const Universities = () => {
             {success}
           </CAlert>
         )}
-        <CCard className="mb-4">
+        <CCard className="mb-4 card-hover animate-fade-in">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
               <h5 className="mb-0">
@@ -338,8 +338,8 @@ const Universities = () => {
                       </CTableDataCell>
                     </CTableRow>
                   ) : (
-                    filteredUniversities.map((university) => (
-                      <CTableRow key={university._id || university.id}>
+                    filteredUniversities.map((university, index) => (
+                      <CTableRow key={university._id || university.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                         <CTableDataCell className="text-center">
                           {university.image ? (
                             <img
@@ -387,7 +387,7 @@ const Universities = () => {
                             color="primary"
                             variant="outline"
                             size="sm"
-                            className="me-2"
+                            className="me-2 btn-animated"
                             onClick={() => handleEdit(university)}
                           >
                             <CIcon icon={cilPencil} />
@@ -396,6 +396,7 @@ const Universities = () => {
                             color="danger"
                             variant="outline"
                             size="sm"
+                            className="btn-animated"
                             onClick={() => handleDeleteClick(university)}
                           >
                             <CIcon icon={cilTrash} />
@@ -411,7 +412,7 @@ const Universities = () => {
         </CCard>
 
         {/* Add/Edit University Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)}>
+        <CModal visible={showModal} onClose={() => setShowModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>{editingId ? 'Edit University' : 'Add New University'}</CModalTitle>
           </CModalHeader>
@@ -544,7 +545,7 @@ const Universities = () => {
               >
                 Cancel
               </CButton>
-              <CButton color="primary" type="submit">
+              <CButton color="primary" type="submit" className="btn-animated">
                 {editingId ? 'Update University' : 'Add University'}
               </CButton>
             </CModalFooter>
@@ -552,7 +553,7 @@ const Universities = () => {
         </CModal>
 
         {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>Confirm Delete</CModalTitle>
           </CModalHeader>
@@ -563,7 +564,7 @@ const Universities = () => {
             <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete}>
+            <CButton color="danger" onClick={handleDelete} className="btn-animated">
               Delete
             </CButton>
           </CModalFooter>

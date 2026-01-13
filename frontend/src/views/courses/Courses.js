@@ -298,7 +298,7 @@ const Courses = () => {
             {success}
           </CAlert>
         )}
-        <CCard className="mb-4">
+        <CCard className="mb-4 card-hover animate-fade-in">
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
               <h5 className="mb-0">
@@ -309,7 +309,7 @@ const Courses = () => {
             <div>
               <CButton
                 color="primary"
-                className="me-2"
+                className="me-2 btn-animated"
                 onClick={() => {
                   handleReset()
                   fetchUniversities() // Refresh universities list
@@ -319,7 +319,7 @@ const Courses = () => {
                 <CIcon icon={cilPlus} className="me-2" />
                 Add Course
               </CButton>
-              <CButton color="secondary" variant="outline" onClick={fetchCourses}>
+              <CButton color="secondary" variant="outline" className="btn-animated" onClick={fetchCourses}>
                 <CIcon icon={cilReload} />
               </CButton>
             </div>
@@ -382,8 +382,8 @@ const Courses = () => {
                       </CTableDataCell>
                     </CTableRow>
                   ) : (
-                    filteredCourses.map((course) => (
-                      <CTableRow key={course._id || course.id}>
+                    filteredCourses.map((course, index) => (
+                      <CTableRow key={course._id || course.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                         <CTableDataCell className="text-center">
                           {course.image ? (
                             <img
@@ -437,7 +437,7 @@ const Courses = () => {
                             color="primary"
                             variant="outline"
                             size="sm"
-                            className="me-2"
+                            className="me-2 btn-animated"
                             onClick={() => handleEdit(course)}
                           >
                             <CIcon icon={cilPencil} />
@@ -446,6 +446,7 @@ const Courses = () => {
                             color="danger"
                             variant="outline"
                             size="sm"
+                            className="btn-animated"
                             onClick={() => handleDeleteClick(course)}
                           >
                             <CIcon icon={cilTrash} />
@@ -461,7 +462,7 @@ const Courses = () => {
         </CCard>
 
         {/* Add/Edit Course Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg">
+        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg" className="modal-animate">
           <CModalHeader>
             <CModalTitle>{editingId ? 'Edit Course' : 'Add New Course'}</CModalTitle>
           </CModalHeader>
@@ -647,7 +648,7 @@ const Courses = () => {
               >
                 Cancel
               </CButton>
-              <CButton color="primary" type="submit">
+              <CButton color="primary" type="submit" className="btn-animated">
                 {editingId ? 'Update Course' : 'Add Course'}
               </CButton>
             </CModalFooter>
@@ -655,7 +656,7 @@ const Courses = () => {
         </CModal>
 
         {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
           <CModalHeader>
             <CModalTitle>Confirm Delete</CModalTitle>
           </CModalHeader>
@@ -666,7 +667,7 @@ const Courses = () => {
             <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete}>
+            <CButton color="danger" onClick={handleDelete} className="btn-animated">
               Delete
             </CButton>
           </CModalFooter>

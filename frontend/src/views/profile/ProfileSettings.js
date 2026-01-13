@@ -183,7 +183,7 @@ const ProfileSettings = () => {
             {success}
           </CAlert>
         )}
-        <CCard className="mb-4">
+        <CCard className="mb-4 card-hover animate-fade-in">
           <CCardHeader>
             <div className="d-flex align-items-center">
               <CIcon icon={cilUser} className="me-2" />
