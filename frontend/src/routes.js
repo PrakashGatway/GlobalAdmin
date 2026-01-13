@@ -10,6 +10,7 @@ const Countries = React.lazy(() => import('./views/countries/Countries'))
 const Support = React.lazy(() => import('./views/support/Support'))
 const ProfileSettings = React.lazy(() => import('./views/profile/ProfileSettings'))
 const Coupons = React.lazy(() => import('./views/coupons/Coupons'))
+const ApplicationHistory = React.lazy(() => import('./views/application-history/ApplicationHistory'))
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -22,6 +23,7 @@ const routes = [
   { path: '/countries', name: 'Countries', element: Countries },
   { path: '/support', name: 'Support', element: Support },
   { path: '/coupons', name: 'Coupons', element: Coupons },
+  { path: '/application-history', name: 'Application History', element: ApplicationHistory },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
 ]
 

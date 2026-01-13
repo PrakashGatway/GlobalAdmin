@@ -72,8 +72,8 @@ exports.sendOTP = async (req, res) => {
       })
     }
 
-    // Generate 6-digit OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+    // Generate static 6-digit OTP
+    const otpCode = '123456'
 
     // Log OTP to console (for development/testing)
     console.log(`\n📧 OTP Generated for ${email} (${role}): ${otpCode}\n`)

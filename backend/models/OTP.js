@@ -29,7 +29,7 @@ const otpSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-)
+) 
 
 // Index for automatic cleanup of expired OTPs
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })

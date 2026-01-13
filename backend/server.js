@@ -24,6 +24,7 @@ app.use('/api/support', require('./routes/support'))
 app.use('/api/purchases', require('./routes/purchases'))
 app.use('/api/rewards', require('./routes/rewards'))
 app.use('/api/coupons', require('./routes/coupons'))
+app.use('/api/applications', require('./routes/applications'))
 app.use('/api/upload', require('./routes/upload'))
 
 // Health check
@@ -62,6 +63,9 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT, () => {
+// Listen on all network interfaces (0.0.0.0) to allow access from other devices on the network
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`)
+  console.log(`Access from network: http://<your-ip>:${PORT}`)
+  console.log(`Local access: http://localhost:${PORT}`)
 })
