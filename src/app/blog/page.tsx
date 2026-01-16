@@ -92,6 +92,22 @@ export default function BlogPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 bg-gray-50" style={{ paddingTop: '150px', marginTop: '75px' }}>
+        {/* Decorative Arrow on Left Side */}
+        <div className="absolute -left-30 top-[55%] -translate-y-1/2 opacity-20 pointer-events-none hidden lg:block">
+          <div style={{ 
+            transform: 'rotate(35deg)',
+            filter: 'brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)',
+            mixBlendMode: 'multiply'
+          }}>
+            <Image
+              src="/g logo.png"
+              alt="Decorative Arrow"
+              width={400}
+              height={40}
+              className="w-64 h-66 lg:w-96 lg:h-96 object-contain"
+            />
+          </div>
+        </div>
         {/* Decorative Arrow on Right Side */}
         <div className="absolute -right-30 top-[55%] -translate-y-1/2 opacity-20 pointer-events-none hidden lg:block">
           <Image
@@ -112,7 +128,8 @@ export default function BlogPage() {
                 alt="G Logo"
                 width={80}
                 height={80}
-                className="w-16 h-16 lg:w-24 lg:h-24 object-contain"
+                
+                className="w-16 h-16 lg:w-24 lg:h-24   object-contain "
               />
               G
             </h1>
@@ -153,12 +170,8 @@ export default function BlogPage() {
                 {filterTagsRow1.map((tag, index) => (
                   <button
                     key={index}
-                    className={`px-8 py-5 font-semibold text-base transition-all ${
+                    className={`px-8 py-5 font-semibold text-base transition-all bg-white text-gray-800 border border-white hover:bg-gray-600 hover:text-white ${
                       index === 0 && tag === "UK" ? "rounded-tl-3xl" : "rounded-none"
-                    } ${
-                      tag === "VISA" 
-                        ? "bg-gray-600 text-white hover:bg-gray-700" 
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                     }`}
                   >
                     {tag}
@@ -170,11 +183,7 @@ export default function BlogPage() {
                 {filterTagsRow2.map((tag, index) => (
                   <button
                     key={index}
-                    className={`${tag === "CANADA" ? "px-10" : "px-11"} py-5 rounded-none font-semibold text-base transition-all rounded-none ${
-                      tag === "IRELAND" 
-                        ? "bg-gray-600 text-white hover:bg-gray-700" 
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`${tag === "CANADA" ? "px-10" : "px-11"} py-5 rounded-none font-semibold text-base transition-all bg-white text-gray-800 border border-white hover:bg-gray-600 hover:text-white`}
                   >
                     {tag}
                   </button>
@@ -185,11 +194,7 @@ export default function BlogPage() {
                 {filterTagsRow3.map((tag, index) => (
                   <button
                     key={index}
-                    className={`px-8 py-5 rounded-none font-semibold text-base transition-all rounded-none ${
-                      tag === "USA" 
-                        ? "bg-gray-600 text-white hover:bg-gray-700" 
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className="px-8 py-5 rounded-none font-semibold text-base transition-all bg-white text-gray-800 border border-white hover:bg-gray-600 hover:text-white"
                   >
                     {tag}
                   </button>
@@ -203,8 +208,19 @@ export default function BlogPage() {
       {/* Blog Posts Grid */}
       <section className="bg-white py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
+          {/* G Logo for third row last column - behind the card */}
+          <div className="absolute right-[-70px] top-[70%] -translate-y-1/2 opacity-20 pointer-events-none hidden lg:block z-0">
+            <Image
+              src="/g logo.png"
+              alt="Decorative Arrow"
+              width={400}
+              height={80}
+              className="w-64 h-66 lg:w-96 lg:h-96 object-contain"
+              style={{ transform: 'scaleX(-1) rotate(-40deg)' }}
+            />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 relative z-[111]">
-            {blogPosts.map((post) => (
+            {blogPosts.map((post, index) => (
               <div
                 key={post.id}
                 className="
@@ -309,7 +325,23 @@ export default function BlogPage() {
       </section>
 
       {/* Join Our Exclusive Study Abroad Network */}
-      <section className="py-10 bg-[#FF6B35]">
+      <section className="py-10 bg-[#FF6B35] relative overflow-visible">
+        {/* Decorative Arrow on Left Side */}
+        <div className="absolute -left-30 top-2 -translate-y-1/2 opacity-20 pointer-events-none hidden lg:block">
+          <div style={{ 
+            transform: 'rotate(-20deg)',
+            filter: 'brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)',
+            mixBlendMode: 'multiply'
+          }}>
+            <Image
+              src="/g logo.png"
+              alt="Decorative Arrow"
+              width={400}
+              height={40}
+              className="w-64 h-66 lg:w-96 lg:h-96 object-contain"
+            />
+          </div>
+        </div>
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
