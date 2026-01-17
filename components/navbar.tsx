@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronDown, Menu, X, GraduationCap, BookOpen, MessageSquare, Target, FileText, Briefcase, Phone } from "lucide-react"
+import { ChevronDown, Menu, X, GraduationCap, BookOpen, MessageSquare, Target, FileText, Briefcase, Phone, Calendar } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navItems = [
@@ -38,6 +38,13 @@ const navItems = [
     href: "/blog", 
     hasDropdown: false,
     icon: FileText,
+   
+  },
+  { 
+    name: "Events", 
+    href: "/events", 
+    hasDropdown: false,
+    icon: Calendar,
    
   },
   { 
