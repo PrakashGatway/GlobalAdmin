@@ -29,6 +29,356 @@ import {
 import pageInformationService from '../../services/pageInformationService'
 import uploadService from '../../services/uploadService'
 
+// Page Information Form Structure JSON
+const pageInformationFormStructure = {
+  "Load Existing Page": {
+    "heading": "Load Existing Page",
+    "shortDescription": "Enter the page ID from the database to load and edit existing page data including images",
+    "containerClass": "input_container_bx",
+    "form-feild": [
+      {
+        "label": "Page ID",
+        "width": "col_width100",
+        "placeHolder": "Enter Page ID to load existing page",
+        "id": "pageId",
+        "type": "text",
+        "value": "",
+        "name": "pageId",
+        "attributes": "",
+        "validation": {
+          "required": "Page ID is required to load existing page"
+        },
+        "pattern": {
+          "message": ""
+        },
+        "patternValue": ""
+      }
+    ]
+  },
+  "Basic Information": {
+    "heading": "Basic Information",
+    "shortDescription": "Enter the basic details for your page",
+    "containerClass": "input_container_bx",
+    "form-feild": [
+      {
+        "label": "Page Type *",
+        "width": "col_width50",
+        "placeHolder": "",
+        "id": "pageType",
+        "type": "select",
+        "value": "",
+        "name": "pageType",
+        "option": [
+          "home_page",
+          "about_page",
+          "contact_page",
+          "city_page",
+          "ivy_league",
+          "usa_universities",
+          "uk_universities",
+          "germany_public_universities",
+          "italy_france",
+          "canada_australia",
+          "other"
+        ],
+        "attributes": "",
+        "validation": {
+          "required": "Page type is required"
+        }
+      },
+      {
+        "label": "Status *",
+        "width": "col_width50",
+        "placeHolder": "",
+        "id": "status",
+        "type": "select",
+        "value": "",
+        "name": "status",
+        "option": ["Draft", "Published"],
+        "attributes": "",
+        "validation": {
+          "required": "Status is required"
+        }
+      },
+      {
+        "label": "Title *",
+        "width": "col_width100",
+        "placeHolder": "Enter page title",
+        "id": "title",
+        "type": "text",
+        "value": "",
+        "name": "title",
+        "attributes": "",
+        "validation": {
+          "required": "Title is required",
+          "maxLength": {
+            "value": 200,
+            "message": "The length of Title must be 200 characters or fewer."
+          }
+        },
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Sub Title",
+        "width": "col_width100",
+        "placeHolder": "Enter sub title",
+        "id": "subTitle",
+        "type": "text",
+        "value": "",
+        "name": "subTitle",
+        "attributes": "",
+        "validation": {
+          "maxLength": {
+            "value": 300,
+            "message": "The length of Sub Title must be 300 characters or fewer."
+          }
+        },
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Slug *",
+        "width": "col_width100",
+        "placeHolder": "page-slug",
+        "id": "slug",
+        "type": "text",
+        "value": "",
+        "name": "slug",
+        "attributes": "",
+        "validation": {
+          "required": "Slug is required",
+          "maxLength": {
+            "value": 100,
+            "message": "The length of Slug must be 100 characters or fewer."
+          }
+        },
+        "pattern": {
+          "message": "Slug must contain only lowercase letters, numbers, and hyphens"
+        },
+        "patternValue": "^[a-z0-9-]+$"
+      },
+      {
+        "label": "Is Featured",
+        "width": "col_width50",
+        "placeHolder": "",
+        "id": "isFeatured",
+        "type": "select",
+        "value": "",
+        "name": "isFeatured",
+        "option": ["Yes", "No"],
+        "attributes": "",
+        "validation": {}
+      },
+      {
+        "label": "Meta Title",
+        "width": "col_width100",
+        "placeHolder": "Enter meta title",
+        "id": "metaTitle",
+        "type": "text",
+        "value": "",
+        "name": "metaTitle",
+        "attributes": "",
+        "validation": {
+          "maxLength": {
+            "value": 60,
+            "message": "The length of Meta Title must be 60 characters or fewer for optimal SEO."
+          }
+        },
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Meta Description",
+        "width": "col_width100",
+        "placeHolder": "Enter meta description",
+        "id": "metaDescription",
+        "type": "textarea",
+        "value": "",
+        "name": "metaDescription",
+        "attributes": "",
+        "validation": {
+          "maxLength": {
+            "value": 160,
+            "message": "The length of Meta Description must be 160 characters or fewer for optimal SEO."
+          }
+        },
+        "pattern": { "message": "" },
+        "patternValue": ""
+      }
+    ]
+  },
+  "Home Page Images": {
+    "heading": "Home Page Images",
+    "shortDescription": "Upload images for your page (conditional based on page type)",
+    "containerClass": "input_container_bx",
+    "form-feild": [
+      {
+        "label": "Hero Image",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "heroImage",
+        "type": "file",
+        "value": "",
+        "name": "heroImage",
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Roadmap Image",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "roadmapImage",
+        "type": "file",
+        "value": "",
+        "name": "roadmapImage",
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Mobile Roadmap Image",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "mobileRoadmapImage",
+        "type": "file",
+        "value": "",
+        "name": "mobileRoadmapImage",
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "University Cap Background",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "universityCapBg",
+        "type": "file",
+        "value": "",
+        "name": "universityCapBg",
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "University Slider Background",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "universitySliderBg",
+        "type": "file",
+        "value": "",
+        "name": "universitySliderBg",
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Immigration Services Background",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "immigrationServicesBg",
+        "type": "file",
+        "value": "",
+        "name": "immigrationServicesBg",
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      }
+    ]
+  },
+  "Sections Fields": {
+    "heading": "Sections Fields",
+    "shortDescription": "Add dynamic content sections to your page",
+    "containerClass": "input_container_bx",
+    "form-feild": [
+      { "label": "Hero Section", "width": "col_width100", "placeHolder": "", "id": "hero_section", "type": "button", "value": "Add Hero Section", "name": "hero_section", "sectionType": "hero_section", "attributes": "", "validation": {} },
+      { "label": "Form Section", "width": "col_width100", "placeHolder": "", "id": "form_section", "type": "button", "value": "Add Form Section", "name": "form_section", "sectionType": "form_section", "attributes": "", "validation": {} },
+      { "label": "Why Choose Us", "width": "col_width100", "placeHolder": "", "id": "why_choose_us", "type": "button", "value": "Add Why Choose Us", "name": "why_choose_us", "sectionType": "why_choose_us", "attributes": "", "validation": {} },
+      { "label": "Slider Card", "width": "col_width100", "placeHolder": "", "id": "slider_card", "type": "button", "value": "Add Slider Card", "name": "slider_card", "sectionType": "slider_card", "attributes": "", "validation": {} },
+      { "label": "Road-map", "width": "col_width100", "placeHolder": "", "id": "road-map", "type": "button", "value": "Add Road-map", "name": "road-map", "sectionType": "road-map", "attributes": "", "validation": {} },
+      { "label": "Content", "width": "col_width100", "placeHolder": "", "id": "content", "type": "button", "value": "Add Content", "name": "content", "sectionType": "content", "attributes": "", "validation": {} },
+      { "label": "Statistics", "width": "col_width100", "placeHolder": "", "id": "statistics", "type": "button", "value": "Add Statistics", "name": "statistics", "sectionType": "statistics", "attributes": "", "validation": {} },
+      { "label": "Comparison Table", "width": "col_width100", "placeHolder": "", "id": "comparison_table", "type": "button", "value": "Add Comparison Table", "name": "comparison_table", "sectionType": "comparison_table", "attributes": "", "validation": {} },
+      { "label": "Blog/News", "width": "col_width100", "placeHolder": "", "id": "blog_section", "type": "button", "value": "Add Blog/News", "name": "blog_section", "sectionType": "blog_section", "attributes": "", "validation": {} },
+      { "label": "Requirements", "width": "col_width100", "placeHolder": "", "id": "requirements", "type": "button", "value": "Add Requirements", "name": "requirements", "sectionType": "requirements", "attributes": "", "validation": {} },
+      { "label": "Testimonials", "width": "col_width100", "placeHolder": "", "id": "testimonials", "type": "button", "value": "Add Testimonials", "name": "testimonials", "sectionType": "testimonials", "attributes": "", "validation": {} },
+      { "label": "Case Studies", "width": "col_width100", "placeHolder": "", "id": "case_studies", "type": "button", "value": "Add Case Studies", "name": "case_studies", "sectionType": "case_studies", "attributes": "", "validation": {} },
+      { "label": "CTA Section", "width": "col_width100", "placeHolder": "", "id": "cta_section", "type": "button", "value": "Add CTA Section", "name": "cta_section", "sectionType": "cta_section", "attributes": "", "validation": {} },
+      { "label": "Track Record", "width": "col_width100", "placeHolder": "", "id": "track_record", "type": "button", "value": "Add Track Record", "name": "track_record", "sectionType": "track_record", "attributes": "", "validation": {} }
+    ]
+  },
+  "SEO and Metadata Fields": {
+    "heading": "SEO and Metadata Fields",
+    "shortDescription": "Configure SEO settings and metadata for better search engine visibility",
+    "containerClass": "input_container_bx",
+    "form-feild": [
+      {
+        "label": "Keywords (comma-separated)",
+        "width": "col_width100",
+        "placeHolder": "seo, marketing, education",
+        "id": "keywords",
+        "type": "text",
+        "value": "",
+        "name": "keywords",
+        "attributes": "",
+        "validation": {
+          "maxLength": {
+            "value": 500,
+            "message": "The length of Keywords must be 500 characters or fewer."
+          }
+        },
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Tags (comma-separated)",
+        "width": "col_width100",
+        "placeHolder": "blog, featured, news",
+        "id": "tags",
+        "type": "text",
+        "value": "",
+        "name": "tags",
+        "attributes": "",
+        "validation": {
+          "maxLength": {
+            "value": 500,
+            "message": "The length of Tags must be 500 characters or fewer."
+          }
+        },
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Canonical URL",
+        "width": "col_width100",
+        "placeHolder": "https://example.com/page",
+        "id": "canonicalUrl",
+        "type": "url",
+        "value": "",
+        "name": "canonicalUrl",
+        "attributes": "",
+        "validation": {
+          "maxLength": {
+            "value": 500,
+            "message": "The length of Canonical URL must be 500 characters or fewer."
+          }
+        },
+        "pattern": {
+          "message": "Please enter a valid URL"
+        },
+        "patternValue": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$"
+      }
+    ]
+  }
+}
+
 const PageInformation = () => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -77,6 +427,344 @@ const PageInformation = () => {
   })
 
   const [sections, setSections] = useState([])
+
+  // Display form structure JSON when on /add route
+  useEffect(() => {
+    // Check if we're on the add page route
+    const isAddPage = location.pathname.includes('/pages/add') || location.pathname.includes('/page-information') && !location.search.includes('id=')
+    
+    if (isAddPage) {
+      // Log form structure JSON for Network tab visibility
+      console.log('📋 Page Information Form Structure JSON:', JSON.stringify(pageInformationFormStructure, null, 2))
+      console.log('📊 Form Structure Summary:', {
+        sections: Object.keys(pageInformationFormStructure).length,
+        totalFields: Object.values(pageInformationFormStructure).reduce((sum, section) => sum + (section['form-feild']?.length || 0), 0),
+        sectionNames: Object.keys(pageInformationFormStructure)
+      })
+      
+      // Make form structure available globally for console access
+      window.pageInformationFormStructure = pageInformationFormStructure
+      window.getPageInfoFormData = () => {
+        return {
+          formStructure: pageInformationFormStructure,
+          currentFormData: formData,
+          currentSections: sections,
+          formDataJSON: JSON.stringify({
+            formStructure: pageInformationFormStructure,
+            currentFormData: formData,
+            currentSections: sections
+          }, null, 2)
+        }
+      }
+      
+      // Add helper function to fetch page information with auth
+      window.fetchPageInfoWithAuth = async (pageId = null, params = {}) => {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.error('❌ No auth token found. Please login first.')
+          return null
+        }
+        
+        const baseURL = window.location.protocol + '//' + window.location.hostname + ':5000/api'
+        let url = `${baseURL}/page-information`
+        
+        if (pageId) {
+          url = `${baseURL}/page-information/${pageId}`
+        } else {
+          const queryParams = new URLSearchParams(params).toString()
+          if (queryParams) {
+            url += `?${queryParams}`
+          }
+        }
+        
+        try {
+          console.log('🌐 Fetching page information with auth token...')
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          
+          const data = await response.json()
+          console.log('✅ Page Information Response:', data)
+          console.log('📋 Complete JSON:', JSON.stringify(data, null, 2))
+          
+          // Store in sessionStorage
+          sessionStorage.setItem('pageInfoResponse', JSON.stringify(data))
+          
+          return data
+        } catch (error) {
+          console.error('❌ Error fetching page information:', error)
+          return null
+        }
+      }
+      
+      // Add helper function to show sections array structure and examples
+      window.getSectionsExamples = () => {
+        return {
+          structure: {
+            description: "Sections array structure in MongoDB",
+            example: {
+              sections: [
+                {
+                  type: "hero_section",
+                  order: 1,
+                  data: {
+                    title: "Welcome to Our Website",
+                    subTitle: "Your Journey Starts Here",
+                    description: "This is a hero section description",
+                    ctaText: "Get Started",
+                    ctaLink: "/contact",
+                    backgroundImage: "https://example.com/image.jpg",
+                    backgroundImagePublicId: "folder/image-id"
+                  }
+                },
+                {
+                  type: "track_record",
+                  order: 2,
+                  data: {
+                    title: "IVY COACH'S COLLEGE ADMISSIONS TRACK RECORD",
+                    description: "Our success rate",
+                    totalOffers: "1,485",
+                    successRate: "98%"
+                  }
+                },
+                {
+                  type: "testimonials",
+                  order: 3,
+                  data: {
+                    title: "What Our Students Say",
+                    items: [
+                      {
+                        name: "John Doe",
+                        text: "Great experience",
+                        image: "https://example.com/testimonial.jpg"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          availableTypes: [
+            "hero_section",
+            "form_section",
+            "why_choose_us",
+            "slider_card",
+            "road-map",
+            "content",
+            "statistics",
+            "comparison_table",
+            "blog_section",
+            "requirements",
+            "testimonials",
+            "case_studies",
+            "cta_section",
+            "track_record"
+          ],
+          howToAdd: {
+            method1: {
+              title: "Via Admin Panel",
+              steps: [
+                "1. Go to /pages/add",
+                "2. Click on section buttons (e.g., '+ Add Hero Section')",
+                "3. Fill in the section data",
+                "4. Click 'Save Page'",
+                "5. Sections will be saved in sections array"
+              ]
+            },
+            method2: {
+              title: "Via MongoDB Compass",
+              steps: [
+                "1. Open MongoDB Compass",
+                "2. Find your page document",
+                "3. Click 'UPDATE' button",
+                "4. Find 'sections' field",
+                "5. Replace empty array [] with section objects"
+              ],
+              example: [
+                {
+                  type: "hero_section",
+                  order: 1,
+                  data: {
+                    title: "Your Title",
+                    subTitle: "Your Subtitle",
+                    description: "Description text"
+                  }
+                }
+              ]
+            },
+            method3: {
+              title: "Via API",
+              steps: [
+                "1. Use PUT /api/page-information/{id}",
+                "2. Send sections array in request body",
+                "3. Each section must have: type, order, data"
+              ]
+            }
+          },
+          mongoDBExample: {
+            description: "How to add sections in MongoDB Compass",
+            steps: [
+              "1. Open your page document",
+              "2. Click 'UPDATE' button",
+              "3. Find 'sections' field (currently empty array)",
+              "4. Replace empty array [] with:",
+              "",
+              "[",
+              "  {",
+              "    \"type\": \"hero_section\",",
+              "    \"order\": 1,",
+              "    \"data\": {",
+              "      \"title\": \"Your Title\",",
+              "      \"subTitle\": \"Your Subtitle\",",
+              "      \"description\": \"Description text\"",
+              "    }",
+              "  }",
+              "]",
+              "",
+              "5. Click 'UPDATE' to save"
+            ]
+          }
+        }
+      }
+      
+      console.log('💡 Console Commands:')
+      console.log('  - window.pageInformationFormStructure - Get form structure')
+      console.log('  - window.getPageInfoFormData() - Get current form data + structure')
+      console.log('  - window.fetchPageInfoWithAuth() - Fetch page info with auth (shows in Network tab)')
+      console.log('  - window.getSectionsExamples() - Get sections array structure and examples')
+      console.log('')
+      console.log('📋 Sections Array Usage:')
+      console.log('  Run: window.getSectionsExamples()')
+      console.log('  This will show:')
+      console.log('    - Section structure')
+      console.log('    - Available section types')
+      console.log('    - How to add sections (Admin Panel / MongoDB / API)')
+      console.log('    - MongoDB Compass example')
+      
+      // Create a comprehensive response object
+      const mockResponse = {
+        success: true,
+        data: pageInformationFormStructure,
+        message: 'Page Information Form Structure',
+        timestamp: new Date().toISOString(),
+        route: location.pathname
+      }
+      
+      // Log complete JSON structure in a prominent way
+      console.log('%c📋 COMPLETE PAGE INFORMATION FORM STRUCTURE JSON', 'color: #2196F3; font-weight: bold; font-size: 16px; background: #E3F2FD; padding: 5px;')
+      console.log('%cAll Sections Included:', 'color: #4CAF50; font-weight: bold;')
+      console.log('  1. Load Existing Page')
+      console.log('  2. Basic Information')
+      console.log('  3. Page Images (Home Page Images)')
+      console.log('  4. Sections Fields')
+      console.log('  5. SEO and Metadata Fields')
+      console.log('')
+      console.log(JSON.stringify(mockResponse, null, 2))
+      console.log('%c📋 Copy the JSON above to use in your application', 'color: #4CAF50; font-weight: bold;')
+      
+      // Also log each section separately for easy access
+      console.log('%c📑 Individual Sections:', 'color: #FF9800; font-weight: bold; font-size: 14px;')
+      Object.keys(pageInformationFormStructure).forEach((sectionName, index) => {
+        console.log(`${index + 1}. ${sectionName}:`, pageInformationFormStructure[sectionName])
+      })
+      
+      // Log sections array structure example
+      console.log('%c📋 SECTIONS ARRAY STRUCTURE:', 'color: #9C27B0; font-weight: bold; font-size: 14px; background: #F3E5F5; padding: 5px;')
+      console.log('The sections field in MongoDB should be an array of objects with this structure:')
+      console.log(JSON.stringify({
+        sections: [
+          {
+            type: "hero_section",
+            order: 1,
+            data: {
+              title: "Example Title",
+              subTitle: "Example Subtitle",
+              description: "Example description text",
+              ctaText: "Get Started",
+              ctaLink: "/contact"
+            }
+          },
+          {
+            type: "track_record",
+            order: 2,
+            data: {
+              title: "TRACK RECORD TITLE",
+              description: "Description text",
+              totalOffers: "1,485",
+              successRate: "98%"
+            }
+          }
+        ]
+      }, null, 2))
+      console.log('%c💡 To see more examples, run: window.getSectionsExamples()', 'color: #4CAF50; font-weight: bold;')
+      
+      // Log as if it's an API response
+      console.log('🌐 Form Structure API Response:', mockResponse)
+      
+      // Store form structure as "general-info" for easy access
+      const jsonString = JSON.stringify(mockResponse, null, 2)
+      sessionStorage.setItem('pageInformationFormStructure', jsonString)
+      sessionStorage.setItem('generalInfoFormStructure', jsonString)
+      sessionStorage.setItem('general-info', jsonString) // Also as "general-info"
+      
+      // Create downloadable JSON file
+      try {
+        const blob = new Blob([jsonString], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        
+        // Create download function
+        window.downloadGeneralInfoJSON = () => {
+          const link = document.createElement('a')
+          link.href = url
+          link.download = 'general-info-form-structure.json'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
+        
+        // Create function to open JSON in new tab
+        window.openGeneralInfoJSON = () => {
+          const newWindow = window.open('', '_blank')
+          if (newWindow) {
+            newWindow.document.write(`
+              <html>
+                <head>
+                  <title>General Info - Form Structure JSON</title>
+                  <style>
+                    body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+                    pre { background: white; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                    h1 { color: #2196F3; }
+                  </style>
+                </head>
+                <body>
+                  <h1>General Info - Form Structure JSON</h1>
+                  <pre>${jsonString}</pre>
+                </body>
+              </html>
+            `)
+            newWindow.document.close()
+          }
+        }
+        
+        console.log('✅ General Info Form Structure ready!')
+        console.log('💡 Commands:')
+        console.log('  - window.downloadGeneralInfoJSON() - Download JSON file')
+        console.log('  - window.openGeneralInfoJSON() - Open JSON in new tab')
+        console.log('  - sessionStorage.getItem("general-info") - Get JSON string')
+        
+        // Also log the data URL for direct access
+        const dataUrl = `data:application/json;charset=utf-8,${encodeURIComponent(jsonString)}`
+        console.log('🔗 Data URL:', dataUrl)
+        console.log('📋 Copy above URL and paste in browser to open JSON')
+      } catch (error) {
+        console.error('Error creating form structure:', error)
+      }
+    }
+  }, [location.pathname, location.search])
 
   // Load existing page data
   useEffect(() => {
@@ -2383,14 +3071,21 @@ const PageInformation = () => {
         immigrationServicesBg: formData.immigrationServicesBg || '',
         immigrationServicesBgPublicId: formData.immigrationServicesBgPublicId || '',
         sections: normalizedSections,
-        keywords: formData.keywords
-          ? formData.keywords.split(',').map(k => k.trim()).filter(k => k)
+        keywords: (formData.keywords && formData.keywords.trim())
+          ? formData.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0)
           : [],
-        tags: formData.tags
-          ? formData.tags.split(',').map(t => t.trim()).filter(t => t)
+        tags: (formData.tags && formData.tags.trim())
+          ? formData.tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
           : [],
         canonicalUrl: formData.canonicalUrl?.trim() || '',
       }
+      
+      // Log keywords and tags conversion
+      console.log('🔑 Keywords & Tags Conversion:')
+      console.log('  Form Keywords (string):', formData.keywords)
+      console.log('  Form Tags (string):', formData.tags)
+      console.log('  Converted Keywords (array):', submitData.keywords)
+      console.log('  Converted Tags (array):', submitData.tags)
       
       console.log('📤 Submitting form data:', { 
         editingId, 
@@ -2399,14 +3094,50 @@ const PageInformation = () => {
         pageType: submitData.pageType,
         status: submitData.status,
         keywordsCount: Array.isArray(submitData.keywords) ? submitData.keywords.length : 0,
+        keywordsArray: submitData.keywords,
         tagsCount: Array.isArray(submitData.tags) ? submitData.tags.length : 0,
+        tagsArray: submitData.tags,
         hasCanonicalUrl: !!submitData.canonicalUrl
+      })
+      
+      // Log full payload for Network tab visibility
+      console.log('📋 Full Form Payload (Complete JSON):', JSON.stringify(submitData, null, 2))
+      console.log('📊 Payload Summary:', {
+        totalFields: Object.keys(submitData).length,
+        sectionsCount: normalizedSections.length,
+        sectionsTypes: normalizedSections.map(s => s.type),
+        imagesCount: [
+          submitData.heroImage,
+          submitData.roadmapImage,
+          submitData.mobileRoadmapImage,
+          submitData.universityCapBg,
+          submitData.universitySliderBg,
+          submitData.immigrationServicesBg
+        ].filter(img => img).length,
+        payloadSize: JSON.stringify(submitData).length + ' bytes'
+      })
+      console.log('🔗 API Endpoint:', editingId ? `PUT /page-information/${editingId}` : 'POST /page-information')
+      console.log('🌐 Full API URL:', editingId 
+        ? `${window.location.protocol}//${window.location.hostname}:5000/api/page-information/${editingId}`
+        : `${window.location.protocol}//${window.location.hostname}:5000/api/page-information`)
+      
+      // Also log as table for better visibility
+      console.table({
+        'Page Type': submitData.pageType,
+        'Title': submitData.title,
+        'Slug': submitData.slug,
+        'Status': submitData.status,
+        'Is Featured': submitData.isFeatured,
+        'Sections Count': normalizedSections.length,
+        'Keywords Count': Array.isArray(submitData.keywords) ? submitData.keywords.length : 0,
+        'Tags Count': Array.isArray(submitData.tags) ? submitData.tags.length : 0
       })
       
       let response
       if (editingId) {
         // Update existing page
         try {
+          console.log('🚀 Making API call to update page information...')
           response = await pageInformationService.updatePageInformation(editingId, submitData)
           console.log('📥 Update response:', {
             success: response?.success,
@@ -2414,6 +3145,11 @@ const PageInformation = () => {
             message: response?.message,
             sectionsCount: response?.data?.sections?.length || 0
           })
+          
+          // Log complete response JSON
+          if (response?.data) {
+            console.log('📋 Complete Update Response (JSON):', JSON.stringify(response.data, null, 2))
+          }
         } catch (updateError) {
           console.error('❌ Update API error:', updateError)
           throw updateError
@@ -2509,8 +3245,25 @@ const PageInformation = () => {
         }
       } else {
         // Create new page
-        response = await pageInformationService.createPageInformation(submitData)
-        if (response.success) {
+        try {
+          console.log('🚀 Making API call to create new page information...')
+          response = await pageInformationService.createPageInformation(submitData)
+          console.log('📥 Create response:', {
+            success: response?.success,
+            hasData: !!response?.data,
+            message: response?.message
+          })
+          
+          // Log complete response JSON
+          if (response?.data) {
+            console.log('📋 Complete Create Response (JSON):', JSON.stringify(response.data, null, 2))
+          }
+        } catch (createError) {
+          console.error('❌ Create API error:', createError)
+          throw createError
+        }
+        
+        if (response && response.success) {
           setEditingId(response.data._id)
           setSuccess('Page information created successfully!')
           // Optionally navigate back to list after 2 seconds
@@ -2519,6 +3272,10 @@ const PageInformation = () => {
               navigate('/website/pages')
             }
           }, 2000)
+        } else {
+          const errorMsg = response?.message || response?.error || 'Failed to create page information'
+          setError(errorMsg)
+          console.error('❌ Create failed:', response)
         }
       }
       setTimeout(() => setSuccess(''), 3000)

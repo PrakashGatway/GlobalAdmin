@@ -6,10 +6,10 @@ const pageInformationSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please provide page type'],
       enum: [
-        'home_page', 
-        'about_page', 
-        'contact_page', 
-        'city_page', 
+        'home_page',
+        'about_page',
+        'contact_page',
+        'city_page',
         'ivy_league',
         'usa_universities',
         'uk_universities',
@@ -104,10 +104,7 @@ const pageInformationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    // Sections array - Flexible: any section type add kar sakte hain
-    // Enum removed for flexibility -any section type use kar sakte hain
-    // Examples: 'hero_section', 'form_section', 'why_choose_us', 'slider_card', 
-    //          'testimonials', 'faq', 'pricing', 'gallery', etc.
+  
     sections: [
       {
         type: {

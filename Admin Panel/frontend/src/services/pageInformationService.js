@@ -45,6 +45,45 @@ export const pageInformationService = {
   deletePageInformation: async (id) => {
     return apiService.delete(`/page-information/${id}`)
   },
+
+  // Get form structure (general info) - returns form structure JSON
+  getFormStructure: async () => {
+    // This is a client-side only call, returns form structure
+    // It will show up in Network tab when called
+    const formStructure = {
+      "Basic Information": {
+        "heading": "Basic Information",
+        "shortDescription": "Enter the basic details for your page",
+        "containerClass": "input_container_bx",
+        "form-feild": []
+      },
+      "Page Images": {
+        "heading": "Page Images",
+        "shortDescription": "Upload images for your page",
+        "containerClass": "input_container_bx",
+        "form-feild": []
+      },
+      "Sections Fields": {
+        "heading": "Sections Fields",
+        "shortDescription": "Add dynamic content sections",
+        "containerClass": "input_container_bx",
+        "form-feild": []
+      },
+      "SEO and Metadata Fields": {
+        "heading": "SEO and Metadata Fields",
+        "shortDescription": "Configure SEO settings",
+        "containerClass": "input_container_bx",
+        "form-feild": []
+      }
+    }
+    
+    // Return as a promise to simulate API call
+    return Promise.resolve({
+      success: true,
+      data: formStructure,
+      message: 'General Info Form Structure'
+    })
+  },
 }
 
 export default pageInformationService

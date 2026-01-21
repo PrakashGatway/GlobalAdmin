@@ -181,13 +181,30 @@ exports.createPageInformation = async (req, res) => {
     }
 
     // Convert keywords and tags from comma-separated string to array
-    const keywordsArray = typeof keywords === 'string' 
-      ? keywords.split(',').map(k => k.trim()).filter(k => k)
-      : Array.isArray(keywords) ? keywords : []
+    console.log('🔑 Keywords & Tags Processing (Create):')
+    console.log('  Received keywords:', keywords, 'Type:', typeof keywords)
+    console.log('  Received tags:', tags, 'Type:', typeof tags)
     
-    const tagsArray = typeof tags === 'string'
-      ? tags.split(',').map(t => t.trim()).filter(t => t)
-      : Array.isArray(tags) ? tags : []
+    let keywordsArray = []
+    if (keywords !== undefined) {
+      if (typeof keywords === 'string' && keywords.trim()) {
+        keywordsArray = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0)
+      } else if (Array.isArray(keywords)) {
+        keywordsArray = keywords.filter(k => k && k.trim().length > 0)
+      }
+    }
+    
+    let tagsArray = []
+    if (tags !== undefined) {
+      if (typeof tags === 'string' && tags.trim()) {
+        tagsArray = tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
+      } else if (Array.isArray(tags)) {
+        tagsArray = tags.filter(t => t && t.trim().length > 0)
+      }
+    }
+    
+    console.log('  Processed keywords:', keywordsArray)
+    console.log('  Processed tags:', tagsArray)
 
     // Create page information
     const pageInformation = await PageInformation.create({
@@ -268,16 +285,34 @@ exports.updatePageInformation = async (req, res) => {
     } = req.body
 
     // Convert keywords and tags if they are strings
+    console.log('🔑 Keywords & Tags Processing:')
+    console.log('  Received keywords:', keywords, 'Type:', typeof keywords)
+    console.log('  Received tags:', tags, 'Type:', typeof tags)
+    
     if (keywords !== undefined) {
-      updateData.keywords = typeof keywords === 'string'
-        ? keywords.split(',').map(k => k.trim()).filter(k => k)
-        : Array.isArray(keywords) ? keywords : []
+      if (typeof keywords === 'string') {
+        updateData.keywords = keywords.trim()
+          ? keywords.split(',').map(k => k.trim()).filter(k => k.length > 0)
+          : []
+      } else if (Array.isArray(keywords)) {
+        updateData.keywords = keywords.filter(k => k && k.trim().length > 0)
+      } else {
+        updateData.keywords = []
+      }
+      console.log('  Processed keywords:', updateData.keywords)
     }
 
     if (tags !== undefined) {
-      updateData.tags = typeof tags === 'string'
-        ? tags.split(',').map(t => t.trim()).filter(t => t)
-        : Array.isArray(tags) ? tags : []
+      if (typeof tags === 'string') {
+        updateData.tags = tags.trim()
+          ? tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
+          : []
+      } else if (Array.isArray(tags)) {
+        updateData.tags = tags.filter(t => t && t.trim().length > 0)
+      } else {
+        updateData.tags = []
+      }
+      console.log('  Processed tags:', updateData.tags)
     }
 
     // Ensure sections is properly formatted

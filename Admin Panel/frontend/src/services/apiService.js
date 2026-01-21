@@ -27,16 +27,35 @@ const apiClient = axios.create({
   },
 })
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and log requests
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // Log request details for 
+    console.log('🌐 API Request:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      data: config.data,
+      headers: config.headers,
+      timestamp: new Date().toISOString()
+    })
+    
+    // Log complete JSON payload in formatted way
+    if (config.data) {
+      console.log(' Complete Request Payload (JSON):', JSON.stringify(config.data, null, 2))
+      console.log(' Request Payload Size:', JSON.stringify(config.data).length, 'bytes')
+    }
+    
     return config
   },
   (error) => {
+    console.error('Request Error:', error)
     return Promise.reject(error)
   }
 )
@@ -44,10 +63,45 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => {
+    // Log successful response for Network tab visibility
+    console.log(' API Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config?.url,
+      data: response.data,
+      timestamp: new Date().toISOString()
+    })
+    
+    // Log complete JSON response in formatted way for Network tab visibility
+    if (response.data) {
+      console.log(' Complete Response Payload (JSON):', JSON.stringify(response.data, null, 2))
+      console.log(' Response Payload Size:', JSON.stringify(response.data).length, 'bytes')
+      
+      // If it's page information data, log key details
+      if (response.data.pageType || response.data.title) {
+        console.log(' Page Information Response Summary:', {
+          pageType: response.data.pageType,
+          title: response.data.title,
+          slug: response.data.slug,
+          status: response.data.status,
+          sectionsCount: Array.isArray(response.data.sections) ? response.data.sections.length : 0,
+          hasImages: !!(response.data.heroImage || response.data.roadmapImage)
+        })
+      }
+    }
+    
     return response.data
   },
   (error) => {
+    // Log error response for Network tab visibility
     if (error.response) {
+      console.error(' API Error Response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        url: error.config?.url,
+        data: error.response.data,
+        timestamp: new Date().toISOString()
+      })
       // Server responded with error status
       const message = error.response.data?.message || 'Something went wrong'
       // Preserve the full error object to access response.data
@@ -55,9 +109,18 @@ apiClient.interceptors.response.use(
       errorWithResponse.response = error.response
       throw errorWithResponse
     } else if (error.request) {
+      console.error(' Network Error - No Response:', {
+        url: error.config?.url,
+        message: 'Request made but no response received',
+        timestamp: new Date().toISOString()
+      })
       // Request made but no response received
       throw new Error('Network error. Please check your connection.')
     } else {
+      console.error('❌ Request Setup Error:', {
+        message: error.message || 'An error occurred',
+        timestamp: new Date().toISOString()
+      })
       // Something else happened
       throw new Error(error.message || 'An error occurred')
     }
