@@ -9,7 +9,7 @@ const updateUserRole = async () => {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cway-admin')
     console.log('MongoDB Connected\n')
 
-    const email = 'akashxofficial.in@gmail.com'
+    const email = 'dasaakash84@gmail.com'
     const newRole = 'admin'
 
     // Find and update user

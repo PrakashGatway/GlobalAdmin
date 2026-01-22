@@ -59,7 +59,15 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' })
+  console.error(`[404] Route not found: ${req.method} ${req.path}`)
+  console.error(`Request headers:`, req.headers)
+  console.error(`Request body:`, req.body)
+  res.status(404).json({ 
+    success: false, 
+    message: 'Route not found',
+    path: req.path,
+    method: req.method
+  })
 })
 
 const PORT = process.env.PORT || 5000
