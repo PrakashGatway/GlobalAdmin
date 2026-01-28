@@ -110,7 +110,7 @@ const pageInformationFormStructure = {
         "name": "title",
         "attributes": "",
         "validation": {
-          "required": "Title is required",
+        
           "maxLength": {
             "value": 200,
             "message": "The length of Title must be 200 characters or fewer."
@@ -290,6 +290,32 @@ const pageInformationFormStructure = {
         "validation": {},
         "pattern": { "message": "" },
         "patternValue": ""
+      },
+      {
+        "label": "Immigration IMG1",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "immigrationServices1Bg",  // ✅ CORRECT
+        "type": "file",
+        "value": "",
+        "name": "immigrationServices1Bg", // ✅ CORRECT
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
+      },
+      {
+        "label": "Immigration IMG2",
+        "width": "col_width100",
+        "placeHolder": "",
+        "id": "immigrationServices2Bg",  // ✅ CORRECT
+        "type": "file",
+        "value": "",
+        "name": "immigrationServices2Bg", // ✅ CORRECT
+        "attributes": "accept='image/*'",
+        "validation": {},
+        "pattern": { "message": "" },
+        "patternValue": ""
       }
     ]
   },
@@ -311,7 +337,12 @@ const pageInformationFormStructure = {
       { "label": "Testimonials", "width": "col_width100", "placeHolder": "", "id": "testimonials", "type": "button", "value": "Add Testimonials", "name": "testimonials", "sectionType": "testimonials", "attributes": "", "validation": {} },
       { "label": "Case Studies", "width": "col_width100", "placeHolder": "", "id": "case_studies", "type": "button", "value": "Add Case Studies", "name": "case_studies", "sectionType": "case_studies", "attributes": "", "validation": {} },
       { "label": "CTA Section", "width": "col_width100", "placeHolder": "", "id": "cta_section", "type": "button", "value": "Add CTA Section", "name": "cta_section", "sectionType": "cta_section", "attributes": "", "validation": {} },
-      { "label": "Track Record", "width": "col_width100", "placeHolder": "", "id": "track_record", "type": "button", "value": "Add Track Record", "name": "track_record", "sectionType": "track_record", "attributes": "", "validation": {} }
+      { "label": "Track Record", "width": "col_width100", "placeHolder": "", "id": "track_record", "type": "button", "value": "Add Track Record", "name": "track_record", "sectionType": "track_record", "attributes": "", "validation": {} },
+      { "label": "University Partners", "width": "col_width100", "placeHolder": "", "id": "university_partners", "type": "button", "value": "Add University Partners", "name": "university_partners", "sectionType": "university_partners", "attributes": "", "validation": {} },
+      { "label": "Immigration Services bg1", "width": "col_width100", "placeHolder": "", "id": "immigration_services", "type": "button", "value": "Add Immigration Services", "name": "immigration_services", "sectionType": "immigration_services", "attributes": "", "validation": {} },
+      { "label": "Video Testimonials", "width": "col_width100", "placeHolder": "", "id": "video_testimonials", "type": "button", "value": "Add Video Testimonials", "name": "video_testimonials", "sectionType": "video_testimonials", "attributes": "", "validation": {} },
+      { "label": "Image Testimonials", "width": "col_width100", "placeHolder": "", "id": "image_testimonials", "type": "button", "value": "Add Image Testimonials", "name": "image_testimonials", "sectionType": "image_testimonials", "attributes": "", "validation": {} },
+      { "label": "Top Universities", "width": "col_width100", "placeHolder": "", "id": "top_universities", "type": "button", "value": "Add Top Universities", "name": "top_universities", "sectionType": "top_universities", "attributes": "", "validation": {} }
     ]
   },
   "SEO and Metadata Fields": {
@@ -397,12 +428,17 @@ const PageInformation = () => {
   const [uploadingUniversityCapBg, setUploadingUniversityCapBg] = useState(false)
   const [uploadingUniversitySliderBg, setUploadingUniversitySliderBg] = useState(false)
   const [uploadingImmigrationServicesBg, setUploadingImmigrationServicesBg] = useState(false)
+  const [uploadingImmigrationServices1Bg, setUploadingImmigrationServices1Bg] = useState(false)
+  const [uploadingImmigrationServices2Bg, setUploadingImmigrationServices2Bg] = useState(false)
   const [deletingImages, setDeletingImages] = useState({})
 
   const [formData, setFormData] = useState({
     pageType: 'home_page',
     title: '',
     subTitle: '',
+    navbarTitle: '',
+    route: '',
+    hasDropdown: false,
     slug: '',
     metaTitle: '',
     metaDescription: '',
@@ -419,6 +455,10 @@ const PageInformation = () => {
     universitySliderBg: '',
     universitySliderBgPublicId: '',
     immigrationServicesBg: '',
+    immigrationServices1Bg: '',
+    immigrationServices1BgPublicId: '',
+    immigrationServices2Bg: '',
+    immigrationServices2BgPublicId: '',
     immigrationServicesBgPublicId: '',
 
     keywords: '',
@@ -789,6 +829,7 @@ const PageInformation = () => {
               pageType: pageData.pageType || 'home_page',
               title: pageData.title || '',
               subTitle: pageData.subTitle || '',
+              navbarTitle: pageData.navbarTitle || '',
               slug: pageData.slug || '',
               metaTitle: pageData.metaTitle || '',
               metaDescription: pageData.metaDescription || '',
@@ -806,6 +847,10 @@ const PageInformation = () => {
               universitySliderBgPublicId: pageData.universitySliderBgPublicId || '',
               immigrationServicesBg: pageData.immigrationServicesBg || '',
               immigrationServicesBgPublicId: pageData.immigrationServicesBgPublicId || '',
+              immigrationServices1Bg: pageData.immigrationServices1Bg || '',
+              immigrationServices1BgPublicId: pageData.immigrationServices1BgPublicId || '',
+              immigrationServices2Bg: pageData.immigrationServices2Bg || '',
+              immigrationServices2BgPublicId: pageData.immigrationServices2BgPublicId || '',
               sections: pageData.sections || [],
               keywords: Array.isArray(pageData.keywords) ? pageData.keywords.join(', ') : (pageData.keywords || ''),
               tags: Array.isArray(pageData.tags) ? pageData.tags.join(', ') : (pageData.tags || ''),
@@ -831,8 +876,13 @@ const PageInformation = () => {
 
   // Handle form input change
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const { name, value, type } = e.target
+    // Handle hasDropdown as boolean
+    if (name === 'hasDropdown') {
+      setFormData((prev) => ({ ...prev, [name]: value === 'true' || value === true }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
     setError('')
   }
 
@@ -840,31 +890,43 @@ const PageInformation = () => {
   const handleImageUpload = async (e, imageType) => {
     const file = e.target.files[0]
     if (!file) return
-
+    console.log(`🔄 Starting upload for ${imageType}:`, {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      imageType: imageType,
+      expectedField: imageType,
+      expectedPublicIdField: `${imageType}PublicId`
+    })
+  
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file')
       return
     }
-
+  
     if (file.size > 5 * 1024 * 1024) {
       setError('Image size should be less than 5MB')
       return
     }
-
-    const uploadingState = {
+  
+    // Map image types to their setUploading functions
+    const uploadingStateMap = {
       heroImage: setUploadingHero,
       roadmapImage: setUploadingRoadmap,
       mobileRoadmapImage: setUploadingMobileRoadmap,
       universityCapBg: setUploadingUniversityCapBg,
       universitySliderBg: setUploadingUniversitySliderBg,
       immigrationServicesBg: setUploadingImmigrationServicesBg,
+      immigrationServices1Bg: setUploadingImmigrationServices1Bg,
+      immigrationServices2Bg: setUploadingImmigrationServices2Bg,
     }
-
-    if (uploadingState[imageType]) {
-      uploadingState[imageType](true)
+  
+    const setUploading = uploadingStateMap[imageType]
+    if (setUploading) {
+      setUploading(true)
     }
     setError('')
-
+  
     try {
       const response = await uploadService.uploadImage(file)
       if (response.success) {
@@ -879,8 +941,8 @@ const PageInformation = () => {
     } catch (err) {
       setError(err.message || 'Failed to upload image')
     } finally {
-      if (uploadingState[imageType]) {
-        uploadingState[imageType](false)
+      if (setUploading) {
+        setUploading(false)
       }
     }
   }
@@ -940,13 +1002,19 @@ const PageInformation = () => {
     
     // Get uploading state based on image type
     let isUploading = false
-    if (imageType === 'heroImage') isUploading = uploadingHero
-    else if (imageType === 'roadmapImage') isUploading = uploadingRoadmap
-    else if (imageType === 'mobileRoadmapImage') isUploading = uploadingMobileRoadmap
-    else if (imageType === 'universityCapBg') isUploading = uploadingUniversityCapBg
-    else if (imageType === 'universitySliderBg') isUploading = uploadingUniversitySliderBg
-    else if (imageType === 'immigrationServicesBg') isUploading = uploadingImmigrationServicesBg
-
+    const uploadingStateMap = {
+      heroImage: uploadingHero,
+      roadmapImage: uploadingRoadmap,
+      mobileRoadmapImage: uploadingMobileRoadmap,
+      universityCapBg: uploadingUniversityCapBg,
+      universitySliderBg: uploadingUniversitySliderBg,
+      immigrationServicesBg: uploadingImmigrationServicesBg,
+      immigrationServices1Bg: uploadingImmigrationServices1Bg,
+      immigrationServices2Bg: uploadingImmigrationServices2Bg,
+    }
+    
+    isUploading = uploadingStateMap[imageType] || false
+    
     return (
       <CCol md={4} className="mb-3">
         <CFormLabel>{label}</CFormLabel>
@@ -1061,6 +1129,9 @@ const PageInformation = () => {
           pageType: pageData.pageType || 'home_page',
           title: pageData.title || '',
           subTitle: pageData.subTitle || '',
+          navbarTitle: pageData.navbarTitle || '',
+          route: pageData.route || '',
+          hasDropdown: pageData.hasDropdown || false,
           slug: pageData.slug || '',
           metaTitle: pageData.metaTitle || '',
           metaDescription: pageData.metaDescription || '',
@@ -1077,6 +1148,10 @@ const PageInformation = () => {
           universitySliderBg: pageData.universitySliderBg || '',
           universitySliderBgPublicId: pageData.universitySliderBgPublicId || '',
           immigrationServicesBg: pageData.immigrationServicesBg || '',
+          immigrationServices1Bg: pageData.immigrationServices1Bg || '',
+          immigrationServices1BgPublicId: pageData.immigrationServices1BgPublicId || '',
+          immigrationServices2Bg: pageData.immigrationServices2Bg || '',
+          immigrationServices2BgPublicId: pageData.immigrationServices2BgPublicId || '',
           immigrationServicesBgPublicId: pageData.immigrationServicesBgPublicId || '',
           sections: pageData.sections || [],
           keywords: Array.isArray(pageData.keywords) ? pageData.keywords.join(', ') : (pageData.keywords || ''),
@@ -1230,6 +1305,47 @@ const PageInformation = () => {
           title: '',
           subTitle: '',
           description: '',
+        }
+
+      case 'university_partners':
+        return {
+          title: 'International University Partners',
+          subTitle: '',
+          description: '',
+          images: []
+        }
+
+      case 'immigration_services':
+        return {
+          title: 'Your Trusted Partner in Immigration Services',
+          subTitle: '',
+          description: 'We provide reliable guidance for study, work, and permanent residency applications.',
+          buttonText: 'About Us',
+          buttonLink: '/about-us'
+        }
+
+      case 'video_testimonials':
+        return {
+          title: 'Video Testimonials',
+          subTitle: '',
+          description: '',
+          videos: []
+        }
+
+      case 'image_testimonials':
+        return {
+          title: 'Image Testimonials',
+          subTitle: '',
+          description: '',
+          images: []
+        }
+
+      case 'top_universities':
+        return {
+          title: 'Top Universities Hub',
+          subTitle: '',
+          description: 'Explore globally recognized university groups across major study destinations.',
+          items: []
         }
 
       default:
@@ -2899,6 +3015,327 @@ const PageInformation = () => {
         </CCard>
       )
     }
+
+    // University Partners Section
+    if (section.type === 'university_partners') {
+      const images = Array.isArray(section.data?.images) ? section.data.images : []
+      
+      const handleAddImage = () => {
+        const newImages = [...images, { url: '', alt: '' }]
+        handleSectionDataChange(index, 'images', newImages)
+      }
+
+      const handleRemoveImage = (imgIndex) => {
+        const newImages = images.filter((_, i) => i !== imgIndex)
+        handleSectionDataChange(index, 'images', newImages)
+      }
+
+      const handleImageChange = (imgIndex, field, value) => {
+        const newImages = [...images]
+        newImages[imgIndex] = { ...newImages[imgIndex], [field]: value }
+        handleSectionDataChange(index, 'images', newImages)
+      }
+
+      return (
+        <CCard className="mb-3" key={index}>
+          <CCardHeader className="d-flex justify-content-between align-items-center">
+            <strong>University Partners Section #{index + 1}</strong>
+            <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveSection(index)}><CIcon icon={cilTrash} /></CButton>
+          </CCardHeader>
+          <CCardBody>
+            <CRow>
+              {renderOrderField()}
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.title || ''} onChange={(e) => handleSectionDataChange(index, 'title', e.target.value)} placeholder="e.g., International University Partners" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Sub Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.subTitle || ''} onChange={(e) => handleSectionDataChange(index, 'subTitle', e.target.value)} placeholder="Enter sub title" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <CFormLabel className="mb-0">Partner Logos</CFormLabel>
+                  <CButton color="primary" variant="outline" size="sm" onClick={handleAddImage}><CIcon icon={cilPlus} className="me-1" /> Add Logo</CButton>
+                </div>
+                {images.map((img, imgIndex) => (
+                  <CCard key={imgIndex} className="mb-2">
+                    <CCardBody>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <strong>Logo #{imgIndex + 1}</strong>
+                        <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveImage(imgIndex)}><CIcon icon={cilX} /></CButton>
+                      </div>
+                      <CRow>
+                        <CCol md={12} className="mb-2">
+                          <CFormLabel>Image URL</CFormLabel>
+                          <CFormInput type="text" value={img.url || ''} onChange={(e) => handleImageChange(imgIndex, 'url', e.target.value)} placeholder="Enter image URL" />
+                        </CCol>
+                        <CCol md={12} className="mb-2">
+                          <CFormLabel>Alt Text</CFormLabel>
+                          <CFormInput type="text" value={img.alt || ''} onChange={(e) => handleImageChange(imgIndex, 'alt', e.target.value)} placeholder="Enter alt text" />
+                        </CCol>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                ))}
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+      )
+    }
+
+    // Immigration Services Section
+    if (section.type === 'immigration_services') {
+      return (
+        <CCard className="mb-3" key={index}>
+          <CCardHeader className="d-flex justify-content-between align-items-center">
+            <strong>Immigration Services Section #{index + 1}</strong>
+            <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveSection(index)}><CIcon icon={cilTrash} /></CButton>
+          </CCardHeader>
+          <CCardBody>
+            <CRow>
+              {renderOrderField()}
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.title || ''} onChange={(e) => handleSectionDataChange(index, 'title', e.target.value)} placeholder="Enter title" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Sub Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.subTitle || ''} onChange={(e) => handleSectionDataChange(index, 'subTitle', e.target.value)} placeholder="Enter sub title" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Description</CFormLabel>
+                <CFormTextarea value={section.data?.description || ''} onChange={(e) => handleSectionDataChange(index, 'description', e.target.value)} placeholder="Enter description" rows={3} />
+              </CCol>
+              <CCol md={6} className="mb-3">
+                <CFormLabel>Button Text</CFormLabel>
+                <CFormInput type="text" value={section.data?.buttonText || ''} onChange={(e) => handleSectionDataChange(index, 'buttonText', e.target.value)} placeholder="e.g., About Us" />
+              </CCol>
+              <CCol md={6} className="mb-3">
+                <CFormLabel>Button Link</CFormLabel>
+                <CFormInput type="text" value={section.data?.buttonLink || ''} onChange={(e) => handleSectionDataChange(index, 'buttonLink', e.target.value)} placeholder="e.g., /about-us" />
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+      )
+    }
+
+    // Video Testimonials Section
+    if (section.type === 'video_testimonials') {
+      const videos = Array.isArray(section.data?.videos) ? section.data.videos : []
+      
+      const handleAddVideo = () => {
+        const newVideos = [...videos, { url: '', thumbnail: '', title: '' }]
+        handleSectionDataChange(index, 'videos', newVideos)
+      }
+
+      const handleRemoveVideo = (vidIndex) => {
+        const newVideos = videos.filter((_, i) => i !== vidIndex)
+        handleSectionDataChange(index, 'videos', newVideos)
+      }
+
+      const handleVideoChange = (vidIndex, field, value) => {
+        const newVideos = [...videos]
+        newVideos[vidIndex] = { ...newVideos[vidIndex], [field]: value }
+        handleSectionDataChange(index, 'videos', newVideos)
+      }
+
+      return (
+        <CCard className="mb-3" key={index}>
+          <CCardHeader className="d-flex justify-content-between align-items-center">
+            <strong>Video Testimonials Section #{index + 1}</strong>
+            <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveSection(index)}><CIcon icon={cilTrash} /></CButton>
+          </CCardHeader>
+          <CCardBody>
+            <CRow>
+              {renderOrderField()}
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.title || ''} onChange={(e) => handleSectionDataChange(index, 'title', e.target.value)} placeholder="e.g., Video Testimonials" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <CFormLabel className="mb-0">Videos</CFormLabel>
+                  <CButton color="primary" variant="outline" size="sm" onClick={handleAddVideo}><CIcon icon={cilPlus} className="me-1" /> Add Video</CButton>
+                </div>
+                {videos.map((vid, vidIndex) => (
+                  <CCard key={vidIndex} className="mb-2">
+                    <CCardBody>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <strong>Video #{vidIndex + 1}</strong>
+                        <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveVideo(vidIndex)}><CIcon icon={cilX} /></CButton>
+                      </div>
+                      <CRow>
+                        <CCol md={12} className="mb-2">
+                          <CFormLabel>Video URL</CFormLabel>
+                          <CFormInput type="text" value={vid.url || ''} onChange={(e) => handleVideoChange(vidIndex, 'url', e.target.value)} placeholder="YouTube/Vimeo URL" />
+                        </CCol>
+                        <CCol md={6} className="mb-2">
+                          <CFormLabel>Thumbnail URL (Optional)</CFormLabel>
+                          <CFormInput type="text" value={vid.thumbnail || ''} onChange={(e) => handleVideoChange(vidIndex, 'thumbnail', e.target.value)} placeholder="Enter thumbnail image URL" />
+                        </CCol>
+                        <CCol md={6} className="mb-2">
+                          <CFormLabel>Video Title/Name</CFormLabel>
+                          <CFormInput type="text" value={vid.title || ''} onChange={(e) => handleVideoChange(vidIndex, 'title', e.target.value)} placeholder="Enter title" />
+                        </CCol>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                ))}
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+      )
+    }
+
+    // Image Testimonials Section
+    if (section.type === 'image_testimonials') {
+      const images = Array.isArray(section.data?.images) ? section.data.images : []
+      
+      const handleAddImage = () => {
+        const newImages = [...images, { url: '', name: '', role: '', text: '' }]
+        handleSectionDataChange(index, 'images', newImages)
+      }
+
+      const handleRemoveImage = (imgIndex) => {
+        const newImages = images.filter((_, i) => i !== imgIndex)
+        handleSectionDataChange(index, 'images', newImages)
+      }
+
+      const handleImageChange = (imgIndex, field, value) => {
+        const newImages = [...images]
+        newImages[imgIndex] = { ...newImages[imgIndex], [field]: value }
+        handleSectionDataChange(index, 'images', newImages)
+      }
+
+      return (
+        <CCard className="mb-3" key={index}>
+          <CCardHeader className="d-flex justify-content-between align-items-center">
+            <strong>Image Testimonials Section #{index + 1}</strong>
+            <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveSection(index)}><CIcon icon={cilTrash} /></CButton>
+          </CCardHeader>
+          <CCardBody>
+            <CRow>
+              {renderOrderField()}
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.title || ''} onChange={(e) => handleSectionDataChange(index, 'title', e.target.value)} placeholder="e.g., Image Testimonials" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <CFormLabel className="mb-0">Testimonials</CFormLabel>
+                  <CButton color="primary" variant="outline" size="sm" onClick={handleAddImage}><CIcon icon={cilPlus} className="me-1" /> Add Testimonial</CButton>
+                </div>
+                {images.map((img, imgIndex) => (
+                  <CCard key={imgIndex} className="mb-2">
+                    <CCardBody>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <strong>Testimonial #{imgIndex + 1}</strong>
+                        <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveImage(imgIndex)}><CIcon icon={cilX} /></CButton>
+                      </div>
+                      <CRow>
+                        <CCol md={6} className="mb-2">
+                          <CFormLabel>Name</CFormLabel>
+                          <CFormInput type="text" value={img.name || ''} onChange={(e) => handleImageChange(imgIndex, 'name', e.target.value)} placeholder="Student Name" />
+                        </CCol>
+                        <CCol md={6} className="mb-2">
+                          <CFormLabel>Role/University</CFormLabel>
+                          <CFormInput type="text" value={img.role || ''} onChange={(e) => handleImageChange(imgIndex, 'role', e.target.value)} placeholder="e.g., Harvard University" />
+                        </CCol>
+                        <CCol md={12} className="mb-2">
+                          <CFormLabel>Review Text</CFormLabel>
+                          <CFormTextarea value={img.text || ''} onChange={(e) => handleImageChange(imgIndex, 'text', e.target.value)} placeholder="Enter review" rows={2} />
+                        </CCol>
+                        <CCol md={12} className="mb-2">
+                          <CFormLabel>Image URL</CFormLabel>
+                          <CFormInput type="text" value={img.url || ''} onChange={(e) => handleImageChange(imgIndex, 'url', e.target.value)} placeholder="Enter image URL" />
+                        </CCol>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                ))}
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+      )
+    }
+
+    // Top Universities Hub Section
+    if (section.type === 'top_universities') {
+      const items = Array.isArray(section.data?.items) ? section.data.items : []
+      
+      const handleAddItem = () => {
+        const newItems = [...items, { title: '', description: '', image: '' }]
+        handleSectionDataChange(index, 'items', newItems)
+      }
+
+      const handleRemoveItem = (itemIndex) => {
+        const newItems = items.filter((_, i) => i !== itemIndex)
+        handleSectionDataChange(index, 'items', newItems)
+      }
+
+      const handleItemChange = (itemIndex, field, value) => {
+        const newItems = [...items]
+        newItems[itemIndex] = { ...newItems[itemIndex], [field]: value }
+        handleSectionDataChange(index, 'items', newItems)
+      }
+
+      return (
+        <CCard className="mb-3" key={index}>
+          <CCardHeader className="d-flex justify-content-between align-items-center">
+            <strong>Top Universities Hub Section #{index + 1}</strong>
+            <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveSection(index)}><CIcon icon={cilTrash} /></CButton>
+          </CCardHeader>
+          <CCardBody>
+            <CRow>
+              {renderOrderField()}
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Title</CFormLabel>
+                <CFormInput type="text" value={section.data?.title || ''} onChange={(e) => handleSectionDataChange(index, 'title', e.target.value)} placeholder="e.g., Top Universities Hub" />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <CFormLabel>Description</CFormLabel>
+                <CFormTextarea value={section.data?.description || ''} onChange={(e) => handleSectionDataChange(index, 'description', e.target.value)} placeholder="Enter description" rows={3} />
+              </CCol>
+              <CCol md={12} className="mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <CFormLabel className="mb-0">University Groups</CFormLabel>
+                  <CButton color="primary" variant="outline" size="sm" onClick={handleAddItem}><CIcon icon={cilPlus} className="me-1" /> Add Group</CButton>
+                </div>
+                {items.map((item, itemIndex) => (
+                  <CCard key={itemIndex} className="mb-2">
+                    <CCardBody>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <strong>Group #{itemIndex + 1}</strong>
+                        <CButton color="danger" variant="ghost" size="sm" onClick={() => handleRemoveItem(itemIndex)}><CIcon icon={cilX} /></CButton>
+                      </div>
+                      <CRow>
+                        <CCol md={6} className="mb-2">
+                          <CFormLabel>Group Title</CFormLabel>
+                          <CFormInput type="text" value={item.title || ''} onChange={(e) => handleItemChange(itemIndex, 'title', e.target.value)} placeholder="e.g., Ivy League" />
+                        </CCol>
+                        <CCol md={6} className="mb-2">
+                          <CFormLabel>Image URL</CFormLabel>
+                          <CFormInput type="text" value={item.image || ''} onChange={(e) => handleItemChange(itemIndex, 'image', e.target.value)} placeholder="Enter image URL" />
+                        </CCol>
+                        <CCol md={12} className="mb-2">
+                          <CFormLabel>Description</CFormLabel>
+                          <CFormTextarea value={item.description || ''} onChange={(e) => handleItemChange(itemIndex, 'description', e.target.value)} placeholder="Enter short description" rows={2} />
+                        </CCol>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                ))}
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+      )
+    }
     
     // Default render for other section types (generic section editor)
     const sectionData = section.data || {}
@@ -2995,8 +3432,29 @@ const PageInformation = () => {
     setSuccess('')
     setSaving(true)
 
+    console.log('🔍 DEBUG - FormData before submission:', {
+      immigrationServices1Bg: {
+        value: formData.immigrationServices1Bg,
+        length: formData.immigrationServices1Bg?.length || 0,
+        exists: !!formData.immigrationServices1Bg
+      },
+      immigrationServices2Bg: {
+        value: formData.immigrationServices2Bg,
+        length: formData.immigrationServices2Bg?.length || 0,
+        exists: !!formData.immigrationServices2Bg
+      },
+      allImmigrationFields: Object.keys(formData)
+        .filter(key => key.includes('immigration'))
+        .map(key => ({ key, value: formData[key], hasValue: !!formData[key] }))
+    })
+
     // Validation
-    if (!formData.title || !formData.title.trim()) {
+    // Title is not required for destination pages
+    const isDestinationPage = formData.pageType === 'destination_page' || 
+                              (formData.pageType && !['home_page', 'about_page', 'contact_page', 'services_page', 'blogs_page', 'events_page', 'career_page', 'city_page'].includes(formData.pageType))
+    
+    // Title is required for non-destination pages
+    if (!isDestinationPage && (!formData.title || !formData.title.trim())) {
       setError('Please enter a valid Title. Title is required.')
       setSaving(false)
       return
@@ -3053,6 +3511,9 @@ const PageInformation = () => {
         pageType: formData.pageType || 'home_page',
         title: formData.title?.trim() || '',
         subTitle: formData.subTitle?.trim() || '',
+        navbarTitle: formData.navbarTitle?.trim() || '',
+        route: formData.route?.trim() || '',
+        hasDropdown: formData.hasDropdown === true || formData.hasDropdown === 'true',
         slug: formData.slug?.trim().toLowerCase() || '',
         metaTitle: formData.metaTitle?.trim() || '',
         metaDescription: formData.metaDescription?.trim() || '',
@@ -3069,7 +3530,11 @@ const PageInformation = () => {
         universitySliderBg: formData.universitySliderBg || '',
         universitySliderBgPublicId: formData.universitySliderBgPublicId || '',
         immigrationServicesBg: formData.immigrationServicesBg || '',
-        immigrationServicesBgPublicId: formData.immigrationServicesBgPublicId || '',
+  immigrationServicesBgPublicId: formData.immigrationServicesBgPublicId || '',
+  immigrationServices1Bg: formData.immigrationServices1Bg || '',
+  immigrationServices1BgPublicId: formData.immigrationServices1BgPublicId || '',
+  immigrationServices2Bg: formData.immigrationServices2Bg || '',
+  immigrationServices2BgPublicId: formData.immigrationServices2BgPublicId || '',
         sections: normalizedSections,
         keywords: (formData.keywords && formData.keywords.trim())
           ? formData.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0)
@@ -3125,6 +3590,7 @@ const PageInformation = () => {
       console.table({
         'Page Type': submitData.pageType,
         'Title': submitData.title,
+        'Navbar Title': submitData.navbarTitle,
         'Slug': submitData.slug,
         'Status': submitData.status,
         'Is Featured': submitData.isFeatured,
@@ -3173,6 +3639,9 @@ const PageInformation = () => {
               pageType: pageData.pageType || formData.pageType,
               title: pageData.title || '',
               subTitle: pageData.subTitle || '',
+              navbarTitle: pageData.navbarTitle || '',
+              route: pageData.route || '',
+              hasDropdown: pageData.hasDropdown || false,
               slug: pageData.slug || '',
               metaTitle: pageData.metaTitle || '',
               metaDescription: pageData.metaDescription || '',
@@ -3189,7 +3658,11 @@ const PageInformation = () => {
               universitySliderBg: pageData.universitySliderBg || '',
               universitySliderBgPublicId: pageData.universitySliderBgPublicId || '',
               immigrationServicesBg: pageData.immigrationServicesBg || '',
-              immigrationServicesBgPublicId: pageData.immigrationServicesBgPublicId || '',
+  immigrationServicesBgPublicId: pageData.immigrationServicesBgPublicId || '',
+  immigrationServices1Bg: pageData.immigrationServices1Bg || '',
+  immigrationServices1BgPublicId: pageData.immigrationServices1BgPublicId || '',
+  immigrationServices2Bg: pageData.immigrationServices2Bg || '',
+  immigrationServices2BgPublicId: pageData.immigrationServices2BgPublicId || '',
               keywords: Array.isArray(pageData.keywords) ? pageData.keywords.join(', ') : (pageData.keywords || ''),
               tags: Array.isArray(pageData.tags) ? pageData.tags.join(', ') : (pageData.tags || ''),
               canonicalUrl: pageData.canonicalUrl || '',
@@ -3211,6 +3684,9 @@ const PageInformation = () => {
                   pageType: pageData.pageType || formData.pageType,
                   title: pageData.title || '',
                   subTitle: pageData.subTitle || '',
+                  navbarTitle: pageData.navbarTitle || '',
+                  route: pageData.route || '',
+                  hasDropdown: pageData.hasDropdown || false,
                   slug: pageData.slug || '',
                   metaTitle: pageData.metaTitle || '',
                   metaDescription: pageData.metaDescription || '',
@@ -3426,6 +3902,11 @@ const PageInformation = () => {
                       <option value="home_page">Home Page</option>
                       <option value="about_page">About Page</option>
                       <option value="contact_page">Contact Page</option>
+                      <option value="services_page">Services Page</option>
+                      <option value="destination_page">Destination Page</option>
+                      <option value="blogs_page">Blogs Page</option>
+                      <option value="events_page">Events Page</option>
+                      <option value="career_page">Career Page</option>
                       <option value="city_page">City Page</option>
                       <option value="ivy_league">Ivy League</option>
                       <option value="usa_universities">USA Universities</option>
@@ -3450,7 +3931,11 @@ const PageInformation = () => {
                   </CCol>
                   <CCol md={6} className="mb-3">
                     <CFormLabel htmlFor="title">
-                      Title <span className="text-danger">*</span>
+                      Title {(() => {
+                        const isDestinationPage = formData.pageType === 'destination_page' || 
+                                                  (formData.pageType && !['home_page', 'about_page', 'contact_page', 'services_page', 'blogs_page', 'events_page', 'career_page', 'city_page'].includes(formData.pageType))
+                        return !isDestinationPage ? <span className="text-danger">*</span> : null
+                      })()}
                     </CFormLabel>
                     <CFormInput
                       type="text"
@@ -3459,7 +3944,7 @@ const PageInformation = () => {
                       value={formData.title}
                       onChange={handleInputChange}
                       placeholder="Enter page title"
-                      required
+                      
                     />
                   </CCol>
                   <CCol md={6} className="mb-3">
@@ -3472,6 +3957,40 @@ const PageInformation = () => {
                       onChange={handleInputChange}
                       placeholder="Enter sub title"
                     />
+                  </CCol>
+                  <CCol md={6} className="mb-3">
+                    <CFormLabel htmlFor="navbarTitle">Navbar Title</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="navbarTitle"
+                      name="navbarTitle"
+                      value={formData.navbarTitle}
+                      onChange={handleInputChange}
+                      placeholder="Enter navbar title"
+                    />
+                  </CCol>
+                  <CCol md={6} className="mb-3">
+                    <CFormLabel htmlFor="route">Route</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="route"
+                      name="route"
+                      value={formData.route}
+                      onChange={handleInputChange}
+                      placeholder="Enter route (e.g., /about, /contact)"
+                    />
+                  </CCol>
+                  <CCol md={6} className="mb-3">
+                    <CFormLabel htmlFor="hasDropdown">Has Dropdown</CFormLabel>
+                    <CFormSelect
+                      id="hasDropdown"
+                      name="hasDropdown"
+                      value={formData.hasDropdown === true || formData.hasDropdown === 'true' ? 'true' : 'false'}
+                      onChange={handleInputChange}
+                    >
+                      <option value="false">No</option>
+                      <option value="true">Yes</option>
+                    </CFormSelect>
                   </CCol>
                   <CCol md={6} className="mb-3">
                     <CFormLabel htmlFor="slug">
@@ -3544,19 +4063,27 @@ const PageInformation = () => {
                      formData.pageType === 'germany_public_universities' ? 'Germany Public Universities Page Fields' :
                      formData.pageType === 'italy_france' ? 'Italy & France Page Fields' :
                      formData.pageType === 'canada_australia' ? 'Canada & Australia Page Fields' :
+                     formData.pageType === 'services_page' ? 'Services Page Fields' :
+                     formData.pageType === 'destination_page' ? 'Destination Page Fields' :
+                     formData.pageType === 'blogs_page' ? 'Blogs Page Fields' :
+                     formData.pageType === 'events_page' ? 'Events Page Fields' :
+                     formData.pageType === 'career_page' ? 'Career Page Fields' :
                      'Page Images'}
                   </h6>
                   <CRow>
                     {renderImageField('Hero Image', 'heroImage')}
                     {formData.pageType === 'home_page' && (
-                      <>
-                        {renderImageField('Roadmap Image', 'roadmapImage')}
-                        {renderImageField('Mobile Roadmap Image', 'mobileRoadmapImage')}
-                        {renderImageField('University Cap Background', 'universityCapBg')}
-                        {renderImageField('University Slider Background', 'universitySliderBg')}
-                        {renderImageField('Immigration Services Background', 'immigrationServicesBg')}
-                      </>
-                    )}
+  <>
+    
+    {renderImageField('Roadmap Image', 'roadmapImage')}
+    {renderImageField('Mobile Roadmap Image', 'mobileRoadmapImage')}
+    {renderImageField('University Cap Background', 'universityCapBg')}
+    {renderImageField('University Slider Background', 'universitySliderBg')}
+    {renderImageField('Immigration Services Background', 'immigrationServicesBg')}
+    {renderImageField('Immigration Services IMG1', 'immigrationServices1Bg')}
+    {renderImageField('Immigration Services IMG2', 'immigrationServices2Bg')}
+  </>
+)}
                     {(formData.pageType === 'ivy_league' || 
                       formData.pageType === 'city_page' || 
                       formData.pageType === 'usa_universities' ||
@@ -3736,6 +4263,61 @@ const PageInformation = () => {
                     >
                       <CIcon icon={cilPlus} className="me-2" />
                       Add Track Record
+                    </CButton>
+                  </CCol>
+                  <CCol md={3} className="mb-2">
+                    <CButton
+                      color="primary"
+                      variant="outline"
+                      className="w-100"
+                      onClick={() => handleAddSection('university_partners')}
+                    >
+                      <CIcon icon={cilPlus} className="me-2" />
+                      Add University Partners
+                    </CButton>
+                  </CCol>
+                  <CCol md={3} className="mb-2">
+                    <CButton
+                      color="primary"
+                      variant="outline"
+                      className="w-100"
+                      onClick={() => handleAddSection('immigration_services')}
+                    >
+                      <CIcon icon={cilPlus} className="me-2" />
+                      Add Immigration Services
+                    </CButton>
+                  </CCol>
+                  <CCol md={3} className="mb-2">
+                    <CButton
+                      color="primary"
+                      variant="outline"
+                      className="w-100"
+                      onClick={() => handleAddSection('video_testimonials')}
+                    >
+                      <CIcon icon={cilPlus} className="me-2" />
+                      Add Video Testimonials
+                    </CButton>
+                  </CCol>
+                  <CCol md={3} className="mb-2">
+                    <CButton
+                      color="primary"
+                      variant="outline"
+                      className="w-100"
+                      onClick={() => handleAddSection('image_testimonials')}
+                    >
+                      <CIcon icon={cilPlus} className="me-2" />
+                      Add Image Testimonials
+                    </CButton>
+                  </CCol>
+                  <CCol md={3} className="mb-2">
+                    <CButton
+                      color="primary"
+                      variant="outline"
+                      className="w-100"
+                      onClick={() => handleAddSection('top_universities')}
+                    >
+                      <CIcon icon={cilPlus} className="me-2" />
+                      Add Top Universities
                     </CButton>
                   </CCol>
                 </CRow>
