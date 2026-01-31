@@ -52,8 +52,8 @@ const BlogForm = () => {
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
- const [imagePreview, setImagePreview] = useState('')
-  const [uploadingImage, setUploadingImage] = useState(false)
+    const [imagePreview, setImagePreview] = useState('')
+    const [uploadingImage, setUploadingImage] = useState(false)
     // Fetch categories and blog data (if editing)
     useEffect(() => {
         const fetchData = async () => {
@@ -65,7 +65,6 @@ const BlogForm = () => {
                 ])
 
                 setCategories(cats)
-
                 if (isEditing && blog) {
                     setFormData({
                         title: blog.title || '',
@@ -75,8 +74,17 @@ const BlogForm = () => {
                         category: blog.category?._id || '',
                         status: blog.status || 'Draft',
                         isFeatured: blog.isFeatured || false,
+                        coverImage: blog.coverImage || '',
+                        blogType: blog.blogType || 'blog',
+                        seo: {
+                            metaTitle: blog.seo?.metaTitle || '',
+                            metaDescription: blog.seo?.metaDescription || '',
+                            keywords: blog.seo?.keywords || ''
+                        },
+                        extraMetadata: blog.extraMetadata
                     })
                 }
+
             } catch (err) {
                 setError(err.message || 'Failed to load data')
             } finally {
@@ -87,43 +95,43 @@ const BlogForm = () => {
         fetchData()
     }, [id, isEditing])
 
-      const handleImageChange = async (e) => {
+    const handleImageChange = async (e) => {
         const file = e.target.files[0]
         if (!file) return
-    
+
         if (!file.type.startsWith('image/')) {
-          setError('Please select an image file')
-          return
+            setError('Please select an image file')
+            return
         }
-    
+
         if (file.size > 5 * 1024 * 1024) {
-          setError('Image size should be less than 5MB')
-          return
+            setError('Image size should be less than 5MB')
+            return
         }
-    
+
         const reader = new FileReader()
         reader.onloadend = () => {
-          setImagePreview(reader.result)
+            setImagePreview(reader.result)
         }
         reader.readAsDataURL(file)
-    
+
         setUploadingImage(true)
         setError('')
         try {
-          const response = await uploadService.uploadImage(file)
-          if (response.success) {
-            setFormData((prev) => ({
-              ...prev,
-              coverImage: response.data.url,
-            }))
-          }
+            const response = await uploadService.uploadImage(file)
+            if (response.success) {
+                setFormData((prev) => ({
+                    ...prev,
+                    coverImage: response.data.url,
+                }))
+            }
         } catch (err) {
-          setError(err.message || 'Failed to upload image')
-          setImagePreview('')
+            setError(err.message || 'Failed to upload image')
+            setImagePreview('')
         } finally {
-          setUploadingImage(false)
+            setUploadingImage(false)
         }
-      }
+    }
     // Auto-generate slug
     useEffect(() => {
         if (!isEditing && formData.title) {
@@ -139,11 +147,35 @@ const BlogForm = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }))
+
+        if (name.startsWith("seo.")) {
+            const key = name.split(".")[1]
+            setFormData(prev => ({
+                ...prev,
+                seo: {
+                    ...prev.seo,
+                    [key]: value
+                }
+            }))
+
+        } else if (name.startsWith("extraMetadata.")) {
+            const key = name.split(".")[1]
+            setFormData(prev => ({
+                ...prev,
+                extraMetadata: {
+                    ...prev.extraMetadata,
+                    [key]: value
+                }
+            }))
+
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === "checkbox" ? checked : value
+            }))
+        }
     }
+
 
     const handleContentChange = (value) => {
         setFormData(prev => ({ ...prev, content: value }))
@@ -281,11 +313,11 @@ const BlogForm = () => {
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <CFormLabel htmlFor="seo.metaKeywords">Meta Keywords *</CFormLabel>
+                                        <CFormLabel htmlFor="seo.keywords">Meta Keywords *</CFormLabel>
                                         <CFormTextarea
-                                            id="seo.metaKeywords"
-                                            name="seo.metaKeywords"
-                                            value={formData?.seo?.metaKeywords || ''}
+                                            id="seo.keywords"
+                                            name="seo.keywords"
+                                            value={formData?.seo?.keywords || ''}
                                             onChange={handleChange}
                                             required
                                             rows={2}
@@ -314,51 +346,51 @@ const BlogForm = () => {
                                             <CCardBody>
                                                 <div className="mb-3">
                                                     <CFormLabel htmlFor="category">Cover Image *</CFormLabel>
-                                                    
-                                                        <CFormInput
-                                                            type="file"
-                                                            id="image"
-                                                            name="image"
-                                                            accept="image/*"
-                                                            onChange={handleImageChange}
-                                                            disabled={uploadingImage}
-                                                        />
-                                                        {uploadingImage && (
-                                                            <div className="mt-2">
-                                                                <CSpinner size="sm" /> <small>Uploading image...</small>
-                                                            </div>
-                                                        )}
-                                                        {imagePreview && (
-                                                            <div className="mt-3">
-                                                                <img
-                                                                    src={imagePreview}
-                                                                    alt="Preview"
-                                                                    style={{
-                                                                        maxWidth: '200px',
-                                                                        maxHeight: '200px',
-                                                                        objectFit: 'cover',
-                                                                        borderRadius: '8px',
-                                                                        border: '1px solid #dee2e6',
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                        {formData.image && !imagePreview && (
-                                                            <div className="mt-3">
-                                                                <img
-                                                                    src={formData.image}
-                                                                    alt="Current"
-                                                                    style={{
-                                                                        maxWidth: '200px',
-                                                                        maxHeight: '200px',
-                                                                        objectFit: 'cover',
-                                                                        borderRadius: '8px',
-                                                                        border: '1px solid #dee2e6',
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                 
+
+                                                    <CFormInput
+                                                        type="file"
+                                                        id="image"
+                                                        name="image"
+                                                        accept="image/*"
+                                                        onChange={handleImageChange}
+                                                        disabled={uploadingImage}
+                                                    />
+                                                    {uploadingImage && (
+                                                        <div className="mt-2">
+                                                            <CSpinner size="sm" /> <small>Uploading image...</small>
+                                                        </div>
+                                                    )}
+                                                    {imagePreview && (
+                                                        <div className="mt-3">
+                                                            <img
+                                                                src={imagePreview}
+                                                                alt="Preview"
+                                                                style={{
+                                                                    maxWidth: '200px',
+                                                                    maxHeight: '200px',
+                                                                    objectFit: 'cover',
+                                                                    borderRadius: '8px',
+                                                                    border: '1px solid #dee2e6',
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    {formData.coverImage && !imagePreview && (
+                                                        <div className="mt-3">
+                                                            <img
+                                                                src={formData.coverImage}
+                                                                alt="Current"
+                                                                style={{
+                                                                    maxWidth: '200px',
+                                                                    maxHeight: '200px',
+                                                                    objectFit: 'cover',
+                                                                    borderRadius: '8px',
+                                                                    border: '1px solid #dee2e6',
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+
                                                 </div>
                                                 <div className="mb-3">
                                                     <CFormLabel htmlFor="category">Category *</CFormLabel>
@@ -405,6 +437,72 @@ const BlogForm = () => {
                                                         <option value="webnair">Webnair</option>
                                                     </CFormSelect>
                                                 </div>
+
+                                                {(formData.blogType === 'event' || formData.blogType === 'webnair') && (
+                                                    <>
+                                                        <div className="mb-3">
+                                                            <CFormLabel htmlFor="eventDate">Event Date *</CFormLabel>
+                                                            <CFormInput
+                                                                type="date"
+                                                                id="eventDate"
+                                                                name="extraMetadata.eventDate"
+                                                                value={formData?.extraMetadata?.eventDate || ''}
+                                                                onChange={handleChange}
+                                                                required
+                                                            />
+                                                        </div>
+                                                        <div className='mb-3 d-flex justify-content-between gap-2'>
+                                                            <div className="w-50">
+                                                                <CFormLabel htmlFor="startTime">Event start time *</CFormLabel>
+                                                                <CFormInput
+                                                                    type="time"
+                                                                    id="startTime"
+                                                                    name="extraMetadata.startTime"
+                                                                    value={formData?.extraMetadata?.startTime || ''}
+                                                                    onChange={handleChange}
+                                                                    required
+                                                                />
+                                                            </div>
+                                                            <div className="w-50">
+                                                                <CFormLabel htmlFor="endTime">Event end time *</CFormLabel>
+                                                                <CFormInput
+                                                                    type="time"
+                                                                    id="endTime"
+                                                                    name="extraMetadata.endTime"
+                                                                    value={formData?.extraMetadata?.endTime || ''}
+                                                                    onChange={handleChange}
+                                                                    required
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <CFormLabel htmlFor="location">location *</CFormLabel>
+                                                            <CFormInput
+                                                                type="text"
+                                                                id="location"
+                                                                name="extraMetadata.location"
+                                                                value={formData?.extraMetadata?.location || ''}
+                                                                onChange={handleChange}
+                                                                required
+                                                            />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <CFormLabel htmlFor="form">Event Type *</CFormLabel>
+                                                            <CFormSelect
+                                                                id="form"
+                                                                name="extraMetadata.eventType"
+                                                                value={formData?.extraMetadata?.eventType || ''}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="physical">Physical</option>
+                                                                <option value="virtual">Virtual</option>
+                                                                <option value="live">Live</option>
+                                                            </CFormSelect>
+
+                                                        </div>
+
+                                                    </>
+                                                )}
 
                                                 <div className="mb-3">
                                                     <CFormCheck

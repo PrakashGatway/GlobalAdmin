@@ -7,14 +7,14 @@ const getApiBaseUrl = () => {
   }
   
   // Auto-detect hostname from current window location (works for network access)
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname
-    // Use the same hostname but port 5000 for API
-    return `http://${hostname}:5000/api`
-  }
+  // if (typeof window !== 'undefined') {
+  //   const hostname = window.location.hostname
+  //   // Use the same hostname but port 5000 for API
+  //   return `http://${hostname}:5000/api`
+  // }
   
   // Fallback to localhost (for SSR or build time)
-  return 'http://localhost:5000/api'
+  return 'https://m8j3lq9z-5000.inc1.devtunnels.ms/api'
 }
 
 // Create axios instance with base URL

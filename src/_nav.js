@@ -41,6 +41,24 @@ const _nav = [
     ],
   },
   {
+    component: CNavGroup,
+    name: 'Course Management',
+    to: '/',
+    icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Subjects',
+        to: '/subjects',
+      },
+      {
+        component: CNavItem,
+        name: 'Programs',
+        to: '/courses',
+      }
+    ],
+  },
+  {
     component: CNavItem,
     name: 'Universities',
     to: '/universities',
@@ -51,18 +69,6 @@ const _nav = [
     name: 'Application History',
     to: '/application-history',
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Courses',
-    to: '/courses',
-    icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Programs',
-    to: '/programs',
-    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
@@ -83,10 +89,27 @@ const _nav = [
     icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
   },
   {
-    component: CNavItem,
-    name: 'Blog',
-    to: '/website/blog',
+    component: CNavGroup,
+    name: 'Blogs Management',
+    to: '/blog',
     icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'New Blog',
+        to: '/blogs/create',
+      },
+      {
+        component: CNavItem,
+        name: 'Blogs',
+        to: '/blogs',
+      },
+      {
+        component: CNavItem,
+        name: 'Categories',
+        to: '/categories',
+      }
+    ],
   },
   {
     component: CNavGroup,
