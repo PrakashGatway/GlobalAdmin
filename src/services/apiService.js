@@ -14,7 +14,7 @@ const getApiBaseUrl = () => {
   // }
   
   // Fallback to localhost (for SSR or build time)
-  return 'http://localhost:5000/api'
+  return 'https://api.ooshasglobal.com/api'
 }
 
 // Create axios instance with base URL
