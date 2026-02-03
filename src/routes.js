@@ -17,7 +17,6 @@ const ProfileSettings = React.lazy(() => import('./views/profile/ProfileSettings
 const Coupons = React.lazy(() => import('./views/coupons/Coupons'))
 const ApplicationHistory = React.lazy(() => import('./views/application-history/ApplicationHistory'))
 const PageInformation = React.lazy(() => import('./views/page-information/PageInformation'))
-const PagesList = React.lazy(() => import('./views/pages/PagesList'))
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -31,14 +30,12 @@ const routes = [
   { path: '/support', name: 'Support', element: Support },
   { path: '/coupons', name: 'Coupons', element: Coupons },
   { path: '/application-history', name: 'Application History', element: ApplicationHistory },
-  { path: '/website/pages', name: 'Pages', element: PagesList },
+  { path: '/website/pages', name: 'Pages', element: PageInformation },
   { path: '/website/pages/add', name: 'Add Page', element: PageInformation },
-  { path: '/website/pages/edit', name: 'Edit Page', element: PageInformation },
   { path: '/categories', name: 'Blog Categories', element: BlogCategories },
   { path: '/blogs', name: 'Blog Categories', element: Blogs },
   { path: '/blogs/create', name: 'Blog Categories', element: BlogForm },
   { path: '/blogs/:id', name: 'Blog Categories', element: BlogForm },
-  { path: '/page-information', name: 'Page Information', element: PageInformation }, // Keep for backward compatibility
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
 ]
 

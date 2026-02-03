@@ -432,8 +432,8 @@ const BlogForm = () => {
                                                     >
                                                         <option value="blog">Blog</option>
                                                         <option value="event">Event</option>
-                                                        <option value="university">University</option>
-                                                        <option value="program">Program</option>
+                                                        {/* <option value="university">University</option>
+                                                        <option value="program">Program</option> */}
                                                         <option value="webnair">Webnair</option>
                                                     </CFormSelect>
                                                 </div>

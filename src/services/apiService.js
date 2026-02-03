@@ -14,7 +14,7 @@ const getApiBaseUrl = () => {
   // }
   
   // Fallback to localhost (for SSR or build time)
-  return 'https://m8j3lq9z-5000.inc1.devtunnels.ms/api'
+  return 'http://localhost:5000/api'
 }
 
 // Create axios instance with base URL
