@@ -299,11 +299,11 @@ const DynamicFormBuilder = ({
   }
 
   return (
-    <CForm>
+    <CCard>
       <CAccordion activeItemKey={schema.sections[0]?.name} alwaysOpen>
         {schema.sections.map(renderSection)}
       </CAccordion>
-    </CForm>
+    </CCard>
   )
 }
 
@@ -315,7 +315,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
     setItems(value)
   }, [value])
 
-  
+
   const uploadFile = async (file) => {
     if (!file) return
 

@@ -5,16 +5,15 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL
   }
-  
+
   // Auto-detect hostname from current window location (works for network access)
   // if (typeof window !== 'undefined') {
   //   const hostname = window.location.hostname
   //   // Use the same hostname but port 5000 for API
   //   return `http://${hostname}:5000/api`
   // }
-  
-  // Fallback to localhost (for SSR or build time)
-  return 'https://api.ooshasglobal.com/api'
+
+  return 'http://localhost:5000/api'
 }
 
 // Create axios instance with base URL
@@ -32,24 +31,12 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
-    // Log request details for 
-    console.log('🌐 API Request:', {
-      method: config.method?.toUpperCase(),
-      url: config.url,
-      baseURL: config.baseURL,
-      fullURL: `${config.baseURL}${config.url}`,
-      data: config.data,
-      headers: config.headers,
-      timestamp: new Date().toISOString()
-    })
-    
     // Log complete JSON payload in formatted way
     if (config.data) {
       console.log(' Complete Request Payload (JSON):', JSON.stringify(config.data, null, 2))
       console.log(' Request Payload Size:', JSON.stringify(config.data).length, 'bytes')
     }
-    
+
     return config
   },
   (error) => {
@@ -61,33 +48,6 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => {
-    // Log successful response for Network tab visibility
-    console.log(' API Response:', {
-      status: response.status,
-      statusText: response.statusText,
-      url: response.config?.url,
-      data: response.data,
-      timestamp: new Date().toISOString()
-    })
-    
-    // Log complete JSON response in formatted way for Network tab visibility
-    if (response.data) {
-      console.log(' Complete Response Payload (JSON):', JSON.stringify(response.data, null, 2))
-      console.log(' Response Payload Size:', JSON.stringify(response.data).length, 'bytes')
-      
-      // If it's page information data, log key details
-      if (response.data.pageType || response.data.title) {
-        console.log(' Page Information Response Summary:', {
-          pageType: response.data.pageType,
-          title: response.data.title,
-          slug: response.data.slug,
-          status: response.data.status,
-          sectionsCount: Array.isArray(response.data.sections) ? response.data.sections.length : 0,
-          hasImages: !!(response.data.heroImage || response.data.roadmapImage)
-        })
-      }
-    }
-    
     return response.data
   },
   (error) => {
@@ -139,5 +99,17 @@ export const apiService = {
   // DELETE request
   delete: (endpoint, config = {}) => apiClient.delete(endpoint, config),
 }
+
+
+let pageData;
+
+const loadPageSchemas = async () => {
+  const res = await apiService.get("/page-json");
+  pageData = res;
+};
+
+loadPageSchemas();
+
+export { pageData }
 
 export default apiService

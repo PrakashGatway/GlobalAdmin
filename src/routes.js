@@ -5,6 +5,8 @@ import BlogCategories from './views/websitePages/BlogsCategories'
 import Blogs from './views/websitePages/Blogs'
 import BlogForm from './views/websitePages/BlogForm'
 import Subjects from './views/courses/Subjects'
+import Testimonials from './views/websitePages/Testimonials'
+import ContactManagement from './views/websitePages/Contactus'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserList = React.lazy(() => import('./views/user-management/UserList'))
@@ -36,6 +38,10 @@ const routes = [
   { path: '/blogs', name: 'Blog Categories', element: Blogs },
   { path: '/blogs/create', name: 'Blog Categories', element: BlogForm },
   { path: '/blogs/:id', name: 'Blog Categories', element: BlogForm },
+  { path: '/testimonials', name: 'Testimonials', element: Testimonials },
+  { path: '/contact', name: 'Testimonials', element: ContactManagement },
+
+
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
 ]
 

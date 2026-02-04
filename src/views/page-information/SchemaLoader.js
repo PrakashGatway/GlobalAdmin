@@ -1,5 +1,7 @@
 
-import pageSchemas from './pages.json'
+// import pageSchemas from './pages.json'
+
+import { pageData as pageSchemas } from "../../services/apiService"
 
 export const getPageSchema = (pageType = 'general') => {
   return pageSchemas[pageType] || pageSchemas.general

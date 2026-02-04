@@ -46,7 +46,6 @@ import {
 } from '@coreui/icons'
 import pageService from '../../services/pageInformationService'
 import PageForm from './pageForm'
-
 const PageManagement = () => {
   const [pages, setPages] = useState([])
   const [loading, setLoading] = useState(false)

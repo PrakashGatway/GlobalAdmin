@@ -41,6 +41,12 @@ const _nav = [
     ],
   },
   {
+    component: CNavItem,
+    name: 'Leads Management',
+    to: '/contact',
+    icon: <CIcon icon={cilInfo} customClassName="nav-icon" />,
+  },
+  {
     component: CNavGroup,
     name: 'Course Management',
     to: '/',
@@ -58,36 +64,8 @@ const _nav = [
       }
     ],
   },
-  {
-    component: CNavItem,
-    name: 'Universities',
-    to: '/universities',
-    icon: <CIcon icon={cilEducation} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Application History',
-    to: '/application-history',
-    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Countries',
-    to: '/countries',
-    icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Support',
-    to: '/support',
-    icon: <CIcon icon={cilInfo} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Coupons',
-    to: '/coupons',
-    icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
-  },
+
+
   {
     component: CNavGroup,
     name: 'Blogs Management',
@@ -113,7 +91,7 @@ const _nav = [
   },
   {
     component: CNavGroup,
-    name: 'Website',
+    name: 'Website Management',
     to: '/website',
     icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
     items: [
@@ -121,9 +99,46 @@ const _nav = [
         component: CNavItem,
         name: 'Pages',
         to: '/website/pages',
+      },
+      {
+        component: CNavItem,
+        name: 'Testimonials',
+        to: '/testimonials',
       }
     ],
   },
+  {
+    component: CNavItem,
+    name: 'Universities',
+    to: '/universities',
+    icon: <CIcon icon={cilEducation} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Application',
+    to: '/application-history',
+    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Countries',
+    to: '/countries',
+    icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
+  },
+
+  {
+    component: CNavItem,
+    name: 'Coupons',
+    to: '/coupons',
+    icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
+  },
+
+  {
+    component: CNavItem,
+    name: 'Support',
+    to: '/support',
+    icon: <CIcon icon={cilInfo} customClassName="nav-icon" />,
+  }
 ]
 
 export default _nav

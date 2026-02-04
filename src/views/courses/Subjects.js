@@ -232,7 +232,7 @@ const Subjects = () => {
                                 <div className="mt-2 text-muted">Loading subjects...</div>
                             </div>
                         ) : (
-                            <CTable responsive>
+                            <CTable>
                                 <CTableHead>
                                     <CTableRow>
                                         <CTableHeaderCell>Name</CTableHeaderCell>
@@ -265,20 +265,20 @@ const Subjects = () => {
                                     ) : (
                                         subjects.map(subject => (
                                             <CTableRow key={subject._id}>
-                                                <CTableDataCell>
+                                                <CTableDataCell className='px-0'>
                                                     <strong>{subject.name}</strong>
                                                 </CTableDataCell>
-                                                <CTableDataCell>
+                                                <CTableDataCell className='px-0'>
                                                     <code>{subject.slug}</code>
                                                 </CTableDataCell>
-                                                <CTableDataCell>
+                                                <CTableDataCell className='px-0'>
                                                     {subject.description 
                                                         ? (subject.description.length > 50 
                                                             ? `${subject.description.substring(0, 50)}...` 
                                                             : subject.description)
                                                         : '-'}
                                                 </CTableDataCell>
-                                                <CTableDataCell>
+                                                <CTableDataCell className='px-0'>
                                                     <CBadge 
                                                         color={subject.isActive ? 'success' : 'secondary'}
                                                         text={subject.isActive ? 'Active' : 'Inactive'}
@@ -286,7 +286,7 @@ const Subjects = () => {
                                                         {subject.isActive ? 'Active' : 'Inactive'}
                                                     </CBadge>
                                                 </CTableDataCell>
-                                                <CTableDataCell>
+                                                <CTableDataCell className='px-0'>
                                                     {subject.createdAt 
                                                         ? new Date(subject.createdAt).toLocaleDateString()
                                                         : '-'}
