@@ -17,6 +17,8 @@ import {
 } from '@coreui/react'
 import { FaYoutube, FaImage } from 'react-icons/fa'
 import uploadService from '../../services/uploadService'
+import { CKEditor } from '@ckeditor/ckeditor5-react'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
 const TestimonialForm = ({
   testimonial = null,
@@ -65,6 +67,8 @@ const TestimonialForm = ({
         status: testimonial.status || 'Pending',
         isFeatured: testimonial.isFeatured || false,
         metaDetails: testimonial.metaDetails || {},
+        target: testimonial.target || '',
+        content: testimonial.content || '',
       })
 
       setImages({
@@ -135,7 +139,7 @@ const TestimonialForm = ({
       universityLogo: images.universityLogo,
       rating: Number(formData.rating),
     }
-    
+
 
     onSuccess(payload)
   }
@@ -163,6 +167,10 @@ const TestimonialForm = ({
             <CCol md={6}>
               <CFormLabel>University</CFormLabel>
               <CFormInput name="university" value={formData.university} onChange={handleChange} />
+            </CCol>
+            <CCol md={6}>
+              <CFormLabel>Target</CFormLabel>
+              <CFormInput name="target" value={formData.target} onChange={handleChange} />
             </CCol>
 
             <CCol md={6}>
@@ -196,12 +204,18 @@ const TestimonialForm = ({
         <CCard className="mb-4">
           <CCardHeader><h5>Case Study Content</h5></CCardHeader>
           <CCardBody>
-            <CFormTextarea
-              rows={6}
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              required
+            <CKEditor
+              editor={ClassicEditor}
+              data={formData.content}
+              config={{
+                simpleUpload: {
+                  uploadUrl: 'http://localhost:5000/api/upload'
+                }
+              }}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                handleChange({target:{name: 'content', value: data}});
+              }}
             />
           </CCardBody>
         </CCard>

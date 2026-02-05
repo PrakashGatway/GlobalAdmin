@@ -75,6 +75,7 @@ const Testimonials = () => {
         status: '',
         isFeatured: '',
         rating: '',
+        isAdmin:true,
         page: 1,
         limit: 20,
     })

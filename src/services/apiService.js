@@ -13,7 +13,7 @@ const getApiBaseUrl = () => {
   //   return `http://${hostname}:5000/api`
   // }
 
-  return 'http://localhost:5000/api'
+  return 'https://api.ooshasglobal.com/api'
 }
 
 // Create axios instance with base URL

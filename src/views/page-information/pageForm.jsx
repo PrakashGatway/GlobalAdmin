@@ -22,7 +22,7 @@ import {
   CTabContent,
   CTabPane,
 } from '@coreui/react'
-import DynamicFormBuilder from './FormBuilder'
+import DynamicFormBuilder, { uploadFile } from './FormBuilder'
 import { getPageSchema, getPageTypes, getDefaultValues } from './SchemaLoader'
 
 const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
@@ -61,11 +61,11 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
 
   useEffect(() => {
     if (page) {
-      const { sections,seoMeta, ...extra } = page
+      const { sections, seoMeta, ...extra } = page
       setPageType(page.pageType || 'general')
       setFormData({
         content: page.sections || getDefaultValues(page.pageType || 'general'),
-        ...extra,...seoMeta
+        ...extra, ...seoMeta
       })
     }
   }, [page])
@@ -148,7 +148,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
 
     const { content, metaDescription, metaKeywords, canonicalUrl, metaTitle, ...rest } = formData
 
-    onSubmit({ ...rest, sections: content ,seoMeta: { metaDescription, metaKeywords, canonicalUrl, metaTitle } })
+    onSubmit({ ...rest, sections: content, seoMeta: { metaDescription, metaKeywords, canonicalUrl, metaTitle } })
   }
 
   const handleFormError = (fieldName, error) => {
@@ -265,9 +265,60 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                     placeholder="Enter description (optional)"
                   />
                 </CCol>
+
+                <CCol md={6}>
+                  <CFormLabel>Card Image</CFormLabel>
+                  <CFormInput
+                    type="file"
+                    id="cardImage"
+                    accept="image/*"
+                    name="cardImage"
+                    onChange={async (e) => {
+                      const file = e.target.files[0]
+                      if (!file) return
+
+                      try {
+                        const imageUrl = await uploadFile(file)
+                        setFormData(prev => ({ ...prev, cardImage: imageUrl }))
+                      } catch (err) {
+                        console.error(err)
+                        alert('Image upload failed')
+                      }
+                    }}
+                  />
+                  {formData.cardImage && (
+                    <div className="mt-2">
+                      <img src={formData.cardImage} alt="preview" width="120" className="img-thumbnail" />
+                    </div>
+                  )}
+                </CCol>
+
+                <CCol md={6}>
+                  <CFormLabel>Navbar Logo</CFormLabel>
+                  <CFormInput
+                    type="file"
+                    id="navbarImage"
+                    accept="image/*"
+                    name="navbarImage"
+                    onChange={async (e) => {
+                      const file = e.target.files[0]
+                      if (!file) return
+                      try {
+                        const imageUrl = await uploadFile(file)
+                        setFormData(prev => ({ ...prev, navbarImage: imageUrl }))
+                      } catch (err) {
+                        console.error(err)
+                        alert('Image upload failed')
+                      }
+                    }}
+                  />
+                   {formData.navbarImage && (
+                    <div className="mt-2">
+                      <img src={formData.navbarImage} alt="preview" width="120" className="img-thumbnail" />
+                    </div>
+                  )}
+                </CCol>
               </CRow>
-
-
               <CRow className="mt-3">
                 <CCol md={12} className="d-flex gap-4">
                   <CFormCheck

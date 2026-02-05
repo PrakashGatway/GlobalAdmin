@@ -323,10 +323,10 @@ const Universities = () => {
     <CFormCheck
       id="accommodation"
       label="On-Campus Accommodation"
-      checked={filters.on_compus_accommodation === 'true'}
+      checked={filters.on_campus_accommodation === 'true'}
       onChange={(e) =>
         handleFilterChange(
-          'on_compus_accommodation',
+          'on_campus_accommodation',
           e.target.checked ? 'true' : ''
         )
       }

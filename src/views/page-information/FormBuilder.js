@@ -26,6 +26,23 @@ import CIcon from '@coreui/icons-react'
 import { cilPlus, cilMinus, cilTrash, cilArrowTop, cilArrowBottom } from '@coreui/icons'
 import uploadService from '../../services/uploadService'
 
+
+export const uploadFile = async (file) => {
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    setLocalError('Please select an image file')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    setLocalError('Image size must be < 5MB')
+    return
+  }
+  const res = await uploadService.uploadImage(file)
+  if (res.success) {
+    return res.data.url
+  }
+}
 const DynamicFormBuilder = ({
   schema,
   formData,
@@ -48,22 +65,7 @@ const DynamicFormBuilder = ({
     return ''
   }
 
-  const uploadFile = async (file) => {
-    if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-      setLocalError('Please select an image file')
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setLocalError('Image size must be < 5MB')
-      return
-    }
-    const res = await uploadService.uploadImage(file)
-    if (res.success) {
-      return res.data.url
-    }
-  }
 
 
   const handleChange = (sectionName, fieldName, value) => {

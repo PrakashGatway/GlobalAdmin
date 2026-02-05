@@ -154,8 +154,6 @@ const Blogs = () => {
                                 <option value="">All</option>
                                 <option value="blog">Blogs</option>
                                 <option value="event">Events</option>
-                                <option value="university">Universities</option>
-                                <option value="programs">Programs</option>
                                 <option value="webnair">Webnair</option>
                             </CFormSelect>
                             <CCol className="">

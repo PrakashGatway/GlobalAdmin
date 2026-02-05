@@ -24,7 +24,9 @@ import uploadService from '../../services/uploadService'
 import * as countries from "../../../src/assets/Countries.json"
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import apiService from '../../services/apiService'
 // import citiesByCountry from '../../data/cities'
+import AsyncSelect from 'react-select/async'
 
 const UniversityForm = ({
     university = null,
@@ -112,12 +114,17 @@ const UniversityForm = ({
                 status: uni.status || 'Active',
                 short_description: uni.short_description || '',
                 uni_contact: uni.uni_contact || '',
+                slogan: uni.slogan || '',
                 uni_web: uni.uni_web || '',
                 uni_type: uni.uni_type || 'public',
                 intakes: Array.isArray(uni.intakes) ? uni.intakes : [],
                 on_campus_accommodation: !!uni.on_campus_accommodation,
+                off_campus_accommodation: uni.off_campus_accommodation,
                 uni_logo: uni.uni_logo || '',
                 logo_url: uni.logo_url || '',
+                tags: uni.tags || "",
+                acceptanceRate: uni.acceptanceRate || "",
+                cover_photo: uni.cover_photo || '',
                 social_links: {
                     facebook: uni.social_links?.facebook || '',
                     twitter: uni.social_links?.twitter || '',
@@ -151,10 +158,10 @@ const UniversityForm = ({
                     [{ section_key: 'overview', heading: 'Overview', content: '', order: 1 }],
                 isPublished: extra.isPublished ?? true,
                 extraStatus: extra.status || 'Active',
+                
             })
             setImagePreview(uni.uni_logo || '')
         } else {
-            // Reset for new
             setFormData({
                 name: '',
                 slug: '',
@@ -201,6 +208,7 @@ const UniversityForm = ({
                     canonical_tag: '',
                     meta_keywords: ''
                 },
+
                 sections: [{ section_key: 'overview', heading: 'Overview', content: '', order: 1 }],
                 isPublished: true,
                 extraStatus: 'Active',
@@ -240,7 +248,7 @@ const UniversityForm = ({
         }))
     }
 
-    const handleLogoUpload = async (e) => {
+    const handleLogoUpload = async (e, key) => {
         const file = e.target.files[0]
         if (!file) return
 
@@ -262,7 +270,7 @@ const UniversityForm = ({
         try {
             const res = await uploadService.uploadImage(file)
             if (res.success) {
-                setFormData(prev => ({ ...prev, uni_logo: res.data.url }))
+                setFormData(prev => ({ ...prev, [key]: res.data.url }))
             }
         } catch (err) {
             setLocalError(err.message || 'Upload failed')
@@ -274,7 +282,7 @@ const UniversityForm = ({
     const handleAddIntake = () => {
         if (!newIntake.month || !newIntake.year) return
 
-        const intakeString = `${newIntake.month} ${newIntake.year}`
+        const intakeString = `${newIntake.month}`
         if (!formData.intakes.includes(intakeString)) {
             setFormData(prev => ({
                 ...prev,
@@ -283,6 +291,21 @@ const UniversityForm = ({
             setNewIntake({ month: '', year: new Date().getFullYear() })
         }
     }
+
+    const loadCountries = async (inputValue) => {
+        const res = await apiService.get('/countries', {
+            params: {
+                search: inputValue || formData.country,
+                limit: 20,
+                status: 'Active',
+            },
+        })
+        return res.data.map(country => ({
+            label: `${country.name} (${country.code})`,
+            value: country.code,
+        }))
+    }
+
 
     const handleRemoveIntake = (intake) => {
         setFormData(prev => ({
@@ -365,6 +388,8 @@ const UniversityForm = ({
             country: formData.country,
             city: formData.city,
             address: formData.address,
+            tags: formData.tags,
+            acceptanceRate: formData.acceptanceRate,
             established_year: formData.established_year ? parseInt(formData.established_year) : null,
             status: formData.status,
             short_description: formData.short_description,
@@ -373,6 +398,7 @@ const UniversityForm = ({
             uni_type: formData.uni_type,
             intakes: formData.intakes,
             on_campus_accommodation: formData.on_campus_accommodation,
+            off_campus_accommodation: formData?.off_campus_accommodation,
             uni_logo: formData.uni_logo,
             social_links: formData.social_links,
             uni_gallery: formData.uni_gallery,
@@ -381,6 +407,8 @@ const UniversityForm = ({
             financials: formData.financials,
             location_alias: formData.location_alias,
             seo_metadata: formData.seo_metadata,
+            cover_photo: formData.cover_photo,
+            slogan: formData.slogan,
             extra_content: {
                 sections: formData.sections,
                 isPublished: formData.isPublished,
@@ -458,24 +486,32 @@ const UniversityForm = ({
                             </CFormSelect>
                         </CCol>
                         <CCol md={6}>
-                            <CFormLabel>Country *</CFormLabel>
-                            <CFormSelect
-                                name="country"
-                                value={formData.country}
+                            <CFormLabel>Address</CFormLabel>
+                            <CFormInput
+                                name="address"
+                                value={formData.address}
                                 onChange={handleInputChange}
-                                required
-                            >
-                                <option value="">Select Country</option>
-                                <option value="uk">uk</option>
-
-
-                                {/* {countries.map(country => (
-                  <option key={country.code} value={country.name}>
-                    {country.name}
-                  </option>
-                ))} */}
-                            </CFormSelect>
+                                placeholder="Full address"
+                            />
                         </CCol>
+                        <CCol md={6}>
+                            <CFormLabel>Country *</CFormLabel>
+
+                            <AsyncSelect
+                                cacheOptions
+                                loadOptions={loadCountries}
+                                defaultOptions
+                                placeholder="Search & select country..."
+                                onChange={(selected) =>
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        country: selected?.value || '',
+                                    }))
+                                }
+                            />
+                            <small>Selected : {formData.country}</small>
+                        </CCol>
+
                         <CCol md={6}>
                             <CFormLabel>City *</CFormLabel>
                             <CFormInput
@@ -486,27 +522,48 @@ const UniversityForm = ({
                                 placeholder="Enter city"
                             />
                         </CCol>
-                        <CCol md={12}>
-                            <CFormLabel>Address</CFormLabel>
-                            <CFormInput
-                                name="address"
-                                value={formData.address}
-                                onChange={handleInputChange}
-                                placeholder="Full address"
-                            />
-                        </CCol>
+
                         <CCol md={6}>
                             <CFormLabel>Established Year</CFormLabel>
                             <CFormInput
                                 name="established_year"
                                 type="number"
-                                min="1500"
+                                min="100"
                                 max={new Date().getFullYear()}
                                 value={formData.established_year}
                                 onChange={handleInputChange}
                                 placeholder="e.g., 1850"
                             />
                         </CCol>
+                        <CCol md={6}>
+                            <CFormLabel>Universite slogan</CFormLabel>
+                            <CFormInput
+                                name="slogan"
+                                value={formData.slogan}
+                                onChange={handleInputChange}
+                                placeholder="Enter slogan"
+                            />
+                        </CCol>
+                        <CCol md={6}>
+                            <CFormLabel>Acceptance Rate</CFormLabel>
+                            <CFormInput
+                                name="acceptanceRate"
+                                type='Number'
+                                value={formData.acceptanceRate}
+                                onChange={handleInputChange}
+                                placeholder="Enter acceptanceRate"
+                            />
+                        </CCol>
+                         <CCol md={6}>
+                            <CFormLabel>Tags</CFormLabel>
+                            <CFormInput
+                                name="tags"
+                                value={formData.tags}
+                                onChange={handleInputChange}
+                                placeholder="Enter tag with commom separated"
+                            />
+                        </CCol>
+
                         <CCol md={6}>
                             <CFormLabel>Status</CFormLabel>
                             <CFormSelect name="status" value={formData.status} onChange={handleInputChange}>
@@ -571,31 +628,61 @@ const UniversityForm = ({
                             <CFormInput
                                 type="file"
                                 accept="image/*"
-                                onChange={handleLogoUpload}
+                                onChange={(e) => handleLogoUpload(e, 'uni_logo')}
                                 disabled={uploadingImage}
                             />
                             {uploadingImage && <CSpinner size="sm" className="ms-2" />}
                             <small className="text-muted">Max size: 5MB (PNG, JPG, JPEG)</small>
+                            {(formData.uni_logo) && (
+                                <CCol md={6}>
+                                    <CFormLabel>Logo Preview</CFormLabel>
+                                    <div className="mt-2">
+                                        <img
+                                            src={formData.uni_logo}
+                                            alt="University Logo"
+                                            style={{
+                                                height: '100px',
+                                                objectFit: 'contain',
+                                                backgroundColor: '#f8f9fa',
+                                                padding: '10px',
+                                                border: '1px solid #dee2e6',
+                                                borderRadius: '4px'
+                                            }}
+                                        />
+                                    </div>
+                                </CCol>
+                            )}
                         </CCol>
-                        {(imagePreview || formData.uni_logo) && (
-                            <CCol md={12}>
-                                <CFormLabel>Logo Preview</CFormLabel>
-                                <div className="mt-2">
-                                    <img
-                                        src={imagePreview || formData.uni_logo}
-                                        alt="University Logo"
-                                        style={{
-                                            height: '100px',
-                                            objectFit: 'contain',
-                                            backgroundColor: '#f8f9fa',
-                                            padding: '10px',
-                                            border: '1px solid #dee2e6',
-                                            borderRadius: '4px'
-                                        }}
-                                    />
-                                </div>
-                            </CCol>
-                        )}
+                        <CCol md={6}>
+                            <CFormLabel>Cover Image</CFormLabel>
+                            <CFormInput
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleLogoUpload(e, 'cover_photo')}
+                                disabled={uploadingImage}
+                            />
+                            {uploadingImage && <CSpinner size="sm" className="ms-2" />}
+                            <small className="text-muted">Max size: 5MB (PNG, JPG, JPEG)</small>
+                            {(formData.cover_photo) && (
+                                <CCol md={6}>
+                                    <CFormLabel>Cover Preview</CFormLabel>
+                                    <div className="mt-2">
+                                        <img
+                                            src={formData?.cover_photo}
+                                            alt="cover image"
+                                            style={{
+                                                height: '100px',
+                                                objectFit: 'contain',
+                                                backgroundColor: '#f8f9fa',
+                                                padding: '10px',
+                                                border: '1px solid #dee2e6',
+                                                borderRadius: '4px'
+                                            }}
+                                        />
+                                    </div>
+                                </CCol>
+                            )}
+                        </CCol>
                     </CRow>
                 </CCardBody>
             </CCard>
@@ -619,7 +706,7 @@ const UniversityForm = ({
                                 ))}
                             </CFormSelect>
                         </CCol>
-                        <CCol md={4}>
+                        {/* <CCol md={4}>
                             <CFormLabel>Year</CFormLabel>
                             <CFormInput
                                 type="number"
@@ -628,7 +715,7 @@ const UniversityForm = ({
                                 value={newIntake.year}
                                 onChange={(e) => setNewIntake(prev => ({ ...prev, year: e.target.value }))}
                             />
-                        </CCol>
+                        </CCol> */}
                         <CCol md={4}>
                             <CButton color="primary" onClick={handleAddIntake} disabled={!newIntake.month}>
                                 <FaPlus /> Add Intake
@@ -1199,7 +1286,7 @@ const UniversityForm = ({
                                     />
                                 </div>
 
-                                <div>
+                              <div>
                                     <CFormLabel>Content (HTML)</CFormLabel>
                                     <CKEditor
                                         editor={ClassicEditor}
