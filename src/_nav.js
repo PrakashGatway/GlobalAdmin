@@ -31,13 +31,8 @@ const _nav = [
       {
         component: CNavItem,
         name: 'User List',
-        to: '/user-management/user-list',
-      },
-      {
-        component: CNavItem,
-        name: 'User Wallets',
-        to: '/user-management/user-wallets',
-      },
+        to: '/user-management',
+      }
     ],
   },
   {
@@ -47,11 +42,22 @@ const _nav = [
     icon: <CIcon icon={cilInfo} customClassName="nav-icon" />,
   },
   {
+    component: CNavItem,
+    name: 'Scholarship Management',
+    to: '/scholarship',
+    icon: <CIcon icon={cilInfo} customClassName="nav-icon" />,
+  },
+  {
     component: CNavGroup,
     name: 'Course Management',
     to: '/',
     icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
     items: [
+      {
+        component: CNavItem,
+        name: 'Categories',
+        to: '/courses/categories',
+      },
       {
         component: CNavItem,
         name: 'Subjects',
@@ -64,8 +70,6 @@ const _nav = [
       }
     ],
   },
-
-
   {
     component: CNavGroup,
     name: 'Blogs Management',
@@ -104,6 +108,16 @@ const _nav = [
         component: CNavItem,
         name: 'Testimonials',
         to: '/testimonials',
+      },
+      {
+        component: CNavItem,
+        name: 'Gallery',
+        to: '/gallery',
+      },
+      {
+        component: CNavItem,
+        name: 'Faq',
+        to: '/faq',
       }
     ],
   },

@@ -21,7 +21,6 @@ import {
 } from '@coreui/react'
 import { FaPlus, FaTrash, FaYoutube, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaMapMarkerAlt } from 'react-icons/fa'
 import uploadService from '../../services/uploadService'
-import * as countries from "../../../src/assets/Countries.json"
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import apiService from '../../services/apiService'
@@ -124,6 +123,7 @@ const UniversityForm = ({
                 logo_url: uni.logo_url || '',
                 tags: uni.tags || "",
                 acceptanceRate: uni.acceptanceRate || "",
+                offers: uni.offers || "",
                 cover_photo: uni.cover_photo || '',
                 social_links: {
                     facebook: uni.social_links?.facebook || '',
@@ -405,6 +405,7 @@ const UniversityForm = ({
             uni_rank: formData.uni_rank || [],
             google_location: formData.google_location,
             financials: formData.financials,
+            offers: formData.offers,
             location_alias: formData.location_alias,
             seo_metadata: formData.seo_metadata,
             cover_photo: formData.cover_photo,
@@ -496,7 +497,6 @@ const UniversityForm = ({
                         </CCol>
                         <CCol md={6}>
                             <CFormLabel>Country *</CFormLabel>
-
                             <AsyncSelect
                                 cacheOptions
                                 loadOptions={loadCountries}
@@ -552,6 +552,16 @@ const UniversityForm = ({
                                 value={formData.acceptanceRate}
                                 onChange={handleInputChange}
                                 placeholder="Enter acceptanceRate"
+                            />
+                        </CCol>
+                         <CCol md={6}>
+                            <CFormLabel>Offers To university</CFormLabel>
+                            <CFormInput
+                                name="offers"
+                                type='text'
+                                value={formData.offers}
+                                onChange={handleInputChange}
+                                placeholder="Enter offers"
                             />
                         </CCol>
                          <CCol md={6}>

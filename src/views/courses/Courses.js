@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  CAvatar,
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
   CRow,
+  CCol,
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCardFooter,
   CTable,
   CTableBody,
   CTableDataCell,
@@ -17,664 +17,731 @@ import {
   CInputGroup,
   CInputGroupText,
   CFormInput,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
+  CFormSelect,
+  CFormCheck,
   CModal,
   CModalHeader,
   CModalTitle,
   CModalBody,
   CModalFooter,
-  CForm,
-  CFormLabel,
-  CFormSelect,
-  CFormTextarea,
   CAlert,
+  CPagination,
+  CPaginationItem,
+  CFormLabel,
   CSpinner,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem,
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
 import {
-  cilBook,
+  cilPlus,
   cilPencil,
   cilTrash,
   cilMagnifyingGlass,
-  cilPlus,
   cilFilter,
-  cilReload,
-} from '@coreui/icons'
-import courseService from '../../services/courseService'
-import universityService from '../../services/universityService'
-import uploadService from '../../services/uploadService'
+  cilFilterX,
+  cilChevronBottom,
+  cilChevronTop,
+  cilOptions,
+  cilDollar,
+  cilCalendar,
+} from '@coreui/icons';
+import CourseForm from './CourseForm';
+import apiService from '../../services/apiService';
+
+const courseService = {
+  getCourses: async (params) => {
+    try {
+      const response = await apiService.get('/courses', { params });
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch courses';
+    }
+  },
+
+  getCourseById: async (id) => {
+    try {
+      const response = await apiService.get(`/courses/${id}`);
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch course';
+    }
+  },
+
+  createCourse: async (data) => {
+    try {
+      const response = await apiService.post('/courses', data);
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to create course';
+    }
+  },
+
+  updateCourse: async (id, data) => {
+    try {
+      const response = await apiService.put(`/courses/${id}`, data);
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to update course';
+    }
+  },
+
+  deleteCourse: async (id) => {
+    try {
+      const response = await apiService.delete(`/courses/${id}`);
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to delete course';
+    }
+  },
+
+  getUniversities: async () => {
+    try {
+      const response = await apiService.get('/universities?limit=1000');
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch universities';
+    }
+  },
+
+  getSubjects: async () => {
+    try {
+      const response = await apiService.get('/subjects?limit=1000');
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch subjects';
+    }
+  },
+
+  getScholarships: async () => {
+    try {
+      const response = await apiService.get('/scholarships?limit=1000');
+      return response;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch scholarships';
+    }
+  },
+};
 
 const Courses = () => {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [courses, setCourses] = useState([])
-  const [universities, setUniversities] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [editingId, setEditingId] = useState(null)
-  const [deletingId, setDeletingId] = useState(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    code: '',
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [universities, setUniversities] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [scholarships, setScholarships] = useState([]);
+
+  // Filters state
+  const [filters, setFilters] = useState({
+    search: '',
     university: '',
+    subject: '',
+    level: '',
+    studyMode: '',
+    currency: '',
+    status: '',
+    minFee: '',
+    maxFee: '',
     duration: '',
-    price: '',
-    description: '',
-    status: 'Active',
-    image: '',
-    imagePublicId: '',
-  })
-  const [imagePreview, setImagePreview] = useState('')
-  const [uploadingImage, setUploadingImage] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+    sort: '-createdAt',
+    page: 1,
+    limit: 10,
+  });
 
-  // Fetch courses
-  const fetchCourses = async () => {
-    setLoading(true)
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  // Fetch options for dropdowns
+  useEffect(() => {
+    fetchOptions();
+  }, []);
+
+  const fetchOptions = async () => {
     try {
-      const response = await courseService.getCourses()
-      if (response.success) {
-        setCourses(response.data || [])
+      const [uniRes, subRes] = await Promise.all([
+        courseService.getUniversities(),
+        courseService.getSubjects()
+        // courseService.getScholarships(),
+      ]);
+
+      setUniversities(uniRes.result || []);
+      if (subRes.success) setSubjects(subRes.data || []);
+      // if (schRes.success) setScholarships(schRes.result || []);
+    } catch (err) {
+      console.error('Error fetching options:', err);
+    }
+  };
+
+  const fetchCourses = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const params = {
+        ...filters,
+        page: filters.page,
+        limit: filters.limit,
+        sort: filters.sort,
+      };
+
+      // Remove empty filter values
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null) {
+          delete params[key];
+        }
+      });
+
+      const res = await courseService.getCourses(params);
+      if (res.success) {
+        setCourses(res.data || []);
+        setTotal(res.total || 0);
+        setTotalPages(res.pages || 1);
       }
     } catch (err) {
-      setError(err.message || 'Failed to fetch courses')
+      setError(err.message || 'Failed to fetch courses');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-  // Fetch universities for dropdown
-  const fetchUniversities = async () => {
-    try {
-      const response = await universityService.getUniversities()
-      if (response.success) {
-        setUniversities(response.data || [])
-      }
-    } catch (err) {
-      console.error('Failed to fetch universities:', err)
-    }
-  }
+  }, [filters]);
 
   useEffect(() => {
-    fetchCourses()
-    fetchUniversities()
-  }, [])
+    fetchCourses();
+  }, [fetchCourses]);
 
-  // Handle form input change
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    setError('')
-  }
+  const handleFilterChange = (name, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [name]: value,
+      page: 1, // Reset to first page when filters change
+    }));
+  };
 
-  // Handle image file change
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+  const handleSearchChange = (value) => {
+    handleFilterChange('search', value);
+  };
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file')
-      return
-    }
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setFilters(prev => ({ ...prev, page }));
+  };
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB')
-      return
-    }
+  const handleLimitChange = (limit) => {
+    setFilters(prev => ({ ...prev, limit: parseInt(limit), page: 1 }));
+  };
 
-    // Show preview
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setImagePreview(reader.result)
-    }
-    reader.readAsDataURL(file)
+  const handleSortChange = (sort) => {
+    handleFilterChange('sort', sort);
+  };
 
-    // Upload image
-    setUploadingImage(true)
-    setError('')
-    try {
-      const response = await uploadService.uploadImage(file)
-      if (response.success) {
-        setFormData((prev) => ({
-          ...prev,
-          image: response.data.url,
-          imagePublicId: response.data.publicId,
-        }))
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to upload image')
-      setImagePreview('')
-    } finally {
-      setUploadingImage(false)
-    }
-  }
-
-  // Handle edit - populate form with course data
-  const handleEdit = (course) => {
-    const universityId = course.university?._id || course.university || ''
-    setFormData({
-      name: course.name || '',
-      code: course.code || '',
-      university: universityId,
-      duration: course.duration || '',
-      price: course.price?.toString() || '',
-      description: course.description || '',
-      status: course.status || 'Active',
-      image: course.image || '',
-      imagePublicId: course.imagePublicId || '',
-    })
-    setImagePreview(course.image || '')
-    setEditingId(course._id || course.id)
-    setError('')
-    fetchUniversities()
-    setShowModal(true)
-  }
-
-  // Handle delete confirmation
-  const handleDeleteClick = (course) => {
-    setDeletingId(course._id || course.id)
-    setShowDeleteModal(true)
-  }
-
-  // Handle delete confirmation
-  const handleDelete = async () => {
-    if (!deletingId) return
-
-    try {
-      const response = await courseService.deleteCourse(deletingId)
-      if (response.success) {
-        setSuccess('Course deleted successfully!')
-        setShowDeleteModal(false)
-        setDeletingId(null)
-        fetchCourses() // Refresh list
-        setTimeout(() => setSuccess(''), 3000)
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to delete course')
-      setShowDeleteModal(false)
-    }
-  }
-
-  // Handle form submit (both add and edit)
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    // Validation
-    if (!formData.name || !formData.code || !formData.university || !formData.duration || !formData.price) {
-      setError('Please fill all required fields')
-      return
-    }
-
-    if (isNaN(formData.price) || parseFloat(formData.price) < 0) {
-      setError('Price must be a valid number greater than or equal to 0')
-      return
-    }
-
-    try {
-      const submitData = {
-        ...formData,
-        price: parseFloat(formData.price),
-      }
-
-      let response
-      if (editingId) {
-        // Update existing course
-        response = await courseService.updateCourse(editingId, submitData)
-        if (response.success) {
-          setSuccess('Course updated successfully!')
-        }
-      } else {
-        // Create new course
-        response = await courseService.createCourse(submitData)
-        if (response.success) {
-          setSuccess('Course added successfully!')
-        }
-      }
-
-      if (response.success) {
-        setFormData({
-          name: '',
-          code: '',
-          university: '',
-          duration: '',
-          price: '',
-          description: '',
-          status: 'Active',
-        })
-        setEditingId(null)
-        setShowModal(false)
-        fetchCourses() // Refresh list
-        setTimeout(() => setSuccess(''), 3000)
-      }
-    } catch (err) {
-      setError(err.message || (editingId ? 'Failed to update course' : 'Failed to add course'))
-    }
-  }
-
-  // Reset form
-  const handleReset = () => {
-    setFormData({
-      name: '',
-      code: '',
+  const clearAllFilters = () => {
+    setFilters({
+      search: '',
       university: '',
+      subject: '',
+      level: '',
+      studyMode: '',
+      currency: '',
+      status: '',
+      minFee: '',
+      maxFee: '',
       duration: '',
-      price: '',
-      description: '',
-      status: 'Active',
-      image: '',
-      imagePublicId: '',
-    })
-    setImagePreview('')
-    setEditingId(null)
-    setError('')
-    setSuccess('')
-  }
+      sort: '-createdAt',
+      page: 1,
+      limit: 10,
+    });
+  };
 
-  const filteredCourses = courses.filter(
-    (course) =>
-      course.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (course.university?.name || course.university)?.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const handleEdit = (course) => {
+    setEditingCourse(course);
+    setShowModal(true);
+  };
+
+  const handleDeleteClick = (id) => {
+    setDeletingId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const res = await courseService.deleteCourse(deletingId);
+      if (res.success) {
+        setSuccess('Course deleted successfully!');
+        setShowDeleteModal(false);
+        setDeletingId(null);
+        fetchCourses();
+        setTimeout(() => setSuccess(''), 3000);
+      }
+    } catch (err) {
+      setError(err.message || 'Delete failed');
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleFormSubmit = async (data) => {
+    try {
+      let res;
+      if (editingCourse) {
+        res = await courseService.updateCourse(editingCourse._id, data);
+        if (res.success) setSuccess('Course updated successfully!');
+      } else {
+        res = await courseService.createCourse(data);
+        if (res.success) setSuccess('Course created successfully!');
+      }
+      if (res.success) {
+        setShowModal(false);
+        setEditingCourse(null);
+        fetchCourses();
+        setTimeout(() => setSuccess(''), 3000);
+      }
+    } catch (err) {
+      setError(err.message || 'Operation failed');
+    }
+  };
+
+  // Calculate active filter count
+  const activeFilterCount = Object.keys(filters).filter(key =>
+    key !== 'page' &&
+    key !== 'limit' &&
+    key !== 'sort' &&
+    filters[key] !== '' &&
+    filters[key] !== null
+  ).length;
+
+  // Available options for filters
+  const levelOptions = ['Undergraduate', 'Postgraduate', 'PhD', 'Diploma', 'Certificate'];
+  const studyModeOptions = ['Full-time', 'Part-time', 'Online', 'Hybrid'];
+  const currencyOptions = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'BDT'];
+  const statusOptions = ['Active', 'Inactive'];
+  const sortOptions = [
+    { value: '-createdAt', label: 'Newest First' },
+    { value: 'createdAt', label: 'Oldest First' },
+    { value: 'name', label: 'Name A-Z' },
+    { value: '-name', label: 'Name Z-A' },
+    { value: 'tuitionFee', label: 'Fee Low to High' },
+    { value: '-tuitionFee', label: 'Fee High to Low' },
+  ];
 
   return (
     <CRow>
       <CCol xs={12}>
-        {error && (
-          <CAlert color="danger" dismissible onClose={() => setError('')}>
-            {error}
-          </CAlert>
-        )}
-        {success && (
-          <CAlert color="success" dismissible onClose={() => setSuccess('')}>
-            {success}
-          </CAlert>
-        )}
-        <CCard className="mb-4 card-hover animate-fade-in">
+        {error && <CAlert color="danger" dismissible onClose={() => setError('')}>{error}</CAlert>}
+        {success && <CAlert color="success" dismissible onClose={() => setSuccess('')}>{success}</CAlert>}
+
+        <CCard>
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
-              <h5 className="mb-0">
-                <strong>Courses</strong>
-              </h5>
-              <small className="text-body-secondary">Manage all available courses</small>
+              <h5 className="mb-0">Courses</h5>
+              <small className="text-muted">Total: {total} courses</small>
             </div>
-            <div>
+            <div className="d-flex gap-2">
+              <CDropdown>
+                <CDropdownToggle color="secondary" variant="outline">
+                  <CIcon icon={cilOptions} className="me-2" />
+                  Sort
+                </CDropdownToggle>
+                <CDropdownMenu>
+                  {sortOptions.map((option) => (
+                    <CDropdownItem
+                      key={option.value}
+                      onClick={() => handleSortChange(option.value)}
+                      active={filters.sort === option.value}
+                    >
+                      {option.label}
+                    </CDropdownItem>
+                  ))}
+                </CDropdownMenu>
+              </CDropdown>
+              <CButton
+                color="secondary"
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <CIcon icon={cilFilter} className="me-2" />
+                Filters {activeFilterCount > 0 && <CBadge color="danger" className="ms-1">{activeFilterCount}</CBadge>}
+                <CIcon icon={showFilters ? cilChevronTop : cilChevronBottom} className="ms-2" />
+              </CButton>
               <CButton
                 color="primary"
-                className="me-2 btn-animated"
                 onClick={() => {
-                  handleReset()
-                  fetchUniversities() // Refresh universities list
-                  setShowModal(true)
+                  setEditingCourse(null);
+                  setShowModal(true);
                 }}
               >
-                <CIcon icon={cilPlus} className="me-2" />
-                Add Course
-              </CButton>
-              <CButton color="secondary" variant="outline" className="btn-animated" onClick={fetchCourses}>
-                <CIcon icon={cilReload} />
+                <CIcon icon={cilPlus} className="me-2" /> Add Course
               </CButton>
             </div>
           </CCardHeader>
-          <CCardBody>
-            <CRow className="mb-3">
-              <CCol md={6}>
-                <CInputGroup>
-                  <CInputGroupText>
-                    <CIcon icon={cilMagnifyingGlass} />
-                  </CInputGroupText>
+
+          {/* Filters Section */}
+          {showFilters && (
+            <CCardBody className="border-bottom">
+              <CRow className="g-3">
+                <CCol md={3}>
+                  <CFormLabel>Search</CFormLabel>
+                  <CInputGroup>
+                    <CInputGroupText><CIcon icon={cilMagnifyingGlass} /></CInputGroupText>
+                    <CFormInput
+                      placeholder="Search courses..."
+                      value={filters.search}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                    />
+                  </CInputGroup>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>University</CFormLabel>
+                  <CFormSelect
+                    value={filters.university}
+                    onChange={(e) => handleFilterChange('university', e.target.value)}
+                  >
+                    <option value="">All Universities</option>
+                    {universities.map((uni) => (
+                      <option key={uni._id} value={uni._id}>
+                        {uni.name}
+                      </option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Subject</CFormLabel>
+                  <CFormSelect
+                    value={filters.subject}
+                    onChange={(e) => handleFilterChange('subject', e.target.value)}
+                  >
+                    <option value="">All Subjects</option>
+                    {subjects.map((sub) => (
+                      <option key={sub._id} value={sub._id}>
+                        {sub.name}
+                      </option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Level</CFormLabel>
+                  <CFormSelect
+                    value={filters.level}
+                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                  >
+                    <option value="">All Levels</option>
+                    {levelOptions.map((level) => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Study Mode</CFormLabel>
+                  <CFormSelect
+                    value={filters.studyMode}
+                    onChange={(e) => handleFilterChange('studyMode', e.target.value)}
+                  >
+                    <option value="">All Modes</option>
+                    {studyModeOptions.map((mode) => (
+                      <option key={mode} value={mode}>{mode}</option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Status</CFormLabel>
+                  <CFormSelect
+                    value={filters.status}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                  >
+                    <option value="">All Status</option>
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Currency</CFormLabel>
+                  <CFormSelect
+                    value={filters.currency}
+                    onChange={(e) => handleFilterChange('currency', e.target.value)}
+                  >
+                    <option value="">All Currencies</option>
+                    {currencyOptions.map((curr) => (
+                      <option key={curr} value={curr}>{curr}</option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Duration</CFormLabel>
                   <CFormInput
-                    placeholder="Search courses by name, code, or university..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="e.g., 3 years"
+                    value={filters.duration}
+                    onChange={(e) => handleFilterChange('duration', e.target.value)}
                   />
-                </CInputGroup>
-              </CCol>
-              <CCol md={6} className="text-end">
-                <CDropdown>
-                  <CDropdownToggle color="secondary" variant="outline">
-                    <CIcon icon={cilFilter} className="me-2" />
-                    Filter
-                  </CDropdownToggle>
-                  <CDropdownMenu>
-                    <CDropdownItem>All Courses</CDropdownItem>
-                    <CDropdownItem>Active</CDropdownItem>
-                    <CDropdownItem>Inactive</CDropdownItem>
-                  </CDropdownMenu>
-                </CDropdown>
-              </CCol>
-            </CRow>
+                </CCol>
+
+
+                <CCol md={12} className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                  <div className="d-flex align-items-center gap-2">
+                    <CFormSelect
+                      style={{ width: '100px' }}
+                      value={filters.limit}
+                      onChange={(e) => handleLimitChange(e.target.value)}
+                    >
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                    </CFormSelect>
+                    <span className="text-muted">per page</span>
+                  </div>
+
+                  <div className="d-flex align-items-center gap-2">
+                    <CButton color="danger" variant="outline" onClick={clearAllFilters}>
+                      <CIcon icon={cilFilterX} className="me-2" />
+                      Clear Filters
+                    </CButton>
+                  </div>
+                </CCol>
+              </CRow>
+            </CCardBody>
+          )}
+
+          <CCardBody>
             {loading ? (
               <div className="text-center py-5">
                 <CSpinner />
+                <div className="mt-2">Loading courses...</div>
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="text-center py-5">
+                <CIcon icon={cilMagnifyingGlass} size="xxl" className="text-muted mb-3" />
+                <h5>No courses found</h5>
+                <p className="text-muted">
+                  {activeFilterCount > 0
+                    ? 'Try changing your filters or clear them to see all courses.'
+                    : 'No courses available. Create your first course.'}
+                </p>
               </div>
             ) : (
-              <CTable align="middle" className="mb-0 border" hover responsive>
-                <CTableHead color="light">
-                  <CTableRow>
-                    <CTableHeaderCell className="text-center">
-                      <CIcon icon={cilBook} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell>Course Name</CTableHeaderCell>
-                    <CTableHeaderCell>Course Code</CTableHeaderCell>
-                    <CTableHeaderCell>University</CTableHeaderCell>
-                    <CTableHeaderCell>Duration</CTableHeaderCell>
-                    <CTableHeaderCell>Price</CTableHeaderCell>
-                    <CTableHeaderCell>Students</CTableHeaderCell>
-                    <CTableHeaderCell>Status</CTableHeaderCell>
-                    <CTableHeaderCell>Created At</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Actions</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {filteredCourses.length === 0 ? (
+              <>
+                <CTable hover responsive>
+                  <CTableHead>
                     <CTableRow>
-                      <CTableDataCell colSpan="10" className="text-center py-5">
-                        <div className="text-body-secondary">No courses found</div>
-                      </CTableDataCell>
+                      <CTableHeaderCell>Name</CTableHeaderCell>
+                      <CTableHeaderCell>University</CTableHeaderCell>
+                      <CTableHeaderCell>Subject</CTableHeaderCell>
+                      <CTableHeaderCell>Level</CTableHeaderCell>
+                      <CTableHeaderCell>Mode</CTableHeaderCell>
+                      <CTableHeaderCell>Duration</CTableHeaderCell>
+                      <CTableHeaderCell>Fee</CTableHeaderCell>
+                      <CTableHeaderCell>Status</CTableHeaderCell>
+                      <CTableHeaderCell>Actions</CTableHeaderCell>
                     </CTableRow>
-                  ) : (
-                    filteredCourses.map((course, index) => (
-                      <CTableRow key={course._id || course.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
-                        <CTableDataCell className="text-center">
-                          {course.image ? (
-                            <img
-                              src={course.image}
-                              alt={course.name}
-                              style={{
-                                width: '50px',
-                                height: '50px',
-                                objectFit: 'cover',
-                                borderRadius: '50%',
-                              }}
-                            />
-                          ) : (
-                            <CAvatar size="md" color="warning" textColor="white">
-                              {course.name?.charAt(0) || 'C'}
-                            </CAvatar>
+                  </CTableHead>
+                  <CTableBody>
+                    {courses.map((course) => (
+                      <CTableRow key={course._id}>
+                        <CTableDataCell className="fw-semibold">
+                          <div>{course.name}</div>
+                          <small className="text-muted">{course.shortName}</small>
+                        </CTableDataCell>
+                        <CTableDataCell>{course.university?.name || '-'}</CTableDataCell>
+                        <CTableDataCell>{course.subject?.name || '-'}</CTableDataCell>
+                        <CTableDataCell>
+                          <CBadge color="info">{course.level}</CBadge>
+                        </CTableDataCell>
+                        <CTableDataCell>{course.studyMode}</CTableDataCell>
+                        <CTableDataCell>{course.duration}</CTableDataCell>
+                        <CTableDataCell>
+                          <div>
+                            <strong>{course.currency} {course.tuitionFee?.toLocaleString()}</strong>
+                          </div>
+                          {course.applicationFee > 0 && (
+                            <small className="text-muted">
+                              App fee: {course.currency} {course.applicationFee}
+                            </small>
                           )}
                         </CTableDataCell>
                         <CTableDataCell>
-                          <div>{course.name}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>{course.code}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>{course.university?.name || course.university || '-'}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>{course.duration}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>₹{course.price?.toLocaleString() || 0}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>{(course.students || 0).toLocaleString()}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
                           <CBadge color={course.status === 'Active' ? 'success' : 'secondary'}>
-                            {course.status || 'Active'}
+                            {course.status}
                           </CBadge>
                         </CTableDataCell>
                         <CTableDataCell>
-                          <div>
-                            {course.createdAt
-                              ? new Date(course.createdAt).toLocaleDateString()
-                              : '-'}
+                          <div className="d-flex gap-1">
+                            <CButton
+                              size="sm"
+                              color="warning"
+                              variant="ghost"
+                              onClick={() => handleEdit(course)}
+                              title="Edit"
+                            >
+                              <CIcon icon={cilPencil} />
+                            </CButton>
+                            <CButton
+                              size="sm"
+                              color="danger"
+                              variant="ghost"
+                              onClick={() => handleDeleteClick(course._id)}
+                              title="Delete"
+                            >
+                              <CIcon icon={cilTrash} />
+                            </CButton>
                           </div>
                         </CTableDataCell>
-                        <CTableDataCell className="text-center">
-                          <CButton
-                            color="primary"
-                            variant="outline"
-                            size="sm"
-                            className="me-2 btn-animated"
-                            onClick={() => handleEdit(course)}
-                          >
-                            <CIcon icon={cilPencil} />
-                          </CButton>
-                          <CButton
-                            color="danger"
-                            variant="outline"
-                            size="sm"
-                            className="btn-animated"
-                            onClick={() => handleDeleteClick(course)}
-                          >
-                            <CIcon icon={cilTrash} />
-                          </CButton>
-                        </CTableDataCell>
                       </CTableRow>
-                    ))
-                  )}
-                </CTableBody>
-              </CTable>
+                    ))}
+                  </CTableBody>
+                </CTable>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <CCardFooter className="d-flex justify-content-between align-items-center">
+                    <div className="text-muted">
+                      Showing {(filters.page - 1) * filters.limit + 1} to{' '}
+                      {Math.min(filters.page * filters.limit, total)} of {total} entries
+                    </div>
+                    <CPagination>
+                      <CPaginationItem
+                        disabled={filters.page <= 1}
+                        onClick={() => handlePageChange(filters.page - 1)}
+                        style={{ cursor: filters.page > 1 ? 'pointer' : 'not-allowed' }}
+                      >
+                        Previous
+                      </CPaginationItem>
+
+                      {/* Show limited page numbers */}
+                      {(() => {
+                        const pages = [];
+                        const maxVisible = 5;
+                        let startPage = Math.max(1, filters.page - Math.floor(maxVisible / 2));
+                        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+                        if (endPage - startPage + 1 < maxVisible) {
+                          startPage = Math.max(1, endPage - maxVisible + 1);
+                        }
+
+                        if (startPage > 1) {
+                          pages.push(
+                            <CPaginationItem
+                              key={1}
+                              onClick={() => handlePageChange(1)}
+                            >
+                              1
+                            </CPaginationItem>
+                          );
+                          if (startPage > 2) {
+                            pages.push(<CPaginationItem key="dots1" disabled>...</CPaginationItem>);
+                          }
+                        }
+
+                        for (let i = startPage; i <= endPage; i++) {
+                          pages.push(
+                            <CPaginationItem
+                              key={i}
+                              active={filters.page === i}
+                              onClick={() => handlePageChange(i)}
+                            >
+                              {i}
+                            </CPaginationItem>
+                          );
+                        }
+
+                        if (endPage < totalPages) {
+                          if (endPage < totalPages - 1) {
+                            pages.push(<CPaginationItem key="dots2" disabled>...</CPaginationItem>);
+                          }
+                          pages.push(
+                            <CPaginationItem
+                              key={totalPages}
+                              onClick={() => handlePageChange(totalPages)}
+                            >
+                              {totalPages}
+                            </CPaginationItem>
+                          );
+                        }
+
+                        return pages;
+                      })()}
+
+                      <CPaginationItem
+                        disabled={filters.page >= totalPages}
+                        onClick={() => handlePageChange(filters.page + 1)}
+                        style={{ cursor: filters.page < totalPages ? 'pointer' : 'not-allowed' }}
+                      >
+                        Next
+                      </CPaginationItem>
+                    </CPagination>
+                  </CCardFooter>
+                )}
+              </>
             )}
           </CCardBody>
         </CCard>
 
-        {/* Add/Edit Course Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg" className="modal-animate">
+        {/* Add/Edit Modal */}
+        <CModal
+          visible={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setEditingCourse(null);
+            setError('');
+          }}
+          size="xl"
+          scrollable
+        >
           <CModalHeader>
-            <CModalTitle>{editingId ? 'Edit Course' : 'Add New Course'}</CModalTitle>
+            <CModalTitle>
+              {editingCourse ? `Edit Course: ${editingCourse.name}` : 'Add New Course'}
+            </CModalTitle>
           </CModalHeader>
-          <CForm onSubmit={handleSubmit}>
-            <CModalBody>
-              {error && (
-                <CAlert color="danger" className="mb-3">
-                  {error}
-                </CAlert>
-              )}
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="name">
-                      Course Name <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter course name"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="code">
-                      Course Code <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="code"
-                      name="code"
-                      value={formData.code}
-                      onChange={handleInputChange}
-                      placeholder="Enter course code"
-                      required
-                    />
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="university">
-                      University <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormSelect
-                      id="university"
-                      name="university"
-                      value={formData.university}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Select University</option>
-                      {universities.map((univ) => (
-                        <option key={univ._id || univ.id} value={univ._id || univ.id}>
-                          {univ.name}
-                        </option>
-                      ))}
-                    </CFormSelect>
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="duration">
-                      Duration <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="duration"
-                      name="duration"
-                      value={formData.duration}
-                      onChange={handleInputChange}
-                      placeholder="e.g., 6 months, 4 years"
-                      required
-                    />
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="price">
-                      Price (₹) <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="number"
-                      id="price"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      placeholder="Enter course price"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="status">Status</CFormLabel>
-                    <CFormSelect
-                      id="status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </CFormSelect>
-                  </div>
-                </CCol>
-              </CRow>
-              <div className="mb-3">
-                <CFormLabel htmlFor="description">Description</CFormLabel>
-                <CFormTextarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Enter course description (optional)"
-                  rows="3"
-                />
-              </div>
-              <div className="mb-3">
-                <CFormLabel htmlFor="image">Course Image</CFormLabel>
-                <CFormInput
-                  type="file"
-                  id="image"
-                  name="image"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  disabled={uploadingImage}
-                />
-                {uploadingImage && (
-                  <div className="mt-2">
-                    <CSpinner size="sm" /> <small>Uploading image...</small>
-                  </div>
-                )}
-                {imagePreview && (
-                  <div className="mt-3">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      style={{
-                        maxWidth: '200px',
-                        maxHeight: '200px',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        border: '1px solid #dee2e6',
-                      }}
-                    />
-                  </div>
-                )}
-                {formData.image && !imagePreview && (
-                  <div className="mt-3">
-                    <img
-                      src={formData.image}
-                      alt="Current"
-                      style={{
-                        maxWidth: '200px',
-                        maxHeight: '200px',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        border: '1px solid #dee2e6',
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </CModalBody>
-            <CModalFooter>
-              <CButton
-                color="secondary"
-                onClick={() => {
-                  setShowModal(false)
-                  handleReset()
-                }}
-              >
-                Cancel
-              </CButton>
-              <CButton color="primary" type="submit" className="btn-animated">
-                {editingId ? 'Update Course' : 'Add Course'}
-              </CButton>
-            </CModalFooter>
-          </CForm>
+          <CModalBody className="p-4">
+            <CourseForm
+              course={editingCourse}
+              onSubmit={handleFormSubmit}
+              onCancel={() => {
+                setShowModal(false);
+                setEditingCourse(null);
+              }}
+              error={error}
+              submitting={loading}
+            />
+          </CModalBody>
         </CModal>
 
         {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
+        <CModal
+          visible={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+        >
           <CModalHeader>
-            <CModalTitle>Confirm Delete</CModalTitle>
+            <CModalTitle>Confirm Deletion</CModalTitle>
           </CModalHeader>
           <CModalBody>
-            <p>Are you sure you want to delete this course? This action cannot be undone.</p>
+            <p>Are you sure you want to delete this course?</p>
+            <p className="text-muted">
+              This action cannot be undone. All associated data will be permanently removed.
+            </p>
           </CModalBody>
           <CModalFooter>
             <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete} className="btn-animated">
-              Delete
+            <CButton color="danger" onClick={handleDelete}>
+              Delete Course
             </CButton>
           </CModalFooter>
         </CModal>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default Courses
+export default Courses;

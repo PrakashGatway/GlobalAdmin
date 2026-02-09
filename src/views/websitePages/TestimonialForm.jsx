@@ -68,7 +68,6 @@ const TestimonialForm = ({
         isFeatured: testimonial.isFeatured || false,
         metaDetails: testimonial.metaDetails || {},
         target: testimonial.target || '',
-        content: testimonial.content || '',
       })
 
       setImages({

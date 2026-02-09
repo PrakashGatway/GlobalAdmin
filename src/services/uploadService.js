@@ -3,15 +3,6 @@ import apiService from './apiService'
 
 // Get API base URL (same logic as apiService)
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL
-  }
-  
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname
-    return `http://${hostname}:5000/api`
-  }
-   
   return 'http://localhost:5000/api'
 }
 

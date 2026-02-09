@@ -475,7 +475,7 @@ const PageManagement = () => {
                               onClick={() => handleToggleStatus(page)}
                               title="Toggle Status"
                             >
-                              {page.status === 'Published' ? 'Unpublish' : 'Publish'}
+                              {page.status !== 'Published' ? 'Unpublish' : 'Publish'}
                             </CButton>
                           </div>
                         </CTableDataCell>

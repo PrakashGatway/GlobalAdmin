@@ -7,10 +7,13 @@ import BlogForm from './views/websitePages/BlogForm'
 import Subjects from './views/courses/Subjects'
 import Testimonials from './views/websitePages/Testimonials'
 import ContactManagement from './views/websitePages/Contactus'
+import CourseCategories from './views/courses/CategoriesList'
+import FAQ from './views/websitePages/Faq'
+import Gallery from './views/websitePages/Gallery'
+import Scholarships from './views/scholarship/Scholarship'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserList = React.lazy(() => import('./views/user-management/UserList'))
-const UserWallets = React.lazy(() => import('./views/user-management/UserWallets'))
 const Universities = React.lazy(() => import('./views/universities/Universities'))
 const Courses = React.lazy(() => import('./views/courses/Courses'))
 const Countries = React.lazy(() => import('./views/countries/Countries'))
@@ -22,11 +25,10 @@ const PageInformation = React.lazy(() => import('./views/page-information/PageIn
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/user-management/user-list', name: 'User List', element: UserList },
-  { path: '/user-management/user-wallets', name: 'User Wallets', element: UserWallets },
   { path: '/user-management', name: 'User Management', element: UserList },
   { path: '/universities', name: 'Universities', element: Universities },
   { path: '/courses', name: 'Courses', element: Courses },
+  { path: '/courses/categories', name: 'Courses Categories', element: CourseCategories },
   { path: '/subjects', name: 'Subjects', element: Subjects },
   { path: '/countries', name: 'Countries', element: Countries },
   { path: '/support', name: 'Support', element: Support },
@@ -40,7 +42,9 @@ const routes = [
   { path: '/blogs/:id', name: 'Blog Categories', element: BlogForm },
   { path: '/testimonials', name: 'Testimonials', element: Testimonials },
   { path: '/contact', name: 'Testimonials', element: ContactManagement },
-
+  { path: '/faq', name: 'Faq', element: FAQ },
+  { path: '/gallery', name: 'Gallery', element: Gallery },
+  { path: '/scholarship', name: 'Scholarships', element: Scholarships },
 
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
 ]

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import {
     CCard,
     CCardBody,
@@ -38,6 +38,7 @@ import {
     cilReload,
 } from '@coreui/icons'
 import apiService from '../../services/apiService'
+import { courseCategoryService } from './CategoriesList'
 
 const subjectService = {
     getSubjects: (params) =>
@@ -60,6 +61,8 @@ const Subjects = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [editingId, setEditingId] = useState(null)
     const [deletingId, setDeletingId] = useState(null)
+    const [loadingOptions, setLoadingOptions] = useState(true);
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
@@ -90,6 +93,23 @@ const Subjects = () => {
         }
     }
 
+    const fetchCategories = async () => {
+        try {
+            const res = await courseCategoryService.getCategories({
+                page: 1,
+                limit: 100,
+            })
+            setCategories(res.data || [])
+            setLoadingOptions(false);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to fetch categories')
+            setCategories([])
+        }
+    }
+
+    useEffect(() => {
+        fetchCategories()
+    }, [])
     useEffect(() => {
         fetchSubjects()
     }, [page])
@@ -132,13 +152,13 @@ const Subjects = () => {
                 setSuccess('Subject created successfully')
             }
 
-            if (res.data?.success) {
+            if (res?.success) {
                 setShowModal(false)
                 setEditingId(null)
                 resetForm()
                 fetchSubjects()
             } else {
-                throw new Error(res.data?.message || 'Operation failed')
+                throw new Error(res?.message || 'Operation failed')
             }
         } catch (err) {
             setError(err.response?.data?.message || err.message || 'Operation failed')
@@ -153,6 +173,7 @@ const Subjects = () => {
             slug: subject.slug || '',
             description: subject.description || '',
             icon: subject.icon || '',
+            category: subject.category || '',
             isActive: subject.isActive?.toString() || 'true',
         })
         setShowModal(true)
@@ -213,9 +234,9 @@ const Subjects = () => {
                                 <CIcon icon={cilPlus} className="me-1" />
                                 Add Subject
                             </CButton>
-                            <CButton 
-                                color="secondary" 
-                                variant="outline" 
+                            <CButton
+                                color="secondary"
+                                variant="outline"
                                 onClick={fetchSubjects}
                                 disabled={loading}
                             >
@@ -237,6 +258,7 @@ const Subjects = () => {
                                     <CTableRow>
                                         <CTableHeaderCell>Name</CTableHeaderCell>
                                         <CTableHeaderCell>Slug</CTableHeaderCell>
+                                        <CTableHeaderCell>Category</CTableHeaderCell>
                                         <CTableHeaderCell>Description</CTableHeaderCell>
                                         <CTableHeaderCell>Status</CTableHeaderCell>
                                         <CTableHeaderCell>Created</CTableHeaderCell>
@@ -248,9 +270,9 @@ const Subjects = () => {
                                         <CTableRow>
                                             <CTableDataCell colSpan="7" className="text-center py-4">
                                                 <div className="text-muted">No subjects found</div>
-                                                <CButton 
-                                                    color="primary" 
-                                                    size="sm" 
+                                                <CButton
+                                                    color="primary"
+                                                    size="sm"
                                                     className="mt-2"
                                                     onClick={() => {
                                                         resetForm()
@@ -265,47 +287,50 @@ const Subjects = () => {
                                     ) : (
                                         subjects.map(subject => (
                                             <CTableRow key={subject._id}>
-                                                <CTableDataCell className='px-0'>
+                                                <CTableDataCell className='px-2'>
                                                     <strong>{subject.name}</strong>
                                                 </CTableDataCell>
-                                                <CTableDataCell className='px-0'>
+                                                <CTableDataCell className='px-2'>
                                                     <code>{subject.slug}</code>
                                                 </CTableDataCell>
-                                                <CTableDataCell className='px-0'>
-                                                    {subject.description 
-                                                        ? (subject.description.length > 50 
-                                                            ? `${subject.description.substring(0, 50)}...` 
+                                                <CTableDataCell className='px-2'>
+                                                    <small>{subject?.category?.name || '-'}</small>
+                                                </CTableDataCell>
+                                                <CTableDataCell className='px-2'>
+                                                    {subject.description
+                                                        ? (subject.description.length > 50
+                                                            ? `${subject.description.substring(0, 50)}...`
                                                             : subject.description)
                                                         : '-'}
                                                 </CTableDataCell>
-                                                <CTableDataCell className='px-0'>
-                                                    <CBadge 
+                                                <CTableDataCell className='px-2'>
+                                                    <CBadge
                                                         color={subject.isActive ? 'success' : 'secondary'}
                                                         text={subject.isActive ? 'Active' : 'Inactive'}
                                                     >
                                                         {subject.isActive ? 'Active' : 'Inactive'}
                                                     </CBadge>
                                                 </CTableDataCell>
-                                                <CTableDataCell className='px-0'>
-                                                    {subject.createdAt 
+                                                <CTableDataCell className='px-2'>
+                                                    {subject.createdAt
                                                         ? new Date(subject.createdAt).toLocaleDateString()
                                                         : '-'}
                                                 </CTableDataCell>
                                                 <CTableDataCell className="text-center">
-                                                    <CButton 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        color="primary" 
-                                                        className="me-2" 
+                                                    <CButton
+                                                        size="sm"
+                                                        variant="outline"
+                                                        color="primary"
+                                                        className="me-2"
                                                         onClick={() => handleEdit(subject)}
                                                         title="Edit subject"
                                                     >
                                                         <CIcon icon={cilPencil} size="sm" />
                                                     </CButton>
-                                                    <CButton 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        color="danger" 
+                                                    <CButton
+                                                        size="sm"
+                                                        variant="outline"
+                                                        color="danger"
                                                         onClick={() => {
                                                             setDeletingId(subject._id)
                                                             setShowDeleteModal(true)
@@ -326,18 +351,18 @@ const Subjects = () => {
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-4">
                                 <CPagination className="m-0">
-                                    <CPaginationItem 
+                                    <CPaginationItem
                                         disabled={page === 1}
                                         onClick={() => setPage(p => Math.max(1, p - 1))}
                                     >
                                         Previous
                                     </CPaginationItem>
-                                    
+
                                     {[...Array(totalPages)].map((_, i) => {
                                         const pageNum = i + 1
                                         // Show first, last, and around current page
                                         if (
-                                            pageNum === 1 || 
+                                            pageNum === 1 ||
                                             pageNum === totalPages ||
                                             (pageNum >= page - 1 && pageNum <= page + 1)
                                         ) {
@@ -361,8 +386,8 @@ const Subjects = () => {
                                         }
                                         return null
                                     })}
-                                    
-                                    <CPaginationItem 
+
+                                    <CPaginationItem
                                         disabled={page === totalPages}
                                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                     >
@@ -375,8 +400,8 @@ const Subjects = () => {
                 </CCard>
 
                 {/* Add/Edit Modal */}
-                <CModal 
-                    visible={showModal} 
+                <CModal
+                    visible={showModal}
                     onClose={() => {
                         setShowModal(false)
                         resetForm()
@@ -392,12 +417,12 @@ const Subjects = () => {
                                 <CCol md={6}>
                                     <div className="mb-3">
                                         <CFormLabel htmlFor="name">Name *</CFormLabel>
-                                        <CFormInput 
+                                        <CFormInput
                                             id="name"
-                                            name="name" 
-                                            value={formData.name} 
-                                            onChange={handleChange} 
-                                            required 
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
                                             placeholder="Mathematics, Science, etc."
                                         />
                                     </div>
@@ -405,12 +430,12 @@ const Subjects = () => {
                                 <CCol md={6}>
                                     <div className="mb-3">
                                         <CFormLabel htmlFor="slug">Slug *</CFormLabel>
-                                        <CFormInput 
+                                        <CFormInput
                                             id="slug"
-                                            name="slug" 
-                                            value={formData.slug} 
-                                            onChange={handleChange} 
-                                            required 
+                                            name="slug"
+                                            value={formData.slug}
+                                            onChange={handleChange}
+                                            required
                                             placeholder="mathematics"
                                             pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
                                             title="Lowercase letters, numbers and hyphens only"
@@ -418,17 +443,34 @@ const Subjects = () => {
                                         <small className="text-muted">Auto-generated from name</small>
                                     </div>
                                 </CCol>
+                                <CCol md={6}>
+                                    <CFormLabel>Category*</CFormLabel>
+                                    <CFormSelect
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={loadingOptions}
+                                    >
+                                        <option value="">Select Category</option>
+                                        {categories.map(sub => (
+                                            <option key={sub._id} value={sub._id}>
+                                                {sub.name}
+                                            </option>
+                                        ))}
+                                    </CFormSelect>
+                                </CCol>
                             </CRow>
-                            
+
                             <CRow>
                                 <CCol md={6}>
                                     <div className="mb-3">
                                         <CFormLabel htmlFor="icon">Icon</CFormLabel>
-                                        <CFormInput 
+                                        <CFormInput
                                             id="icon"
-                                            name="icon" 
-                                            value={formData.icon} 
-                                            onChange={handleChange} 
+                                            name="icon"
+                                            value={formData.icon}
+                                            onChange={handleChange}
                                             placeholder="URL or icon class (e.g., cil-book)"
                                         />
                                         <small className="text-muted">
@@ -439,10 +481,10 @@ const Subjects = () => {
                                 <CCol md={6}>
                                     <div className="mb-3">
                                         <CFormLabel htmlFor="isActive">Status</CFormLabel>
-                                        <CFormSelect 
+                                        <CFormSelect
                                             id="isActive"
-                                            name="isActive" 
-                                            value={formData.isActive} 
+                                            name="isActive"
+                                            value={formData.isActive}
                                             onChange={handleChange}
                                         >
                                             <option value="true">Active</option>
@@ -451,7 +493,7 @@ const Subjects = () => {
                                     </div>
                                 </CCol>
                             </CRow>
-                            
+
                             <div className="mb-3">
                                 <CFormLabel htmlFor="description">Description</CFormLabel>
                                 <CFormTextarea
@@ -465,8 +507,8 @@ const Subjects = () => {
                             </div>
                         </CModalBody>
                         <CModalFooter>
-                            <CButton 
-                                color="secondary" 
+                            <CButton
+                                color="secondary"
                                 onClick={() => {
                                     setShowModal(false)
                                     resetForm()
@@ -474,8 +516,8 @@ const Subjects = () => {
                             >
                                 Cancel
                             </CButton>
-                            <CButton 
-                                color="primary" 
+                            <CButton
+                                color="primary"
                                 type="submit"
                                 disabled={loading}
                             >
@@ -491,8 +533,8 @@ const Subjects = () => {
                 </CModal>
 
                 {/* Delete Modal */}
-                <CModal 
-                    visible={showDeleteModal} 
+                <CModal
+                    visible={showDeleteModal}
                     onClose={() => setShowDeleteModal(false)}
                     color="danger"
                 >
@@ -509,14 +551,14 @@ const Subjects = () => {
                         </p>
                     </CModalBody>
                     <CModalFooter>
-                        <CButton 
-                            color="secondary" 
+                        <CButton
+                            color="secondary"
                             onClick={() => setShowDeleteModal(false)}
                         >
                             Cancel
                         </CButton>
-                        <CButton 
-                            color="danger" 
+                        <CButton
+                            color="danger"
                             onClick={handleDelete}
                             disabled={loading}
                         >
