@@ -3,7 +3,7 @@ import apiService from './apiService'
 
 // Get API base URL (same logic as apiService)
 const getApiBaseUrl = () => {
-  return 'http://localhost:5000/api'
+  return 'https://api.ooshasglobal.com/api'
 }
 
 export const uploadService = {
@@ -32,9 +32,7 @@ export const uploadService = {
     }
   },
 
-  // Delete image
   deleteImage: async (publicId) => {
-    // Encode publicId to handle special characters and slashes (e.g., "cway-admin/folder/image")
     const encodedPublicId = encodeURIComponent(publicId)
     return apiService.delete(`/upload/image/${encodedPublicId}`)
   },
