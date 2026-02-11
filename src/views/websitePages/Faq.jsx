@@ -395,7 +395,7 @@ const FAQ = () => {
                             </div>
                         ) : (
                             <>
-                                <CTable hover responsive>
+                                <CTable >
                                     <CTableHead>
                                         <CTableRow>
                                             <CTableHeaderCell>Order</CTableHeaderCell>

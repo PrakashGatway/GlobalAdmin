@@ -14,13 +14,11 @@ const getUser = () => {
 // Save token and user to localStorage
 const saveAuth = (token, user) => {
   localStorage.setItem('token', token)
-  localStorage.setItem('user', JSON.stringify(user))
 }
 
 // Clear auth data
 const logout = () => {
   localStorage.removeItem('token')
-  localStorage.removeItem('user')
 }
 
 export const authService = {

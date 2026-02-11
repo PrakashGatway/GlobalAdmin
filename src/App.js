@@ -46,7 +46,7 @@ const App = () => {
         <AuthProvider>
           <Suspense
             fallback={
-              <div className="pt-3 text-center">
+              <div className="pt-3 text-center d-flex justify-content-center h-screen">
                 <CSpinner color="primary" variant="grow" />
               </div>
             }
@@ -62,7 +62,7 @@ const App = () => {
                 </PublicRoute>
               }
             />
-            <Route
+            {/* <Route
               exact
               path="/register"
               name="Register Page"
@@ -71,7 +71,7 @@ const App = () => {
                   <Register />
                 </PublicRoute>
               }
-            />
+            /> */}
             <Route exact path="/404" name="Page 404" element={<Page404 />} />
             <Route exact path="/500" name="Page 500" element={<Page500 />} />
             <Route

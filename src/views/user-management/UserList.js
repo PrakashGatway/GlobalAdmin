@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  CAvatar,
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
   CRow,
+  CCol,
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCardFooter,
   CTable,
   CTableBody,
   CTableDataCell,
@@ -17,489 +17,750 @@ import {
   CInputGroup,
   CInputGroupText,
   CFormInput,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
+  CFormSelect,
   CModal,
   CModalHeader,
   CModalTitle,
   CModalBody,
   CModalFooter,
-  CForm,
-  CFormLabel,
-  CFormSelect,
   CAlert,
+  CPagination,
+  CPaginationItem,
+  CFormLabel,
   CSpinner,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem,
+  CTooltip,
+  CFormCheck,
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
 import {
-  cilUser,
+  cilPlus,
   cilPencil,
   cilTrash,
   cilMagnifyingGlass,
-  cilPlus,
   cilFilter,
-  cilReload,
-} from '@coreui/icons'
-import userService from '../../services/userService'
+  cilFilterX,
+  cilChevronBottom,
+  cilChevronTop,
+  cilOptions,
+  cilUser,
+  cilEnvelopeOpen,
+  cilPhone,
+  cilBan,
+  cilCheckCircle,
+  cilWarning
+} from '@coreui/icons';
+import UserForm from './UserForm';
+import userService from '../../services/userService';
 
-const UserList = () => {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [editingId, setEditingId] = useState(null)
-  const [deletingId, setDeletingId] = useState(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    role: 'user',
-    status: 'Active',
-  })
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+const Users = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  // Filters state
+  const [filters, setFilters] = useState({
+    search: '',
+    role: '',
+    status: '',
+    sort: '-createdAt',
+    page: 1,
+    limit: 10,
+  });
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   // Fetch users
-  const fetchUsers = async () => {
-    setLoading(true)
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    setError('');
     try {
-      const response = await userService.getUsers()
-      if (response.success) {
-        setUsers(response.data || [])
+      const params = {
+        ...filters,
+        page: filters.page,
+        limit: filters.limit,
+        sort: filters.sort,
+      };
+
+      // Remove empty filter values
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key];
+        }
+      });
+
+      const res = await userService.getUsers(params);
+      if (res.success) {
+        setUsers(res.data || []);
+        setTotal(res.pagination?.total || 0);
+        setTotalPages(res.pagination?.pages || 1);
       }
     } catch (err) {
-      setError(err.message || 'Failed to fetch users')
+      setError(err.message || 'Failed to fetch users');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [filters]);
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, [fetchUsers]);
 
-  // Handle form input change
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    setError('')
-  }
+  const handleFilterChange = (name, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [name]: value,
+      page: 1,
+    }));
+  };
 
-  // Handle edit - populate form with user data
+  const handleSearchChange = (value) => {
+    handleFilterChange('search', value);
+  };
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setFilters(prev => ({ ...prev, page }));
+  };
+
+  const handleLimitChange = (limit) => {
+    setFilters(prev => ({ ...prev, limit: parseInt(limit), page: 1 }));
+  };
+
+  const handleSortChange = (sort) => {
+    handleFilterChange('sort', sort);
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      search: '',
+      role: '',
+      status: '',
+      sort: '-createdAt',
+      page: 1,
+      limit: 10,
+    });
+    setSelectedUsers([]);
+  };
+
   const handleEdit = (user) => {
-    setFormData({
-      name: user.name || '',
-      email: user.email || '',
-      phone: user.phone || '',
-      role: user.role || 'user',
-      status: user.status || 'Active',
-    })
-    setEditingId(user._id || user.id)
-    setError('')
-    setShowModal(true)
-  }
+    setEditingUser(user);
+    setShowModal(true);
+  };
 
-  // Handle delete confirmation
-  const handleDeleteClick = (user) => {
-    setDeletingId(user._id || user.id)
-    setShowDeleteModal(true)
-  }
+  const handleDeleteClick = (id) => {
+    setDeletingId(id);
+    setShowDeleteModal(true);
+  };
 
-  // Handle delete
   const handleDelete = async () => {
-    if (!deletingId) return
-
-    setLoading(true)
     try {
-      const response = await userService.deleteUser(deletingId)
-      if (response.success) {
-        setSuccess('User deleted successfully')
-        setShowDeleteModal(false)
-        setDeletingId(null)
-        fetchUsers()
+      const res = await userService.deleteUser(deletingId);
+      if (res.success) {
+        setSuccess('User deactivated successfully!');
+        setShowDeleteModal(false);
+        setDeletingId(null);
+        fetchUsers();
+        setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      setError(err.message || 'Failed to delete user')
-    } finally {
-      setLoading(false)
+      setError(err.message || 'Delete failed');
+      setShowDeleteModal(false);
     }
-  }
+  };
 
-  // Handle form submit
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (!formData.name || !formData.email || !formData.phone) {
-      setError('Please fill in all required fields')
-      return
-    }
-
-    setLoading(true)
+  const handleFormSubmit = async (data) => {
     try {
-      if (editingId) {
-        // Update user
-        const response = await userService.updateUser(editingId, formData)
-        if (response.success) {
-          setSuccess('User updated successfully')
-          setShowModal(false)
-          setEditingId(null)
-          fetchUsers()
-        }
+      let res;
+      if (editingUser) {
+        res = await userService.updateUser(editingUser._id, data);
+        if (res.success) setSuccess('User updated successfully!');
       } else {
-        // Create user (if needed)
-        setError('Add user functionality not implemented yet')
+        res = await userService.createUser(data);
+        if (res.success) setSuccess('User created successfully!');
+      }
+      if (res.success) {
+        setShowModal(false);
+        setEditingUser(null);
+        fetchUsers();
+        setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      setError(err.message || 'Failed to save user')
-    } finally {
-      setLoading(false)
+      setError(err.message || 'Operation failed');
     }
-  }
+  };
 
-  // Reset form
-  const handleReset = () => {
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      role: 'user',
-      status: 'Active',
-    })
-    setEditingId(null)
-    setError('')
-    setSuccess('')
-  }
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedUsers(users.map(user => user._id));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone?.includes(searchTerm),
-  )
+  const handleSelectUser = (userId) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleBulkAction = async (action) => {
+    try {
+      if (action === 'activate') {
+        await Promise.all(selectedUsers.map(id => userService.updateUserStatus(id, 'Active')));
+        setSuccess('Selected users activated successfully!');
+      } else if (action === 'deactivate') {
+        await Promise.all(selectedUsers.map(id => userService.deleteUser(id)));
+        setSuccess('Selected users deactivated successfully!');
+      }
+      setSelectedUsers([]);
+      fetchUsers();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.message || 'Bulk action failed');
+    }
+  };
+
+  const exportUsers = async () => {
+    try {
+      const blob = await userService.exportUsers(filters);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err.message || 'Export failed');
+    }
+  };
+
+  // Calculate active filter count
+  const activeFilterCount = Object.keys(filters).filter(key =>
+    key !== 'page' &&
+    key !== 'limit' &&
+    key !== 'sort' &&
+    filters[key] !== '' &&
+    filters[key] !== null &&
+    filters[key] !== undefined
+  ).length;
+
+  // Available options
+  const roleOptions = ['admin', 'manager', 'counsellor', 'user'];
+  const statusOptions = ['Active', 'Inactive', 'Suspended'];
+  const sortOptions = [
+    { value: '-createdAt', label: 'Newest First' },
+    { value: 'createdAt', label: 'Oldest First' },
+    { value: 'name', label: 'Name A-Z' },
+    { value: '-name', label: 'Name Z-A' },
+    { value: 'email', label: 'Email A-Z' },
+    { value: '-email', label: 'Email Z-A' },
+  ];
+
+  const getRoleBadgeColor = (role) => {
+    switch (role) {
+      case 'admin': return 'danger';
+      case 'manager': return 'warning';
+      case 'counsellor': return 'info';
+      default: return 'primary';
+    }
+  };
+
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case 'Active': return 'success';
+      case 'Inactive': return 'secondary';
+      case 'Pending': return 'warning';
+      default: return 'secondary';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
     <CRow>
       <CCol xs={12}>
-        {error && (
-          <CAlert color="danger" dismissible onClose={() => setError('')}>
-            {error}
-          </CAlert>
-        )}
-        {success && (
-          <CAlert color="success" dismissible onClose={() => setSuccess('')}>
-            {success}
-          </CAlert>
-        )}
-        <CCard className="mb-4 card-hover animate-fade-in">
+        {error && <CAlert color="danger" dismissible onClose={() => setError('')}>{error}</CAlert>}
+        {success && <CAlert color="success" dismissible onClose={() => setSuccess('')}>{success}</CAlert>}
+
+        <CCard>
           <CCardHeader className="d-flex justify-content-between align-items-center">
             <div>
-              <h5 className="mb-0">
-                <strong>User Management</strong>
-              </h5>
-              <small className="text-body-secondary">Manage and monitor all users</small>
+              <h5 className="mb-0">User Management</h5>
+              <small className="text-muted">Total: {total} users</small>
             </div>
-            <div>
-              <CButton color="secondary" variant="outline" onClick={fetchUsers}>
-                <CIcon icon={cilReload} />
+            <div className="d-flex gap-2">
+              <CDropdown>
+                <CDropdownToggle color="secondary" variant="outline">
+                  <CIcon icon={cilOptions} className="me-2" />
+                  Sort
+                </CDropdownToggle>
+                <CDropdownMenu>
+                  {sortOptions.map((option) => (
+                    <CDropdownItem
+                      key={option.value}
+                      onClick={() => handleSortChange(option.value)}
+                      active={filters.sort === option.value}
+                    >
+                      {option.label}
+                    </CDropdownItem>
+                  ))}
+                </CDropdownMenu>
+              </CDropdown>
+              <CButton
+                color="secondary"
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <CIcon icon={cilFilter} className="me-2" />
+                Filters {activeFilterCount > 0 && <CBadge color="danger" className="ms-1">{activeFilterCount}</CBadge>}
+                <CIcon icon={showFilters ? cilChevronTop : cilChevronBottom} className="ms-2" />
+              </CButton>
+              {/* <CButton
+                color="success"
+                variant="outline"
+                onClick={exportUsers}
+                disabled={loading}
+              >
+                
+                Export
+              </CButton> */}
+              <CButton
+                color="primary"
+                onClick={() => {
+                  setEditingUser(null);
+                  setShowModal(true);
+                }}
+              >
+                <CIcon icon={cilPlus} className="me-2" /> Add User
               </CButton>
             </div>
           </CCardHeader>
+
+          {/* Filters Section */}
+          {showFilters && (
+            <CCardBody className="border-bottom">
+              <CRow className="g-3">
+                <CCol md={6}>
+                  <CFormLabel>Search</CFormLabel>
+                  <CInputGroup>
+                    <CInputGroupText><CIcon icon={cilMagnifyingGlass} /></CInputGroupText>
+                    <CFormInput
+                      placeholder="Search by name, email, or phone..."
+                      value={filters.search}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                    />
+                  </CInputGroup>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Role</CFormLabel>
+                  <CFormSelect
+                    value={filters.role}
+                    onChange={(e) => handleFilterChange('role', e.target.value)}
+                  >
+                    <option value="">All Roles</option>
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={3}>
+                  <CFormLabel>Status</CFormLabel>
+                  <CFormSelect
+                    value={filters.status}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                  >
+                    <option value="">All Status</option>
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </CFormSelect>
+                </CCol>
+
+                <CCol md={12} className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                  <div className="d-flex align-items-center gap-2">
+                    <CFormSelect
+                      style={{ width: '100px' }}
+                      value={filters.limit}
+                      onChange={(e) => handleLimitChange(e.target.value)}
+                    >
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                    </CFormSelect>
+                    <span className="text-muted">per page</span>
+                  </div>
+
+                  <div className="d-flex align-items-center gap-2">
+                    {/* {selectedUsers.length > 0 && (
+                      <CDropdown className="me-2">
+                        <CDropdownToggle color="warning" size="sm">
+                          Bulk Actions ({selectedUsers.length})
+                        </CDropdownToggle>
+                        <CDropdownMenu>
+                          <CDropdownItem onClick={() => handleBulkAction('activate')}>
+                            <CIcon icon={cilCheckCircle} className="me-2 text-success" />
+                            Activate Selected
+                          </CDropdownItem>
+                          <CDropdownItem onClick={() => handleBulkAction('deactivate')}>
+                            <CIcon icon={cilBan} className="me-2 text-danger" />
+                            Deactivate Selected
+                          </CDropdownItem>
+                        </CDropdownMenu>
+                      </CDropdown>
+                    )} */}
+                    <CButton color="danger" variant="outline" onClick={clearAllFilters}>
+                      <CIcon icon={cilFilterX} className="me-2" />
+                      Clear Filters
+                    </CButton>
+                  </div>
+                </CCol>
+              </CRow>
+            </CCardBody>
+          )}
+
           <CCardBody>
-            <CRow className="mb-3">
-              <CCol md={6}>
-                <CInputGroup>
-                  <CInputGroupText>
-                    <CIcon icon={cilMagnifyingGlass} />
-                  </CInputGroupText>
-                  <CFormInput
-                    placeholder="Search users by name, email, or phone..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </CInputGroup>
-              </CCol>
-              <CCol md={6} className="text-end">
-                <CDropdown>
-                  <CDropdownToggle color="secondary" variant="outline">
-                    <CIcon icon={cilFilter} className="me-2" />
-                    Filter
-                  </CDropdownToggle>
-                  <CDropdownMenu>
-                    <CDropdownItem>All Users</CDropdownItem>
-                    <CDropdownItem>Active</CDropdownItem>
-                    <CDropdownItem>Inactive</CDropdownItem>
-                  </CDropdownMenu>
-                </CDropdown>
-              </CCol>
-            </CRow>
             {loading ? (
               <div className="text-center py-5">
                 <CSpinner />
+                <div className="mt-2">Loading users...</div>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-5">
+                <CIcon icon={cilMagnifyingGlass} size="xxl" className="text-muted mb-3" />
+                <h5>No users found</h5>
+                <p className="text-muted">
+                  {activeFilterCount > 0
+                    ? 'Try changing your filters or clear them to see all users.'
+                    : 'No users available. Create your first user.'}
+                </p>
               </div>
             ) : (
-              <CTable align="middle" className="mb-0 border" hover responsive>
-                <CTableHead color="light">
-                  <CTableRow>
-                    <CTableHeaderCell className="text-center">
-                      <CIcon icon={cilUser} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell>Name</CTableHeaderCell>
-                    <CTableHeaderCell>Email</CTableHeaderCell>
-                    <CTableHeaderCell>Phone</CTableHeaderCell>
-                    <CTableHeaderCell>Role</CTableHeaderCell>
-                    <CTableHeaderCell>Status</CTableHeaderCell>
-                    <CTableHeaderCell>Created At</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Actions</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {filteredUsers.length === 0 ? (
+              <>
+                <CTable hover striped>
+                  <CTableHead>
                     <CTableRow>
-                      <CTableDataCell colSpan="8" className="text-center py-5">
-                        <div className="text-body-secondary">No users found</div>
-                      </CTableDataCell>
+                      <CTableHeaderCell width="50">
+                        <CFormCheck
+                          checked={selectedUsers.length === users.length && users.length > 0}
+                          onChange={handleSelectAll}
+                        />
+                      </CTableHeaderCell>
+                      <CTableHeaderCell>Name</CTableHeaderCell>
+                      <CTableHeaderCell>Email</CTableHeaderCell>
+                      <CTableHeaderCell>Role</CTableHeaderCell>
+                      <CTableHeaderCell>Status</CTableHeaderCell>
+                      <CTableHeaderCell>Profile Status</CTableHeaderCell>
+                      <CTableHeaderCell>Joined</CTableHeaderCell>
+                      <CTableHeaderCell>Last Login</CTableHeaderCell>
+                      <CTableHeaderCell>Actions</CTableHeaderCell>
                     </CTableRow>
-                  ) : (
-                    filteredUsers.map((user, index) => (
-                      <CTableRow key={user._id || user.id} className="table-row-hover animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
-                        <CTableDataCell className="text-center">
-                          {user.profileImage ? (
-                            <img
-                              src={user.profileImage}
-                              alt={user.name}
-                              style={{
-                                width: '50px',
-                                height: '50px',
-                                objectFit: 'cover',
-                                borderRadius: '50%',
-                              }}
-                            />
-                          ) : (
-                            <CAvatar size="md" color="primary" textColor="white">
-                              {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                            </CAvatar>
-                          )}
+                  </CTableHead>
+                  <CTableBody>
+                    {users.map((user) => (
+                      <CTableRow key={user._id} className={!user.status || user.status === 'Inactive' ? 'text-muted' : ''}>
+                        <CTableDataCell>
+                          <CFormCheck
+                            checked={selectedUsers.includes(user._id)}
+                            onChange={() => handleSelectUser(user._id)}
+                          />
                         </CTableDataCell>
                         <CTableDataCell>
-                          <div>{user.name}</div>
+                          <div className="d-flex align-items-center">
+                            <div className="avatar me-2">
+                              {user.profilePicture ? (
+                                <img
+                                  src={user.profilePicture}
+                                  alt={user.name}
+                                  className="rounded-circle"
+                                  width="32"
+                                  height="32"
+                                />
+                              ) : (
+                                <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                  style={{ width: '32px', height: '32px' }}>
+                                  {user.name?.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <div className="fw-semibold">{user.name}</div>
+                            </div>
+                          </div>
                         </CTableDataCell>
                         <CTableDataCell>
-                          <div>{user.email}</div>
+                          <div className="d-flex align-items-center">
+                            <CIcon icon={cilEnvelopeOpen} className="me-2 text-muted" />
+                            {user.email}
+                          </div>
+                          {user.phone ? (
+                            <div className="d-flex align-items-center">
+                              <CIcon icon={cilPhone} className="me-2 text-muted" />
+                              {user.phone}
+                            </div>
+                          ) : '-'}
+
                         </CTableDataCell>
+
                         <CTableDataCell>
-                          <div>{user.phone}</div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <CBadge color="info" className="text-capitalize">
-                            {user.role || 'user'}
+                          <CBadge color={getRoleBadgeColor(user.role)}>
+                            {user.role}
                           </CBadge>
                         </CTableDataCell>
                         <CTableDataCell>
-                          <CBadge color={user.status === 'Active' ? 'success' : 'secondary'}>
+                          <CBadge color={getStatusBadgeColor(user.status)}>
                             {user.status}
                           </CBadge>
                         </CTableDataCell>
                         <CTableDataCell>
-                          <div>
-                            {user.createdAt
-                              ? new Date(user.createdAt).toLocaleDateString()
-                              : '-'}
+                          {(() => {
+                            const completion = user?.profile?.profileCompletion ?? 0
+
+                            return (
+                              <div className="w-100">
+                                <div className="progress" style={{ height: "20px" }}>
+                                  <div
+                                    className={`progress-bar ${completion >= 80
+                                        ? "bg-success"
+                                        : completion >= 40
+                                          ? "bg-warning"
+                                          : "bg-danger"
+                                      }`}
+                                    role="progressbar"
+                                    style={{ width: `${completion}%` }}
+                                  >
+                                    {completion}%
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })()}
+                        </CTableDataCell>
+
+                        <CTableDataCell>
+                          {user.lastLogin ? (
+                            <div>
+                              {formatDate(user.createdAt)}
+                            </div>
+                          ) : 'Never'}
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          {user.lastLogin ? (
+                            <div>
+                              {formatDate(user.lastLogin)}
+                            </div>
+                          ) : 'Never'}
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <div className="d-flex gap-1">
+                            <CTooltip content="Edit User">
+                              <CButton
+                                size="sm"
+                                color="warning"
+                                variant="ghost"
+                                onClick={() => handleEdit(user)}
+                              >
+                                <CIcon icon={cilPencil} />
+                              </CButton>
+                            </CTooltip>
+                            {user.status === 'Active' ? (
+                              <CTooltip content="Deactivate User">
+                                <CButton
+                                  size="sm"
+                                  color="danger"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteClick(user._id)}
+                                >
+                                  <CIcon icon={cilBan} />
+                                </CButton>
+                              </CTooltip>
+                            ) : (
+                              <CTooltip content="Activate User">
+                                <CButton
+                                  size="sm"
+                                  color="success"
+                                  variant="ghost"
+                                  onClick={() => null}
+                                >
+                                  <CIcon icon={cilCheckCircle} />
+                                </CButton>
+                              </CTooltip>
+                            )}
                           </div>
                         </CTableDataCell>
-                        <CTableDataCell className="text-center">
-                          <CButton
-                            color="primary"
-                            variant="outline"
-                            size="sm"
-                            className="me-2 btn-animated"
-                            onClick={() => handleEdit(user)}
-                            title="Edit User"
-                          >
-                            <CIcon icon={cilPencil} />
-                          </CButton>
-                          <CButton
-                            color="danger"
-                            variant="outline"
-                            size="sm"
-                            className="btn-animated"
-                            onClick={() => handleDeleteClick(user)}
-                            title="Delete User"
-                          >
-                            <CIcon icon={cilTrash} />
-                          </CButton>
-                        </CTableDataCell>
                       </CTableRow>
-                    ))
-                  )}
-                </CTableBody>
-              </CTable>
+                    ))}
+                  </CTableBody>
+                </CTable>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <CCardFooter className="d-flex justify-content-between align-items-center">
+                    <div className="text-muted">
+                      Showing {(filters.page - 1) * filters.limit + 1} to{' '}
+                      {Math.min(filters.page * filters.limit, total)} of {total} entries
+                    </div>
+                    <CPagination>
+                      <CPaginationItem
+                        disabled={filters.page <= 1}
+                        onClick={() => handlePageChange(filters.page - 1)}
+                        style={{ cursor: filters.page > 1 ? 'pointer' : 'not-allowed' }}
+                      >
+                        Previous
+                      </CPaginationItem>
+
+                      {/* Show limited page numbers */}
+                      {(() => {
+                        const pages = [];
+                        const maxVisible = 5;
+                        let startPage = Math.max(1, filters.page - Math.floor(maxVisible / 2));
+                        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+                        if (endPage - startPage + 1 < maxVisible) {
+                          startPage = Math.max(1, endPage - maxVisible + 1);
+                        }
+
+                        if (startPage > 1) {
+                          pages.push(
+                            <CPaginationItem
+                              key={1}
+                              onClick={() => handlePageChange(1)}
+                            >
+                              1
+                            </CPaginationItem>
+                          );
+                          if (startPage > 2) {
+                            pages.push(<CPaginationItem key="dots1" disabled>...</CPaginationItem>);
+                          }
+                        }
+
+                        for (let i = startPage; i <= endPage; i++) {
+                          pages.push(
+                            <CPaginationItem
+                              key={i}
+                              active={filters.page === i}
+                              onClick={() => handlePageChange(i)}
+                            >
+                              {i}
+                            </CPaginationItem>
+                          );
+                        }
+
+                        if (endPage < totalPages) {
+                          if (endPage < totalPages - 1) {
+                            pages.push(<CPaginationItem key="dots2" disabled>...</CPaginationItem>);
+                          }
+                          pages.push(
+                            <CPaginationItem
+                              key={totalPages}
+                              onClick={() => handlePageChange(totalPages)}
+                            >
+                              {totalPages}
+                            </CPaginationItem>
+                          );
+                        }
+
+                        return pages;
+                      })()}
+
+                      <CPaginationItem
+                        disabled={filters.page >= totalPages}
+                        onClick={() => handlePageChange(filters.page + 1)}
+                        style={{ cursor: filters.page < totalPages ? 'pointer' : 'not-allowed' }}
+                      >
+                        Next
+                      </CPaginationItem>
+                    </CPagination>
+                  </CCardFooter>
+                )}
+              </>
             )}
           </CCardBody>
         </CCard>
 
-        {/* Edit User Modal */}
-        <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg" className="modal-animate">
+        {/* Add/Edit Modal */}
+        <CModal
+          visible={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setEditingUser(null);
+            setError('');
+          }}
+          size="lg"
+          scrollable
+        >
           <CModalHeader>
-            <CModalTitle>{editingId ? 'Edit User' : 'Add New User'}</CModalTitle>
+            <CModalTitle>
+              {editingUser ? `Edit User: ${editingUser.name}` : 'Add New User'}
+            </CModalTitle>
           </CModalHeader>
-          <CForm onSubmit={handleSubmit}>
-            <CModalBody>
-              {error && (
-                <CAlert color="danger" className="mb-3">
-                  {error}
-                </CAlert>
-              )}
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="name">
-                      Full Name <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter full name"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="email">
-                      Email Address <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter email address"
-                      required
-                      disabled={!!editingId}
-                      className={editingId ? 'bg-body-secondary' : ''}
-                    />
-                    {editingId && (
-                      <small className="text-muted">Email cannot be changed</small>
-                    )}
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="phone">
-                      Phone Number <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="Enter phone number"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="role">Role</CFormLabel>
-                    <CFormSelect
-                      id="role"
-                      name="role"
-                      value={formData.role}
-                      onChange={handleInputChange}
-                    >
-                      <option value="user">User</option>
-                      <option value="counsellor">Counsellor</option>
-                      <option value="manager">Manager</option>
-                      <option value="admin">Admin</option>
-                    </CFormSelect>
-                  </div>
-                </CCol>
-              </CRow>
-              <div className="mb-3">
-                <CFormLabel htmlFor="status">Status</CFormLabel>
-                <CFormSelect
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Suspended">Suspended</option>
-                </CFormSelect>
-              </div>
-            </CModalBody>
-            <CModalFooter>
-              <CButton
-                color="secondary"
-                onClick={() => {
-                  setShowModal(false)
-                  handleReset()
-                }}
-              >
-                Cancel
-              </CButton>
-              <CButton color="primary" type="submit" disabled={loading}>
-                {loading ? (
-                  <>
-                    <CSpinner size="sm" className="me-2" />
-                    Saving...
-                  </>
-                ) : editingId ? (
-                  'Update User'
-                ) : (
-                  'Add User'
-                )}
-              </CButton>
-            </CModalFooter>
-          </CForm>
+          <CModalBody className="p-4">
+            <UserForm
+              user={editingUser}
+              onSubmit={handleFormSubmit}
+              onCancel={() => {
+                setShowModal(false);
+                setEditingUser(null);
+              }}
+              error={error}
+              submitting={loading}
+              isEditing={!!editingUser}
+            />
+          </CModalBody>
         </CModal>
 
-        {/* Delete Confirmation Modal */}
-        <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} className="modal-animate">
+        <CModal
+          visible={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+        >
           <CModalHeader>
-            <CModalTitle>Confirm Delete</CModalTitle>
+            <CModalTitle>Confirm Deactivation</CModalTitle>
           </CModalHeader>
           <CModalBody>
-            <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+            <CAlert color="warning" className="d-flex align-items-center">
+              <CIcon icon={cilWarning} className="me-2 flex-shrink-0" size="lg" />
+              <div>
+                <h6>Are you sure you want to deactivate this user?</h6>
+                <p className="mb-0">
+                  The user will be marked as inactive and will not be able to log in.
+                  This action can be reversed by activating the user later.
+                </p>
+              </div>
+            </CAlert>
           </CModalBody>
           <CModalFooter>
-            <CButton
-              color="secondary"
-              onClick={() => {
-                setShowDeleteModal(false)
-                setDeletingId(null)
-              }}
-            >
+            <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </CButton>
-            <CButton color="danger" onClick={handleDelete} disabled={loading} className="btn-animated">
-              {loading ? (
-                <>
-                  <CSpinner size="sm" className="me-2" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete User'
-              )}
+            <CButton color="danger" onClick={handleDelete}>
+              Deactivate User
             </CButton>
           </CModalFooter>
         </CModal>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default UserList
+export default Users;

@@ -384,7 +384,7 @@ const CourseCategories = () => {
                             </div>
                         ) : (
                             <>
-                                <CTable hover responsive>
+                                <CTable >
                                     <CTableHead>
                                         <CTableRow>
                                             <CTableHeaderCell>#</CTableHeaderCell>

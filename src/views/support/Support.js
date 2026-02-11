@@ -168,7 +168,7 @@ const Support = () => {
                 </CDropdown>
               </CCol>
             </CRow>
-            <CTable align="middle" className="mb-0 border" hover responsive>
+            <CTable align="middle" className="mb-0 border" >
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell className="text-center">Status</CTableHeaderCell>

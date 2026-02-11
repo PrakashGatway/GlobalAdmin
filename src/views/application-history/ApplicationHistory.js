@@ -484,7 +484,7 @@ const ApplicationHistory = () => {
                 <CSpinner />
               </div>
             ) : (
-              <CTable align="middle" className="mb-0 border" hover responsive>
+              <CTable align="middle" className="mb-0 border" hover >
                 <CTableHead color="light">
                   <CTableRow>
                     <CTableHeaderCell>CAMS ID</CTableHeaderCell>

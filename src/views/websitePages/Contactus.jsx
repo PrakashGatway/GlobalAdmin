@@ -260,7 +260,7 @@ const ContactManagement = () => {
               <div className="text-center py-5 text-muted">No contacts found</div>
             ) : (
               <>
-                <CTable hover responsive>
+                <CTable >
                   <CTableHead>
                     <CTableRow>
                       <CTableHeaderCell>Name</CTableHeaderCell>

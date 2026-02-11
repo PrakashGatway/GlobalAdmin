@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="pt-3 text-center">
+      <div className="pt-3 text-center d-flex justify-content-center h-screen">
         <CSpinner color="primary" variant="grow" />
       </div>
     )

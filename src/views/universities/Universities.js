@@ -388,7 +388,7 @@ const Universities = () => {
               </div>
             ) : (
               <>
-                <CTable hover responsive>
+                <CTable >
                   <CTableHead>
                     <CTableRow>
                       <CTableHeaderCell>Name</CTableHeaderCell>

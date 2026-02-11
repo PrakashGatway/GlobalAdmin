@@ -344,7 +344,7 @@ const Dashboard = () => {
 
               <br />
 
-              <CTable align="middle" className="mb-0 border" hover responsive>
+              <CTable align="middle" className="mb-0 border" >
                 <CTableHead color="light" className="text-nowrap">
                   <CTableRow>
                     <CTableHeaderCell className="text-center">

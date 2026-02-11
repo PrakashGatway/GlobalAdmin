@@ -14,11 +14,13 @@ import { AppSidebarNav } from './AppSidebarNav'
 
 // sidebar nav config
 import navigation from '../_nav'
+import { useAuth } from '../context/AuthContext'
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const { user } = useAuth()
 
   return (
     <CSidebar
@@ -34,13 +36,13 @@ const AppSidebar = () => {
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
           <img
-            src="/logo.png"
+            src="https://ooshasglobal.com/images/newlogo3.png"
             alt="C-way global"
-            className="sidebar-brand-full"
-            style={{ height: '80px', width: 'auto', objectFit: 'contain', maxWidth: '100%' }}
+            className="sidebar-brand-full p-0 m-0"
+            style={{ height: '', width: 'auto', objectFit: 'contain', maxWidth: '70%' }}
           />
           <img
-            src="/logo.png"
+            src="https://ooshasglobal.com/images/newlogo3.png"
             alt="C-way global"
             className="sidebar-brand-narrow"
             style={{ height: '60px', width: 'auto', objectFit: 'contain', maxWidth: '100%' }}
@@ -52,7 +54,7 @@ const AppSidebar = () => {
           onClick={() => dispatch({ type: 'set', sidebarShow: false })}
         />
       </CSidebarHeader>
-      <AppSidebarNav items={navigation} />
+      <AppSidebarNav items={user.role == "admin" ? navigation.admin : navigation.manager} />
       <CSidebarFooter className="border-top d-none d-lg-flex">
         <CSidebarToggler
           onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}

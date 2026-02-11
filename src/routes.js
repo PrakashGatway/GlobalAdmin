@@ -11,6 +11,7 @@ import CourseCategories from './views/courses/CategoriesList'
 import FAQ from './views/websitePages/Faq'
 import Gallery from './views/websitePages/Gallery'
 import Scholarships from './views/scholarship/Scholarship'
+import { useAuth } from './context/AuthContext'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserList = React.lazy(() => import('./views/user-management/UserList'))
@@ -23,7 +24,8 @@ const Coupons = React.lazy(() => import('./views/coupons/Coupons'))
 const ApplicationHistory = React.lazy(() => import('./views/application-history/ApplicationHistory'))
 const PageInformation = React.lazy(() => import('./views/page-information/PageInformation'))
 
-const routes = [
+
+const adminRoutes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/user-management', name: 'User Management', element: UserList },
   { path: '/universities', name: 'Universities', element: Universities },
@@ -45,8 +47,26 @@ const routes = [
   { path: '/faq', name: 'Faq', element: FAQ },
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/scholarship', name: 'Scholarships', element: Scholarships },
-
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
 ]
+
+const managerRoutes = [
+  { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/website/pages', name: 'Pages', element: PageInformation },
+  { path: '/website/pages/add', name: 'Add Page', element: PageInformation },
+  { path: '/categories', name: 'Blog Categories', element: BlogCategories },
+  { path: '/blogs', name: 'Blog Categories', element: Blogs },
+  { path: '/blogs/create', name: 'Blog Categories', element: BlogForm },
+  { path: '/blogs/:id', name: 'Blog Categories', element: BlogForm },
+  { path: '/testimonials', name: 'Testimonials', element: Testimonials },
+  { path: '/faq', name: 'Faq', element: FAQ },
+  { path: '/gallery', name: 'Gallery', element: Gallery },
+  { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
+]
+
+const routes = {
+  admin: adminRoutes,
+  manager: managerRoutes,
+}
 
 export default routes

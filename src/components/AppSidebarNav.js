@@ -18,7 +18,7 @@ export const AppSidebarNav = ({ items }) => {
                 <span style={{ width: '10px', height: '10px' ,background:"#c99a9a", borderRadius:"50%" }}></span>
               </span>
             )}
-        {name && name}
+        <span style={{fontSize:"15px"}} className="fw-semibold">{name && name}</span>
         {badge && (
           <CBadge color={badge.color} className="ms-auto" size="sm">
             {badge.text}
@@ -28,13 +28,14 @@ export const AppSidebarNav = ({ items }) => {
     )
   }
 
+
   const navItem = (item, index, indent = false) => {
     const { component, name, badge, icon, ...rest } = item
     const Component = component
     return (
       <Component as="div" key={index}>
         {rest.to || rest.href ? (
-          <CNavLink
+          <CNavLink 
             {...(rest.to && { as: NavLink })}
             {...(rest.href && { target: '_blank', rel: 'noopener noreferrer' })}
             {...rest}

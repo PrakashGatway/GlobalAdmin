@@ -4,6 +4,7 @@ import { CContainer, CSpinner, CAlert } from '@coreui/react'
 
 // routes config
 import routes from '../routes'
+import { useAuth } from '../context/AuthContext'
 
 const NotFound = () => {
   return (
@@ -15,12 +16,16 @@ const NotFound = () => {
 }
 
 const AppContent = () => {
+
+  const { user } = useAuth()
+
+  let userRoutes = user.role == "admin" ? routes.admin : routes.manager
+
   return (
     <CContainer className="px-4 animate-fade-in" lg>
       <Suspense fallback={<CSpinner color="primary" />}>
         <Routes>
-          {routes.map((route, idx) => {
-            // Skip routes without element or exact routes that are just placeholders
+          {userRoutes.map((route, idx) => {
             if (!route.element || (route.exact && route.path === '/')) {
               return null
             }
