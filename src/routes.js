@@ -12,6 +12,7 @@ import FAQ from './views/websitePages/Faq'
 import Gallery from './views/websitePages/Gallery'
 import Scholarships from './views/scholarship/Scholarship'
 import { useAuth } from './context/AuthContext'
+import AdminNotifications from './views/notify/NotificationPage'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserList = React.lazy(() => import('./views/user-management/UserList'))
@@ -37,7 +38,6 @@ const adminRoutes = [
   { path: '/coupons', name: 'Coupons', element: Coupons },
   { path: '/application-history', name: 'Application History', element: ApplicationHistory },
   { path: '/website/pages', name: 'Pages', element: PageInformation },
-  { path: '/website/pages/add', name: 'Add Page', element: PageInformation },
   { path: '/categories', name: 'Blog Categories', element: BlogCategories },
   { path: '/blogs', name: 'Blog Categories', element: Blogs },
   { path: '/blogs/create', name: 'Blog Categories', element: BlogForm },
@@ -48,12 +48,13 @@ const adminRoutes = [
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/scholarship', name: 'Scholarships', element: Scholarships },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
+  { path: '/notification', name: 'Notification', element:  AdminNotifications},
+
 ]
 
 const managerRoutes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/website/pages', name: 'Pages', element: PageInformation },
-  { path: '/website/pages/add', name: 'Add Page', element: PageInformation },
   { path: '/categories', name: 'Blog Categories', element: BlogCategories },
   { path: '/blogs', name: 'Blog Categories', element: Blogs },
   { path: '/blogs/create', name: 'Blog Categories', element: BlogForm },

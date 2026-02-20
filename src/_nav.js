@@ -12,6 +12,7 @@ import {
   cilTag,
   cilDescription,
   cilFile,
+  cilBell,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem } from '@coreui/react'
 
@@ -145,6 +146,12 @@ const adminRoutes = [
     name: 'Coupons',
     to: '/coupons',
     icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
+  },
+    {
+    component: CNavItem,
+    name: 'Notification',
+    to: '/notification',
+    icon: <CIcon icon={cilBell} customClassName="nav-icon" />,
   },
 
   {

@@ -28,7 +28,7 @@ const AppHeaderDropdown = () => {
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
         {user?.profileImage ? (
-          <CAvatar src={user.profileImage} size="md" />
+          <CAvatar  src={user.profileImage} size="md" className='h-10 overflow-hidden w-10'  />
         ) : (
           <CAvatar src={avatar8} size="md" />
         )}
