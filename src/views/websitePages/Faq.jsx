@@ -312,21 +312,6 @@ const FAQ = () => {
                                 </CCol>
 
                                 <CCol md={3}>
-                                    <CFormLabel>Type</CFormLabel>
-                                    <CFormSelect
-                                        value={filters.type}
-                                        onChange={e => handleFilterChange('type', e.target.value)}
-                                    >
-                                        <option value="">All Types</option>
-                                        {faqTypes.map(type => (
-                                            <option key={type} value={type}>
-                                                {type}
-                                            </option>
-                                        ))}
-                                    </CFormSelect>
-                                </CCol>
-
-                                <CCol md={3}>
                                     <CFormLabel>Status</CFormLabel>
                                     <CFormSelect
                                         value={filters.status}
@@ -340,7 +325,7 @@ const FAQ = () => {
                                         ))}
                                     </CFormSelect>
                                 </CCol>
-{/* 
+                                {/* 
                                 <CCol md={3}>
                                     <CFormLabel>Reference Model</CFormLabel>
                                     <CFormSelect
@@ -408,7 +393,7 @@ const FAQ = () => {
                                     </CTableHead>
 
                                     <CTableBody>
-                                        {faqs.map((faq , index) => (
+                                        {faqs.map((faq, index) => (
                                             <CTableRow key={faq._id}>
                                                 <CTableDataCell>{index + 1}</CTableDataCell>
                                                 <CTableDataCell>
@@ -550,17 +535,14 @@ const FAQ = () => {
                             </CCol>
 
                             <CCol md={6}>
-                                <CFormLabel>Type</CFormLabel>
-                                <CFormSelect
+                                <CFormLabel>Route</CFormLabel>
+
+                                <CFormInput
                                     value={formData.type}
                                     onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                >
-                                    {faqTypes.map(type => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </CFormSelect>
+                                    placeholder="Enter route..."
+                                    required
+                                />
                             </CCol>
 
                             {/* <CCol md={6}>

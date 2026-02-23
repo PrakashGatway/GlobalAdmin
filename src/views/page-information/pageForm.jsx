@@ -1,5 +1,5 @@
 // components/PageForm.jsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   CForm,
   CFormInput,
@@ -24,6 +24,7 @@ import {
 } from '@coreui/react'
 import DynamicFormBuilder, { uploadFile } from './FormBuilder'
 import { getPageSchema, getPageTypes, getDefaultValues } from './SchemaLoader'
+import countryService from '../../services/countryService'
 
 const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -45,6 +46,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const [slugError, setSlugError] = useState('')
   const [formErrors, setFormErrors] = useState({})
   const pageSchema = getPageSchema(pageType)
+  const [countries, setCountries] = useState([])
 
   // useEffect(() => {
   //   if (!page) {
@@ -58,6 +60,28 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   //     }))
   //   }
   // }, [pageType, page])
+
+  const fetchCountries = async () => {
+    try {
+      const res = await countryService.getCountries({ limit: 300 })
+      if (res.success) {
+        setCountries(res.data || [])
+      }
+    } catch (err) {
+      setError('Failed to fetch countries')
+    } finally {
+      setFormData(prev => ({
+        ...prev,
+        country: page.pageType === "country" ? page?.country?._id || '' : '',
+      }))
+    }
+  }
+
+  useEffect(() => {
+    if (page.pageType === 'country') {
+      fetchCountries()
+    }
+  }, [])
 
   useEffect(() => {
     if (page) {
@@ -217,8 +241,23 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CRow>
 
               <CRow className="g-3">
+                {formData?.pageType === 'country' && <CCol md={4}>
+                  <CFormLabel>Country</CFormLabel>
+                  <CFormSelect
+                    name="country"
+                    value={formData.country}
+                    onChange={handleBasicInfoChange}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((country) => (
+                      <option key={country._id} value={country._id}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </CFormSelect>
+                </CCol>}
 
-                <CCol md={6}>
+                <CCol md={formData?.pageType === 'country' ? 4 : 6}>
                   <CFormLabel>Slug *</CFormLabel>
                   <CFormInput
                     name="slug"
@@ -237,7 +276,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                     URL will be: {formData.slug}
                   </div>
                 </CCol>
-                <CCol md={6}>
+                <CCol md={formData?.pageType === 'country' ? 4 : 6}>
                   <CFormLabel>Navbar Title</CFormLabel>
                   <CFormInput
                     name="navbarTitle"
@@ -312,7 +351,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                       }
                     }}
                   />
-                   {formData.navbarImage && (
+                  {formData.navbarImage && (
                     <div className="mt-2">
                       <img src={formData.navbarImage} alt="preview" width="120" className="img-thumbnail" />
                     </div>

@@ -1124,41 +1124,6 @@ const UniversityForm = ({
                 </CCardBody>
             </CCard>
 
-            <CCard className="mb-4">
-                <CCardHeader>
-                    <h5>Location Views</h5>
-                </CCardHeader>
-                <CCardBody>
-                    <div>
-                        <CFormLabel>Is in Slider</CFormLabel>
-                        <CFormInput
-                            name="location_alias"
-                            value={formData.location_alias}
-                            onChange={handleInputChange}
-                            placeholder="e.g., usa/new-york/university-name"
-                        />
-                    </div>
-                    <div>
-                        <CFormLabel>Is in stats</CFormLabel>
-                        <CFormInput
-                            name="location_alias"
-                            value={formData.location_alias}
-                            onChange={handleInputChange}
-                            placeholder="e.g., usa/new-york/university-name"
-                        />
-                    </div>
-                    <div>
-                        <CFormLabel>Success Rate</CFormLabel>
-                        <CFormInput
-                            name="location_alias"
-                            value={formData.location_alias}
-                            onChange={handleInputChange}
-                            placeholder="e.g., usa/new-york/university-name"
-                        />
-                    </div>
-                </CCardBody>
-            </CCard>
-
             {/* Location Alias */}
             <CCard className="mb-4">
                 <CCardHeader>

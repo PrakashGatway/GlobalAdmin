@@ -25,6 +25,7 @@ import apiService from '../../services/apiService'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import uploadService from '../../services/uploadService'
+import { CustomMultiSelect } from '../scholarship/ScholarshipForm'
 
 const blogService = {
     getBlog: (id) => apiService.get(`/blogs/${id}`).then(res => res.data),
@@ -43,7 +44,7 @@ const BlogForm = () => {
         slug: '',
         shortDescription: '',
         content: '',
-        category: '',
+        category: [],
         status: 'Draft',
         isFeatured: false,
     })
@@ -71,7 +72,7 @@ const BlogForm = () => {
                         slug: blog.slug || '',
                         shortDescription: blog.shortDescription || '',
                         content: blog.description || '',
-                        category: blog.category?._id || '',
+                        category: [] || [],
                         status: blog.status || 'Draft',
                         isFeatured: blog.isFeatured || false,
                         coverImage: blog.coverImage || '',
@@ -394,20 +395,18 @@ const BlogForm = () => {
                                                 </div>
                                                 <div className="mb-3">
                                                     <CFormLabel htmlFor="category">Category *</CFormLabel>
-                                                    <CFormSelect
-                                                        id="category"
-                                                        name="category"
+                                                    <CustomMultiSelect
+                                                        options={categories}
                                                         value={formData.category}
-                                                        onChange={handleChange}
+                                                        onChange={(value) =>
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                category: value
+                                                            }))
+                                                        }
+                                                        placeholder="Search and select categories..."
                                                         required
-                                                    >
-                                                        <option value="">Select Category</option>
-                                                        {categories.map(cat => (
-                                                            <option key={cat._id} value={cat._id}>
-                                                                {cat.name}
-                                                            </option>
-                                                        ))}
-                                                    </CFormSelect>
+                                                    />
                                                 </div>
 
                                                 <div className="mb-3">

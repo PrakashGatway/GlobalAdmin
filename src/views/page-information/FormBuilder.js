@@ -25,7 +25,27 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilPlus, cilMinus, cilTrash, cilArrowTop, cilArrowBottom } from '@coreui/icons'
 import uploadService from '../../services/uploadService'
+import TinyEditor from './Editor'
+// import { CKEditor } from '@ckeditor/ckeditor5-react'
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
+
+const modules = {
+  toolbar: [
+    [{ font: [] }],
+    [{ size: ["small", false, "large", "huge"] }],
+    [{ header: 1 }, { header: 2 }, { header: 3 }, { header: false }],
+    ["bold", "italic", "underline", "strike"],
+    [{ color: [] }, { background: [] }],
+    [{ script: "sub" }, { script: "super" }],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ indent: "-1" }, { indent: "+1" }],
+    [{ direction: "rtl" }],
+    [{ align: [] }],
+    ["link", "image", "video"],
+    ["clean"],
+  ],
+};
 
 export const uploadFile = async (file) => {
   if (!file) return
@@ -34,8 +54,8 @@ export const uploadFile = async (file) => {
     setLocalError('Please select an image file')
     return
   }
-  if (file.size > 5 * 1024 * 1024) {
-    setLocalError('Image size must be < 5MB')
+  if (file.size > 2 * 1024 * 1024) {
+    setLocalError('Image size must be < 2MB')
     return
   }
   const res = await uploadService.uploadImage(file)
@@ -130,22 +150,18 @@ const DynamicFormBuilder = ({
           />
         )
 
-      case 'richtext':
+      case "richtext":
         return (
           <div className="position-relative">
-            <textarea
-              className="form-control"
-              rows="6"
-              placeholder="Enter rich text content..."
-              {...commonProps}
+            <TinyEditor
+              height={300}
+              initialValue={commonProps.value || ""}
+              onChange={(value) => {
+                commonProps.onChange({ target: { value } });
+              }}
             />
-            <div className="mt-2">
-              <small className="text-muted">
-                Supports HTML formatting. Use &lt;b&gt;, &lt;i&gt;, &lt;ul&gt;, &lt;li&gt; tags.
-              </small>
-            </div>
           </div>
-        )
+        );
 
       case 'checkbox':
         return (
@@ -325,8 +341,8 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
       setLocalError('Please select an image file')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setLocalError('Image size must be < 5MB')
+    if (file.size > 2 * 1024 * 1024) {
+      setLocalError('Image size must be < 2MB')
       return
     }
     const res = await uploadService.uploadImage(file)
@@ -432,6 +448,34 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
 
           </>
         )
+      case "richtext":
+        return (
+          // <div className="position-relative">
+          //   <ReactQuill
+          //     theme="snow"
+          //     value={commonProps.value || ""}
+          //     onChange={(content) => commonProps.onChange({ target: { value: content } })}
+          //     modules={modules}
+          //     style={{ height: "200px", marginBottom: "60px" }}
+          //     placeholder="Write content here..."
+          //   />
+          // </div>
+          <TinyEditor
+            header={false}
+            initialValue={commonProps.value || ""}
+            onChange={(value) => {
+              commonProps.onChange({ target: { value } });
+            }}
+          />
+          // <CKEditor
+          //   editor={ClassicEditor}
+          //   data={commonProps.value || ""}
+          //   onChange={(event, editor) => {
+          //     const data = editor.getData();
+          //     commonProps.onChange({ target: { value: data } });
+          //   }}
+          // />
+        );
       case 'select':
         return (
           <CFormSelect {...commonProps}>
@@ -526,7 +570,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
                   {field.fields.map((itemField) => (
                     <CCol
                       key={itemField.name}
-                      md={itemField.type === 'textarea' ? 12 : 6}
+                      md={itemField.type === 'textarea' || itemField.type === 'richtext' ? 12 : 6}
                     >
                       <CFormLabel>
                         {itemField.label}

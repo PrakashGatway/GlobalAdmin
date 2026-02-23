@@ -317,7 +317,7 @@ const KeyValueEditor = ({
 };
 
 /* ---------- Multi-Select with React Select ---------- */
-const CustomMultiSelect = ({
+export const CustomMultiSelect = ({
     label,
     options = [],
     value = [],
@@ -330,9 +330,8 @@ const CustomMultiSelect = ({
 }) => {
     const SelectComponent = isCreatable ? CreatableSelect : Select;
 
-    // Convert internal value (array of IDs) to React Select format
     const selectValue = useMemo(() => {
-        return value.map(id => {
+        return value?.map(id => {
             const option = options.find(opt => opt._id === id);
             return option ? {
                 value: option._id,
@@ -341,7 +340,6 @@ const CustomMultiSelect = ({
         }).filter(Boolean);
     }, [value, options]);
 
-    // Convert options to React Select format
     const selectOptions = useMemo(() => {
         return options.map(option => ({
             value: option._id,
@@ -436,7 +434,7 @@ const CustomMultiSelect = ({
     );
 };
 
-/* ---------- Main Scholarship Form ---------- */
+
 const ScholarshipForm = ({
     scholarship,
     onSubmit,
