@@ -72,15 +72,13 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     } finally {
       setFormData(prev => ({
         ...prev,
-        country: page.pageType === "country" ? page?.country?._id || '' : '',
+        country: page?.pageType === "country" ? page?.country?._id || '' : '',
       }))
     }
   }
 
   useEffect(() => {
-    if (page.pageType === 'country') {
       fetchCountries()
-    }
   }, [])
 
   useEffect(() => {

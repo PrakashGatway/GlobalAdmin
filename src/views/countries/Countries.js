@@ -165,6 +165,7 @@ const Countries = () => {
     setFormData({
       name: country.name,
       code: country.code,
+      isFeatured: country.isFeatured,
       currency: country.currency,
       status: country.status,
       flg: country.flg || '',
@@ -413,6 +414,8 @@ const Countries = () => {
                         <CTableHeaderCell>Code</CTableHeaderCell>
                         <CTableHeaderCell>Currency</CTableHeaderCell>
                         <CTableHeaderCell>Status</CTableHeaderCell>
+                        <CTableHeaderCell>Featured</CTableHeaderCell>
+
                         <CTableHeaderCell className="text-center" style={{ width: '120px' }}>Actions</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
@@ -446,7 +449,7 @@ const Countries = () => {
                               {c.code}
                             </CBadge>
                           </CTableDataCell>
-                          <CTableDataCell>{c.currency}</CTableDataCell>
+                          <CTableDataCell>{c.currency || 'N/A'}</CTableDataCell>
                           <CTableDataCell>
                             <CBadge 
                               color={c.status === 'Active' ? 'success' : 'secondary'} 
@@ -454,6 +457,15 @@ const Countries = () => {
                               className="px-3"
                             >
                               {c.status}
+                            </CBadge>
+                          </CTableDataCell>
+                          <CTableDataCell>
+                            <CBadge 
+                              color={c.isFeatured === 'Yes' ? 'success' : 'secondary'} 
+                              shape="rounded-pill"
+                              className="px-3"
+                            >
+                              {c.isFeatured === 'Yes' ? 'Yes' : 'No'}
                             </CBadge>
                           </CTableDataCell>
                           <CTableDataCell className="text-center">
@@ -627,7 +639,6 @@ const Countries = () => {
                         onChange={handleInputChange}
                         placeholder="e.g., USD, EUR, INR"
                         className="py-2"
-                        required
                       />
                     </div>
                   </CCol>
@@ -643,6 +654,21 @@ const Countries = () => {
                       >
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
+                      </CFormSelect>
+                    </div>
+                  </CCol>
+                  <CCol md={6}>
+                    <div className="">
+                      <CFormLabel className="fw-semibold">Featured</CFormLabel>
+                      <CFormSelect 
+                        name="isFeatured" 
+                        value={formData?.isFeatured} 
+                        onChange={handleInputChange}
+                        className="py-2"
+                      >
+                        <option value="">Select Option</option>
+                        <option value="Yes">YES</option>
+                        <option value="No">NO</option>
                       </CFormSelect>
                     </div>
                   </CCol>

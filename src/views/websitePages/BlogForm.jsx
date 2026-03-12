@@ -72,7 +72,7 @@ const BlogForm = () => {
                         slug: blog.slug || '',
                         shortDescription: blog.shortDescription || '',
                         content: blog.description || '',
-                        category: [] || [],
+                        category: blog.category || [],
                         status: blog.status || 'Draft',
                         isFeatured: blog.isFeatured || false,
                         coverImage: blog.coverImage || '',

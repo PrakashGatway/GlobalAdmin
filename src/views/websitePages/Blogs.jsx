@@ -303,7 +303,6 @@ const Blogs = () => {
                                     <CTableHead>
                                         <CTableRow className="bg-light">
                                             <CTableHeaderCell>Title & Description</CTableHeaderCell>
-                                            <CTableHeaderCell>Category</CTableHeaderCell>
                                             <CTableHeaderCell>Status</CTableHeaderCell>
                                             <CTableHeaderCell>Featured</CTableHeaderCell>
                                             <CTableHeaderCell>Created</CTableHeaderCell>
@@ -324,11 +323,7 @@ const Blogs = () => {
                                                         <div className="fw-semibold">{blog.title}</div>
                                                         <div className="text-muted small mt-1">{blog.shortDescription}</div>
                                                     </CTableDataCell>
-                                                    <CTableDataCell>
-                                                        <CBadge color="info" shape="rounded-pill">
-                                                            {blog.category?.name || '—'}
-                                                        </CBadge>
-                                                    </CTableDataCell>
+                                                    
                                                     <CTableDataCell>
                                                         <CBadge
                                                             color={blog.status === 'Published' ? 'success' : 'warning'}
