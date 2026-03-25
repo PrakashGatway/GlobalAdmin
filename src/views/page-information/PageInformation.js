@@ -198,8 +198,8 @@ const PageManagement = () => {
         if (res.success) setSuccess('Page created successfully!')
       }
       if (res.success) {
-        setShowModal(false)
-        setEditingPage(null)
+        // setShowModal(false)
+        // setEditingPage(null)
         fetchPages()
         setTimeout(() => setSuccess(''), 3000)
       }
