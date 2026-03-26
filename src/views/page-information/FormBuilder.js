@@ -1,7 +1,6 @@
 // components/DynamicFormBuilder.jsx
 import React, { useState, useEffect } from 'react'
 import {
-  CForm,
   CFormInput,
   CFormLabel,
   CFormTextarea,
@@ -18,59 +17,135 @@ import {
   CAccordionHeader,
   CAccordionBody,
   CBadge,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
   CSpinner,
-  CInputGroup,
-  CInputGroupText,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPlus, cilMinus, cilTrash, cilArrowTop, cilArrowBottom } from '@coreui/icons'
+import { cilPlus, cilTrash, cilArrowTop, cilArrowBottom, cilCopy, cilMenu, cilWarning, cilReload } from '@coreui/icons'
 import uploadService from '../../services/uploadService'
 import TinyEditor from './Editor'
-// import { CKEditor } from '@ckeditor/ckeditor5-react'
-// import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-
-
-const modules = {
-  toolbar: [
-    [{ font: [] }],
-    [{ size: ["small", false, "large", "huge"] }],
-    [{ header: 1 }, { header: 2 }, { header: 3 }, { header: false }],
-    ["bold", "italic", "underline", "strike"],
-    [{ color: [] }, { background: [] }],
-    [{ script: "sub" }, { script: "super" }],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ indent: "-1" }, { indent: "+1" }],
-    [{ direction: "rtl" }],
-    [{ align: [] }],
-    ["link", "image", "video"],
-    ["clean"],
-  ],
-};
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 export const uploadFile = async (file) => {
-  if (!file) return
+  if (!file) return null
 
   if (!file.type.startsWith('image/')) {
-    setLocalError('Please select an image file')
-    return
+    throw new Error('Please select an image file')
   }
   if (file.size > 2 * 1024 * 1024) {
-    setLocalError('Image size must be < 2MB')
-    return
+    throw new Error('Image size must be < 2MB')
   }
+  
   const res = await uploadService.uploadImage(file)
   if (res.success) {
     return res.data.url
   }
+  throw new Error('Upload failed')
 }
+
+const SortableSection = ({ id, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    marginBottom: '1rem',
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      {children({ dragHandleProps: listeners, isDragging })}
+    </div>
+  )
+}
+
 const DynamicFormBuilder = ({
-  schema,
-  formData,
+  schema, // Original JSON schema - NEVER modified
+  formData, // Page content from backend
   onChange,
   onError,
+  onSectionsUpdate, // Callback when sections order/duplication changes
   loading = false
 }) => {
   const [errors, setErrors] = useState({})
+  const [sections, setSections] = useState([]) // Combined sections with order
+  const [expandedSections, setExpandedSections] = useState([])
+  const [sectionToDelete, setSectionToDelete] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Build sections from schema and formData
+  useEffect(() => {
+    if (!schema?.sections) return
+
+    // Get all sections that exist in formData (from backend)
+    const existingSections = Object.keys(formData || {}).map(sectionName => {
+      // Find the original schema section
+      const originalSchemaSection = schema.sections.find(s => s.name === sectionName.split('_copy_')[0])
+      
+      if (originalSchemaSection) {
+        return {
+          id: sectionName,
+          name: sectionName,
+          label: sectionName.includes('_copy_') ? `${originalSchemaSection.label} (Copy)` : originalSchemaSection.label,
+          isDuplicate: sectionName.includes('_copy_'),
+          originalName: sectionName.split('_copy_')[0],
+          order: formData[sectionName]?.__order__ || 0,
+          fields: originalSchemaSection.fields.map(field => ({
+            ...field,
+            // Use the value from formData if exists, otherwise default
+            value: formData[sectionName]?.[field.name] ?? field.default ?? ''
+          }))
+        }
+      }
+      return null
+    }).filter(Boolean)
+
+    // Sort by order
+    existingSections.sort((a, b) => (a.order || 0) - (b.order || 0))
+    
+    setSections(existingSections)
+    
+    // Set expanded sections if empty
+    if (expandedSections.length === 0 && existingSections.length > 0) {
+      setExpandedSections([existingSections[0].id])
+    }
+  }, [schema, formData])
 
   const validateField = (field, value) => {
     if (field.required && !value) {
@@ -85,38 +160,172 @@ const DynamicFormBuilder = ({
     return ''
   }
 
+  const handleChange = (sectionId, fieldName, value) => {
+    const section = sections.find(s => s.id === sectionId)
+    if (!section) return
 
+    const field = schema.sections
+      .find(s => s.name === section.originalName)
+      ?.fields.find(f => f.name === fieldName)
+    
+    if (!field) return
 
-
-  const handleChange = (sectionName, fieldName, value) => {
-
-    const error = validateField(
-      schema.sections
-        .find(s => s.name === sectionName)
-        .fields.find(f => f.name === fieldName),
-      value
-    )
+    const error = validateField(field, value)
 
     setErrors(prev => ({
       ...prev,
-      [`${sectionName}.${fieldName}`]: error
+      [`${sectionId}.${fieldName}`]: error
     }))
 
     if (error && onError) {
       onError(fieldName, error)
     }
-    onChange(sectionName, fieldName, value)
+    
+    // Update the value in the section
+    const updatedSections = sections.map(s => {
+      if (s.id === sectionId) {
+        return {
+          ...s,
+          fields: s.fields.map(f => {
+            if (f.name === fieldName) {
+              return { ...f, value }
+            }
+            return f
+          })
+        }
+      }
+      return s
+    })
+    
+    setSections(updatedSections)
+    
+    // Notify parent of the change
+    if (onChange) {
+      onChange(sectionId, fieldName, value)
+    }
   }
 
-  const renderField = (sectionName, field) => {
-    const value = formData[sectionName]?.[field.name] || ''
-    const error = errors[`${sectionName}.${field.name}`]
+  const getNextOrder = () => {
+    const maxOrder = Math.max(...sections.map(s => s.order || 0), 0)
+    return maxOrder + 1
+  }
+
+  const handleDuplicateSection = (sectionToDuplicate) => {
+    const newSectionId = `${sectionToDuplicate.originalName}_copy_${Date.now()}`
+    const nextOrder = getNextOrder()
+    
+    // Create new section from original schema but with copied data
+    const originalSchemaSection = schema.sections.find(s => s.name === sectionToDuplicate.originalName)
+    
+    const newSection = {
+      id: newSectionId,
+      name: newSectionId,
+      label: `${originalSchemaSection.label} (Copy)`,
+      isDuplicate: true,
+      originalName: sectionToDuplicate.originalName,
+      order: nextOrder,
+      fields: originalSchemaSection.fields.map(field => ({
+        ...field,
+        // Copy values from original section if they exist
+        value: sectionToDuplicate.fields.find(f => f.name === field.name)?.value || field.default || ''
+      }))
+    }
+    
+    const updatedSections = [...sections, newSection]
+    setSections(updatedSections)
+    
+    // Prepare data for backend
+    const updatedFormData = {}
+    updatedSections.forEach(section => {
+      updatedFormData[section.id] = {
+        __order__: section.order,
+        __originalName__: section.originalName,
+        __isDuplicate__: section.isDuplicate
+      }
+      section.fields.forEach(field => {
+        updatedFormData[section.id][field.name] = field.value
+      })
+    })
+    
+    if (onSectionsUpdate) {
+      onSectionsUpdate(updatedFormData, updatedSections)
+    }
+    
+    // Expand the new section
+    setExpandedSections(prev => [...prev, newSectionId])
+  }
+
+  const handleDeleteSection = (sectionToDelete) => {
+    const updatedSections = sections.filter(s => s.id !== sectionToDelete.id)
+    setSections(updatedSections)
+    setExpandedSections(prev => prev.filter(id => id !== sectionToDelete.id))
+    
+    // Prepare data for backend
+    const updatedFormData = {}
+    updatedSections.forEach(section => {
+      updatedFormData[section.id] = {
+        __order__: section.order,
+        __originalName__: section.originalName,
+        __isDuplicate__: section.isDuplicate
+      }
+      section.fields.forEach(field => {
+        updatedFormData[section.id][field.name] = field.value
+      })
+    })
+    
+    if (onSectionsUpdate) {
+      onSectionsUpdate(updatedFormData, updatedSections)
+    }
+    
+    setShowDeleteConfirm(false)
+    setSectionToDelete(null)
+  }
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+
+    if (active.id !== over.id) {
+      const oldIndex = sections.findIndex(s => s.id === active.id)
+      const newIndex = sections.findIndex(s => s.id === over.id)
+      
+      const newSections = arrayMove(sections, oldIndex, newIndex)
+      
+      // Update order numbers
+      const reorderedSections = newSections.map((section, index) => ({
+        ...section,
+        order: index
+      }))
+      
+      setSections(reorderedSections)
+      
+      // Prepare data for backend with updated order
+      const updatedFormData = {}
+      reorderedSections.forEach(section => {
+        updatedFormData[section.id] = {
+          __order__: section.order,
+          __originalName__: section.originalName,
+          __isDuplicate__: section.isDuplicate
+        }
+        section.fields.forEach(field => {
+          updatedFormData[section.id][field.name] = field.value
+        })
+      })
+      
+      if (onSectionsUpdate) {
+        onSectionsUpdate(updatedFormData, reorderedSections)
+      }
+    }
+  }
+
+  const renderField = (section, field) => {
+    const value = field.value || ''
+    const error = errors[`${section.id}.${field.name}`]
 
     const commonProps = {
       name: field.name,
       value: value,
       onChange: (e) => handleChange(
-        sectionName,
+        section.id,
         field.name,
         field.type === 'checkbox' ? e.target.checked : e.target.value
       ),
@@ -161,7 +370,7 @@ const DynamicFormBuilder = ({
               }}
             />
           </div>
-        );
+        )
 
       case 'checkbox':
         return (
@@ -193,7 +402,7 @@ const DynamicFormBuilder = ({
               value={Array.isArray(value) ? value : []}
               onChange={(e) => {
                 const selected = Array.from(e.target.selectedOptions, opt => opt.value)
-                handleChange(sectionName, field.name, selected)
+                handleChange(section.id, field.name, selected)
               }}
             >
               {(field.options || []).map((opt, idx) => (
@@ -207,6 +416,7 @@ const DynamicFormBuilder = ({
             </div>
           </div>
         )
+
       case 'file':
         return (
           <div>
@@ -220,14 +430,13 @@ const DynamicFormBuilder = ({
 
                 try {
                   const imageUrl = await uploadFile(file)
-                  handleChange(sectionName, field.name, imageUrl)
+                  handleChange(section.id, field.name, imageUrl)
                 } catch (err) {
                   console.error(err)
-                  alert('Image upload failed')
+                  alert(err.message || 'Image upload failed')
                 }
               }}
             />
-
             {value && (
               <div className="mt-2">
                 <img src={value} alt="preview" width="120" className="img-thumbnail" />
@@ -236,31 +445,12 @@ const DynamicFormBuilder = ({
           </div>
         )
 
-      case 'file-multiple':
-        return (
-          <div>
-            <CFormInput
-              type="file"
-              accept={field.accept}
-              multiple
-              onChange={(e) => {
-                const files = Array.from(e.target.files)
-                handleChange(sectionName, field.name, files)
-              }}
-              disabled={loading}
-            />
-            <div className="form-text">
-              Max {field.maxFiles || 5} files. Accepted: {field.accept || 'All files'}
-            </div>
-          </div>
-        )
-
       case 'repeater':
         return (
           <RepeaterField
             field={field}
             value={value || []}
-            onChange={(newValue) => handleChange(sectionName, field.name, newValue)}
+            onChange={(newValue) => handleChange(section.id, field.name, newValue)}
             disabled={loading}
           />
         )
@@ -276,56 +466,173 @@ const DynamicFormBuilder = ({
     }
   }
 
-  const renderSection = (section) => {
+  if (sections.length === 0) {
     return (
-      <CAccordionItem key={section.name} itemKey={section.name}>
-        <CAccordionHeader>
-          <div className="d-flex justify-content-between align-items-center w-100">
-            <span className="fw-semibold">{section.label}</span>
-            <CBadge color="light" className="ms-2">
-              {section.fields.length} fields
-            </CBadge>
-          </div>
-        </CAccordionHeader>
-        <CAccordionBody>
-          <CRow className="g-3">
-            {section.fields.map((field) => (
-              <CCol
-                key={field.name}
-                md={field.type === 'textarea' || field.type === 'richtext' || field.type === 'repeater' ? 12 : 6}
-              >
-                <div className="mb-3">
-                  <CFormLabel htmlFor={`${section.name}-${field.name}`}>
-                    {field.label} {field.required && <span className="text-danger">*</span>}
-                  </CFormLabel>
-                  {renderField(section.name, field)}
-                  {errors[`${section.name}.${field.name}`] && (
-                    <div className="invalid-feedback d-block">
-                      {errors[`${section.name}.${field.name}`]}
-                    </div>
-                  )}
-                  {field.placeholder && !errors[`${section.name}.${field.name}`] && (
-                    <div className="form-text">{field.placeholder}</div>
-                  )}
-                </div>
-              </CCol>
-            ))}
-          </CRow>
-        </CAccordionBody>
-      </CAccordionItem>
+      <div className="text-center py-5">
+        <CSpinner />
+        <div className="mt-2">Loading sections...</div>
+      </div>
     )
   }
 
   return (
-    <CCard>
-      <CAccordion activeItemKey={schema.sections[0]?.name} alwaysOpen>
-        {schema.sections.map(renderSection)}
-      </CAccordion>
-    </CCard>
+    <>
+      <CCard>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sections.map(s => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <CAccordion 
+              activeItemKey={expandedSections[0]} 
+              alwaysOpen
+              flush
+            >
+              {sections.map((section) => (
+                <SortableSection key={section.id} id={section.id}>
+                  {({ dragHandleProps }) => (
+                    <CAccordionItem 
+                      itemKey={section.id}
+                      visible={expandedSections.includes(section.id)}
+                    >
+                      <CAccordionHeader
+                        onClick={() => {
+                          setExpandedSections(prev => 
+                            prev.includes(section.id)
+                              ? prev.filter(id => id !== section.id)
+                              : [...prev, section.id]
+                          )
+                        }}
+                      >
+                        <div className="d-flex justify-content-between align-items-center w-100">
+                          <div className="d-flex align-items-center gap-2">
+                            <div 
+                              {...dragHandleProps} 
+                              className="drag-handle" 
+                              style={{ cursor: 'grab' }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <CIcon icon={cilMenu} className="text-secondary" />
+                            </div>
+                            <span className="fw-semibold">
+                              {section.label}
+                              {section.isDuplicate && (
+                                <CBadge color="info" className="ms-2" size="sm">
+                                  Duplicate
+                                </CBadge>
+                              )}
+                            </span>
+                            <CBadge color="light" className="ms-2">
+                              {section.fields.length} fields
+                            </CBadge>
+                          </div>
+                          <div className="d-flex gap-1">
+                            <CButton
+                              size="sm"
+                              color="info"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDuplicateSection(section)
+                              }}
+                              disabled={loading}
+                              title="Duplicate Section"
+                            >
+                              <CIcon icon={cilCopy} />
+                            </CButton>
+                            
+                            {section.isDuplicate && (
+                              <CButton
+                                size="sm"
+                                color="danger"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSectionToDelete(section)
+                                  setShowDeleteConfirm(true)
+                                }}
+                                disabled={loading}
+                                title="Delete Section"
+                              >
+                                <CIcon icon={cilTrash} />
+                              </CButton>
+                            )}
+                          </div>
+                        </div>
+                      </CAccordionHeader>
+                      <CAccordionBody>
+                        <CRow className="g-3">
+                          {section.fields.map((field) => (
+                            <CCol
+                              key={field.name}
+                              md={field.type === 'textarea' || field.type === 'richtext' || field.type === 'repeater' ? 12 : 6}
+                            >
+                              <div className="mb-3">
+                                <CFormLabel htmlFor={`${section.id}-${field.name}`}>
+                                  {field.label} {field.required && <span className="text-danger">*</span>}
+                                </CFormLabel>
+                                {renderField(section, field)}
+                                {errors[`${section.id}.${field.name}`] && (
+                                  <div className="invalid-feedback d-block">
+                                    {errors[`${section.id}.${field.name}`]}
+                                  </div>
+                                )}
+                                {field.placeholder && !errors[`${section.id}.${field.name}`] && (
+                                  <div className="form-text">{field.placeholder}</div>
+                                )}
+                              </div>
+                            </CCol>
+                          ))}
+                        </CRow>
+                      </CAccordionBody>
+                    </CAccordionItem>
+                  )}
+                </SortableSection>
+              ))}
+            </CAccordion>
+          </SortableContext>
+        </DndContext>
+      </CCard>
+
+      <CModal
+        visible={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        aria-labelledby="delete-section-modal"
+      >
+        <CModalHeader>
+          <CModalTitle id="delete-section-modal">
+            <CIcon icon={cilWarning} className="me-2 text-warning" />
+            Delete Section
+          </CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <p>Are you sure you want to delete the section <strong>"{sectionToDelete?.label}"</strong>?</p>
+          <p className="text-danger mb-0">This action cannot be undone. All data in this section will be permanently removed.</p>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            color="secondary"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            Cancel
+          </CButton>
+          <CButton
+            color="danger"
+            onClick={() => handleDeleteSection(sectionToDelete)}
+          >
+            Delete Section
+          </CButton>
+        </CModalFooter>
+      </CModal>
+    </>
   )
 }
 
-// Repeater Field Component for dynamic arrays
+// Repeater Field Component
 const RepeaterField = ({ field, value = [], onChange, disabled }) => {
   const [items, setItems] = useState(value)
 
@@ -333,23 +640,6 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
     setItems(value)
   }, [value])
 
-
-  const uploadFile = async (file) => {
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      setLocalError('Please select an image file')
-      return
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setLocalError('Image size must be < 2MB')
-      return
-    }
-    const res = await uploadService.uploadImage(file)
-    if (res.success) {
-      return res.data.url
-    }
-  }
   const handleAddItem = () => {
     const newItem = {}
     field.fields.forEach(f => {
@@ -436,7 +726,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
                   handleChange(itemIndex, itemField.name, imageUrl)
                 } catch (err) {
                   console.error(err)
-                  alert('Image upload failed')
+                  alert(err.message || 'Image upload failed')
                 }
               }}
             />
@@ -445,21 +735,10 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
                 <img src={itemValue} alt="preview" width="120" className="img-thumbnail" />
               </div>
             )}
-
           </>
         )
       case "richtext":
         return (
-          // <div className="position-relative">
-          //   <ReactQuill
-          //     theme="snow"
-          //     value={commonProps.value || ""}
-          //     onChange={(content) => commonProps.onChange({ target: { value: content } })}
-          //     modules={modules}
-          //     style={{ height: "200px", marginBottom: "60px" }}
-          //     placeholder="Write content here..."
-          //   />
-          // </div>
           <TinyEditor
             header={false}
             initialValue={commonProps.value || ""}
@@ -467,15 +746,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
               commonProps.onChange({ target: { value } });
             }}
           />
-          // <CKEditor
-          //   editor={ClassicEditor}
-          //   data={commonProps.value || ""}
-          //   onChange={(event, editor) => {
-          //     const data = editor.getData();
-          //     commonProps.onChange({ target: { value: data } });
-          //   }}
-          // />
-        );
+        )
       case 'select':
         return (
           <CFormSelect {...commonProps}>

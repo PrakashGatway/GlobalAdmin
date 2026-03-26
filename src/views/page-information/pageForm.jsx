@@ -1,5 +1,5 @@
 // components/PageForm.jsx
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   CForm,
   CFormInput,
@@ -14,13 +14,10 @@ import {
   CSpinner,
   CCard,
   CCardBody,
-  CTabs,
   CBadge,
   CNav,
   CNavItem,
   CNavLink,
-  CTabContent,
-  CTabPane,
 } from '@coreui/react'
 import DynamicFormBuilder, { uploadFile } from './FormBuilder'
 import { getPageSchema, getPageTypes, getDefaultValues } from './SchemaLoader'
@@ -33,33 +30,31 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     // Basic page info
     title: page?.title || '',
     subTitle: page?.subTitle || '',
+    description: page?.description || '',
     slug: page?.slug || '',
     pageType: page?.pageType || 'general',
+    // SEO fields
+    metaTitle: page?.metaTitle || '',
     metaDescription: page?.metaDescription || '',
     metaKeywords: page?.metaKeywords || '',
+    canonicalUrl: page?.canonicalUrl || '',
+    // Page settings
     status: page?.status || 'Draft',
     isFeatured: page?.isFeatured || false,
     isNavbar: page?.isNavbar || false,
-    content: page?.content || {},
+    navbarTitle: page?.navbarTitle || '',
+    navbarImage: page?.navbarImage || '',
+    cardImage: page?.cardImage || '',
+    // Country specific
+    country: page?.country || '',
+    // Content sections
+    content: page?.sections || {},
   })
 
   const [slugError, setSlugError] = useState('')
   const [formErrors, setFormErrors] = useState({})
   const pageSchema = getPageSchema(pageType)
   const [countries, setCountries] = useState([])
-
-  // useEffect(() => {
-  //   if (!page) {
-  //     const defaultContent = getDefaultValues(pageType)
-  //     console.log(defaultContent)
-
-  //     setFormData(prev => ({
-  //       ...prev,
-  //       pageType,
-  //       content: defaultContent
-  //     }))
-  //   }
-  // }, [pageType, page])
 
   const fetchCountries = async () => {
     try {
@@ -68,26 +63,38 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
         setCountries(res.data || [])
       }
     } catch (err) {
-      setError('Failed to fetch countries')
-    } finally {
-      setFormData(prev => ({
-        ...prev,
-        country: page?.pageType === "country" ? page?.country?._id || '' : '',
-      }))
+      console.error('Failed to fetch countries', err)
     }
   }
 
   useEffect(() => {
+    if (page?.pageType === "country") {
       fetchCountries()
-  }, [])
+    }
+  }, [page?.pageType])
 
   useEffect(() => {
     if (page) {
       const { sections, seoMeta, ...extra } = page
       setPageType(page.pageType || 'general')
       setFormData({
-        content: page.sections || getDefaultValues(page.pageType || 'general'),
-        ...extra, ...seoMeta
+        title: page.title || '',
+        subTitle: page.subTitle || '',
+        description: page.description || '',
+        slug: page.slug || '',
+        pageType: page.pageType || 'general',
+        metaTitle: page.metaTitle || seoMeta?.metaTitle || '',
+        metaDescription: page.metaDescription || seoMeta?.metaDescription || '',
+        metaKeywords: page.metaKeywords || seoMeta?.metaKeywords || '',
+        canonicalUrl: page.canonicalUrl || seoMeta?.canonicalUrl || '',
+        status: page.status || 'Draft',
+        isFeatured: page.isFeatured || false,
+        isNavbar: page.isNavbar || false,
+        navbarTitle: page.navbarTitle || '',
+        navbarImage: page.navbarImage || '',
+        cardImage: page.cardImage || '',
+        country: page.country || '',
+        content: page.sections || {},
       })
     }
   }, [page])
@@ -113,21 +120,39 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
 
     // Page type change
     if (name === 'pageType' && !page) {
-      setPageType(value)
+      const newPageType = value
+      setPageType(newPageType)
+      const defaultContent = getDefaultValues(newPageType)
+      setFormData(prev => ({
+        ...prev,
+        pageType: newPageType,
+        content: defaultContent
+      }))
     }
   }
 
-  const handleContentChange = (sectionName, fieldName, value) => {
+  const handleContentChange = (sectionId, fieldName, value) => {
     setFormData(prev => ({
       ...prev,
       content: {
         ...prev.content,
-        [sectionName]: {
-          ...prev.content[sectionName],
+        [sectionId]: {
+          ...(prev.content[sectionId] || {}),
           [fieldName]: value
         }
       }
     }))
+  }
+
+  // Handle sections updates (duplicate, delete, reorder)
+  const handleSectionsUpdate = (updatedContent, updatedSections) => {
+    setFormData(prev => ({
+      ...prev,
+      content: updatedContent
+    }))
+    
+    // Optional: Auto-save to backend
+    console.log('Sections updated:', updatedSections)
   }
 
   const validateSlug = (slug) => {
@@ -153,24 +178,27 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     // Basic validation
     if (!formData.title.trim()) {
       setFormErrors({ title: 'Title is required' })
-      setActiveTab(0) // Switch to first tab (General Info)
+      setActiveTab(0)
       return
     }
 
     if (!formData.slug.trim()) {
       setSlugError('Slug is required')
-      setActiveTab(0) // Switch to first tab (General Info)
+      setActiveTab(0)
       return
     }
 
     if (!validateSlug(formData.slug)) {
-      setActiveTab(0) // Switch to first tab (General Info)
+      setActiveTab(0)
       return
     }
 
-    const { content, metaDescription, metaKeywords, canonicalUrl, metaTitle, ...rest } = formData
+    const { content, ...rest } = formData
 
-    onSubmit({ ...rest, sections: content, seoMeta: { metaDescription, metaKeywords, canonicalUrl, metaTitle } })
+    onSubmit({ 
+      ...rest, 
+      sections: content
+    })
   }
 
   const handleFormError = (fieldName, error) => {
@@ -182,66 +210,192 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   return (
     <CForm onSubmit={handleSubmit}>
       {error && <CAlert color="danger" className="mb-4">{error}</CAlert>}
+      
+      <CNav variant="tabs" className="mb-3">
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 0}
+            onClick={() => setActiveTab(0)}
+            style={{ cursor: 'pointer' }}
+          >
+            General Info
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 1}
+            onClick={() => setActiveTab(1)}
+            style={{ cursor: 'pointer' }}
+          >
+            Page Content
+            {Object.keys(formData.content || {}).length > 0 && (
+              <CBadge color="info" className="ms-2" size="sm">
+                {Object.keys(formData.content).length} sections
+              </CBadge>
+            )}
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 2}
+            onClick={() => setActiveTab(2)}
+            style={{ cursor: 'pointer' }}
+          >
+            SEO Settings
+          </CNavLink>
+        </CNavItem>
+      </CNav>
+
       <div style={{ maxWidth: "1400px" }} className='mx-auto'>
-        <CTabContent>
-          <CTabPane visible>
-            <div className="mt-3">
-              <CRow className="g-3">
-                <CCol md={6}>
-                  <CFormLabel>Page Title *</CFormLabel>
-                  <CFormInput
-                    name="title"
-                    value={formData.title}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter page title"
-                    required
-                    invalid={!!formErrors.title}
-                  />
-                  {formErrors.title && (
-                    <div className="invalid-feedback d-block">
-                      {formErrors.title}
-                    </div>
-                  )}
-                </CCol>
-
-                <CCol md={3}>
-                  <CFormLabel>Page Type *</CFormLabel>
-                  <CFormSelect
-                    name="pageType"
-                    value={formData.pageType}
-                    onChange={handleBasicInfoChange}
-                    required
-                  >
-                    <option value="">Select Page Type</option>
-                    {pageTypes.map((type, idx) => (
-                      <option key={idx} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </CFormSelect>
-                  <div className="form-text">
-                    {pageTypes.find(t => t.value === formData.pageType)?.description}
+        {/* General Info Tab - COMPLETE VERSION */}
+        {activeTab === 0 && (
+          <div className="mt-3">
+            {/* Row 1: Title, Page Type, Status */}
+            <CRow className="g-3">
+              <CCol md={6}>
+                <CFormLabel htmlFor="title">Page Title *</CFormLabel>
+                <CFormInput
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter page title"
+                  required
+                  invalid={!!formErrors.title}
+                />
+                {formErrors.title && (
+                  <div className="invalid-feedback d-block">
+                    {formErrors.title}
                   </div>
-                </CCol>
+                )}
+                <div className="form-text">
+                  This will be displayed as the main heading of the page
+                </div>
+              </CCol>
 
-                <CCol md={3}>
-                  <CFormLabel>Status</CFormLabel>
-                  <CFormSelect
-                    name="status"
-                    value={formData.status}
-                    onChange={handleBasicInfoChange}
-                  >
-                    <option value="Draft">Draft</option>
-                    <option value="Published">Published</option>
-                    <option value="Archived">Archived</option>
-                  </CFormSelect>
-                </CCol>
-              </CRow>
+              <CCol md={3}>
+                <CFormLabel htmlFor="pageType">Page Type *</CFormLabel>
+                <CFormSelect
+                  id="pageType"
+                  name="pageType"
+                  value={formData.pageType}
+                  onChange={handleBasicInfoChange}
+                  required
+                  disabled={!!page}
+                >
+                  <option value="">Select Page Type</option>
+                  {pageTypes.map((type, idx) => (
+                    <option key={idx} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </CFormSelect>
+                <div className="form-text">
+                  {pageTypes.find(t => t.value === formData.pageType)?.description}
+                </div>
+                {page && (
+                  <div className="text-warning small mt-1">
+                    ⚠️ Page type cannot be changed after creation
+                  </div>
+                )}
+              </CCol>
 
-              <CRow className="g-3">
-                {formData?.pageType === 'country' && <CCol md={4}>
-                  <CFormLabel>Country</CFormLabel>
+              <CCol md={3}>
+                <CFormLabel htmlFor="status">Status</CFormLabel>
+                <CFormSelect
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleBasicInfoChange}
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Published">Published</option>
+                  <option value="Archived">Archived</option>
+                </CFormSelect>
+                <div className="form-text">
+                  Draft pages are only visible to admins
+                </div>
+              </CCol>
+            </CRow>
+
+            {/* Row 2: Slug, Navbar Title */}
+            <CRow className="g-3 mt-3">
+              <CCol md={6}>
+                <CFormLabel htmlFor="slug">Slug *</CFormLabel>
+                <CFormInput
+                  id="slug"
+                  name="slug"
+                  value={formData.slug}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter URL slug"
+                  required
+                  invalid={!!slugError}
+                />
+                {slugError && (
+                  <div className="invalid-feedback d-block">
+                    {slugError}
+                  </div>
+                )}
+                <div className="form-text">
+                  URL will be: /{formData.slug || 'page-slug'}
+                </div>
+              </CCol>
+
+              <CCol md={6}>
+                <CFormLabel htmlFor="navbarTitle">Navbar Title</CFormLabel>
+                <CFormInput
+                  id="navbarTitle"
+                  name="navbarTitle"
+                  value={formData.navbarTitle}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter navbar title"
+                />
+                <div className="form-text">
+                  If left empty, page title will be used in navbar
+                </div>
+              </CCol>
+            </CRow>
+
+            {/* Row 3: Subtitle, Description */}
+            <CRow className="g-3 mt-3">
+              <CCol md={6}>
+                <CFormLabel htmlFor="subTitle">Subtitle</CFormLabel>
+                <CFormTextarea
+                  id="subTitle"
+                  name="subTitle"
+                  value={formData.subTitle}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter subtitle (optional)"
+                  rows={2}
+                />
+                <div className="form-text">
+                  Brief subtitle that appears below the title
+                </div>
+              </CCol>
+
+              <CCol md={6}>
+                <CFormLabel htmlFor="description">Description</CFormLabel>
+                <CFormTextarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter description (optional)"
+                  rows={2}
+                />
+                <div className="form-text">
+                  Detailed description of the page content
+                </div>
+              </CCol>
+            </CRow>
+
+            {/* Row 4: Country (if page type is country) */}
+            {formData?.pageType === 'country' && (
+              <CRow className="g-3 mt-3">
+                <CCol md={12}>
+                  <CFormLabel htmlFor="country">Country</CFormLabel>
                   <CFormSelect
+                    id="country"
                     name="country"
                     value={formData.country}
                     onChange={handleBasicInfoChange}
@@ -253,211 +407,252 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                       </option>
                     ))}
                   </CFormSelect>
-                </CCol>}
-
-                <CCol md={formData?.pageType === 'country' ? 4 : 6}>
-                  <CFormLabel>Slug *</CFormLabel>
-                  <CFormInput
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter URL slug"
-                    required
-                    invalid={!!slugError}
-                  />
-                  {slugError && (
-                    <div className="invalid-feedback d-block">
-                      {slugError}
-                    </div>
-                  )}
                   <div className="form-text">
-                    URL will be: {formData.slug}
+                    Select the country this page is associated with
                   </div>
                 </CCol>
-                <CCol md={formData?.pageType === 'country' ? 4 : 6}>
-                  <CFormLabel>Navbar Title</CFormLabel>
-                  <CFormInput
-                    name="navbarTitle"
-                    value={formData.navbarTitle}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter navbarTitle"
-                  />
-                </CCol>
-                <CCol md={6}>
-                  <CFormLabel>Subtitle</CFormLabel>
-                  <CFormTextarea
-                    name="subTitle"
-                    value={formData.subTitle}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter subtitle (optional)"
-                  />
-                </CCol>
-
-                <CCol md={6}>
-                  <CFormLabel>Description</CFormLabel>
-                  <CFormTextarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter description (optional)"
-                  />
-                </CCol>
-
-                <CCol md={6}>
-                  <CFormLabel>Card Image</CFormLabel>
-                  <CFormInput
-                    type="file"
-                    id="cardImage"
-                    accept="image/*"
-                    name="cardImage"
-                    onChange={async (e) => {
-                      const file = e.target.files[0]
-                      if (!file) return
-
-                      try {
-                        const imageUrl = await uploadFile(file)
-                        setFormData(prev => ({ ...prev, cardImage: imageUrl }))
-                      } catch (err) {
-                        console.error(err)
-                        alert('Image upload failed')
-                      }
-                    }}
-                  />
-                  {formData.cardImage && (
-                    <div className="mt-2">
-                      <img src={formData.cardImage} alt="preview" width="120" className="img-thumbnail" />
-                    </div>
-                  )}
-                </CCol>
-
-                <CCol md={6}>
-                  <CFormLabel>Navbar Logo</CFormLabel>
-                  <CFormInput
-                    type="file"
-                    id="navbarImage"
-                    accept="image/*"
-                    name="navbarImage"
-                    onChange={async (e) => {
-                      const file = e.target.files[0]
-                      if (!file) return
-                      try {
-                        const imageUrl = await uploadFile(file)
-                        setFormData(prev => ({ ...prev, navbarImage: imageUrl }))
-                      } catch (err) {
-                        console.error(err)
-                        alert('Image upload failed')
-                      }
-                    }}
-                  />
-                  {formData.navbarImage && (
-                    <div className="mt-2">
-                      <img src={formData.navbarImage} alt="preview" width="120" className="img-thumbnail" />
-                    </div>
-                  )}
-                </CCol>
               </CRow>
-              <CRow className="mt-3">
-                <CCol md={12} className="d-flex gap-4">
-                  <CFormCheck
-                    id="isFeatured"
-                    name="isFeatured"
-                    label="Featured Page"
-                    checked={formData.isFeatured}
-                    onChange={handleBasicInfoChange}
-                  />
-                  <CFormCheck
-                    id="isNavbar"
-                    name="isNavbar"
-                    label="Show in Navbar"
-                    checked={formData.isNavbar}
-                    onChange={handleBasicInfoChange}
-                  />
-                </CCol>
-              </CRow>
-            </div>
-          </CTabPane>
+            )}
 
-          {/* Page Content Tab */}
-          <CTabPane visible>
-            <div className="mt-3">
-              <CCard>
-                <CCardBody>
-                  {pageSchema ? (
-                    <DynamicFormBuilder
-                      schema={pageSchema}
-                      formData={formData.content}
-                      onChange={handleContentChange}
-                      onError={handleFormError}
-                      loading={submitting}
+            {/* Row 5: Card Image, Navbar Logo */}
+            <CRow className="g-3 mt-3">
+              <CCol md={6}>
+                <CFormLabel htmlFor="cardImage">Card Image</CFormLabel>
+                <CFormInput
+                  type="file"
+                  id="cardImage"
+                  accept="image/*"
+                  name="cardImage"
+                  onChange={async (e) => {
+                    const file = e.target.files[0]
+                    if (!file) return
+
+                    try {
+                      const imageUrl = await uploadFile(file)
+                      setFormData(prev => ({ ...prev, cardImage: imageUrl }))
+                    } catch (err) {
+                      console.error(err)
+                      alert(err.message || 'Image upload failed')
+                    }
+                  }}
+                />
+                <div className="form-text">
+                  Image shown in cards and listings (recommended size: 400x300px)
+                </div>
+                {formData.cardImage && (
+                  <div className="mt-2">
+                    <img 
+                      src={formData.cardImage} 
+                      alt="Card preview" 
+                      width="120" 
+                      className="img-thumbnail" 
                     />
-                  ) : (
-                    <div className="text-center py-5">
-                      <CSpinner />
-                      <div className="mt-2">Loading form schema...</div>
-                    </div>
-                  )}
-                </CCardBody>
-              </CCard>
-            </div>
-          </CTabPane>
-
-          {/* SEO Settings Tab */}
-          <CTabPane visible>
-            <div className="mt-3">
-              <CRow className="g-3">
-                <CCol md={6}>
-                  <CFormLabel>Meta title</CFormLabel>
-                  <CFormTextarea
-                    name="metaTitle"
-                    value={formData.metaTitle}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter meta metaTitle for SEO "
-                    rows={2}
-                  />
-                </CCol>
-                <CCol md={6}>
-                  <CFormLabel>Meta Description</CFormLabel>
-                  <CFormTextarea
-                    name="metaDescription"
-                    value={formData.metaDescription}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter meta description for SEO (recommended: 150-160 characters)"
-                    rows={2}
-                  />
-                  <div className="form-text">
-                    {formData.metaDescription?.length || 0} characters
+                    <CButton
+                      size="sm"
+                      color="danger"
+                      variant="ghost"
+                      className="ms-2"
+                      onClick={() => setFormData(prev => ({ ...prev, cardImage: '' }))}
+                    >
+                      Remove
+                    </CButton>
                   </div>
-                </CCol>
-              </CRow>
+                )}
+              </CCol>
 
-              <CRow className="g-3 mt-1">
-                <CCol md={6}>
-                  <CFormLabel>Meta Keywords</CFormLabel>
-                  <CFormTextarea
-                    name="metaKeywords"
-                    value={formData.metaKeywords}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter keywords separated by commas"
-                  />
-                  <div className="form-text">
-                    Example: study abroad, university admission, education consultancy
+              <CCol md={6}>
+                <CFormLabel htmlFor="navbarImage">Navbar Logo</CFormLabel>
+                <CFormInput
+                  type="file"
+                  id="navbarImage"
+                  accept="image/*"
+                  name="navbarImage"
+                  onChange={async (e) => {
+                    const file = e.target.files[0]
+                    if (!file) return
+                    try {
+                      const imageUrl = await uploadFile(file)
+                      setFormData(prev => ({ ...prev, navbarImage: imageUrl }))
+                    } catch (err) {
+                      console.error(err)
+                      alert(err.message || 'Image upload failed')
+                    }
+                  }}
+                />
+                <div className="form-text">
+                  Custom logo for navbar (recommended size: 150x50px)
+                </div>
+                {formData.navbarImage && (
+                  <div className="mt-2">
+                    <img 
+                      src={formData.navbarImage} 
+                      alt="Navbar logo preview" 
+                      width="120" 
+                      className="img-thumbnail" 
+                    />
+                    <CButton
+                      size="sm"
+                      color="danger"
+                      variant="ghost"
+                      className="ms-2"
+                      onClick={() => setFormData(prev => ({ ...prev, navbarImage: '' }))}
+                    >
+                      Remove
+                    </CButton>
                   </div>
-                </CCol>
-                <CCol md={6}>
-                  <CFormLabel>Canonical URL</CFormLabel>
-                  <CFormTextarea
-                    name="canonicalUrl"
-                    value={formData.canonicalUrl}
-                    onChange={handleBasicInfoChange}
-                    placeholder="Enter canonicalUrl"
-                  />
-                </CCol>
-              </CRow>
-            </div>
-          </CTabPane>
-        </CTabContent>
+                )}
+              </CCol>
+            </CRow>
+
+            {/* Row 6: Featured and Navbar checkboxes */}
+            <CRow className="mt-4">
+              <CCol md={12} className="d-flex gap-4">
+                <CFormCheck
+                  id="isFeatured"
+                  name="isFeatured"
+                  label="Featured Page"
+                  checked={formData.isFeatured}
+                  onChange={handleBasicInfoChange}
+                />
+                <div className="form-text ms-2">
+                  Featured pages appear on the homepage
+                </div>
+              </CCol>
+              <CCol md={12} className="d-flex gap-4 mt-2">
+                <CFormCheck
+                  id="isNavbar"
+                  name="isNavbar"
+                  label="Show in Navbar"
+                  checked={formData.isNavbar}
+                  onChange={handleBasicInfoChange}
+                />
+                <div className="form-text ms-2">
+                  Display this page in the main navigation menu
+                </div>
+              </CCol>
+            </CRow>
+
+            {/* Help Text Section */}
+            <CRow className="mt-4">
+              <CCol md={12}>
+                <CCard className="bg-light">
+                  <CCardBody>
+                    <h6 className="mb-2">Page Information Help</h6>
+                    <small className="text-muted">
+                      <strong>Title:</strong> The main heading of your page. This appears in search results and browser tabs.<br />
+                      <strong>Slug:</strong> The URL path for your page. Use hyphens between words (e.g., "about-us").<br />
+                      <strong>Page Type:</strong> Determines the layout and available content sections.<br />
+                      <strong>Status:</strong> Draft pages are not visible to visitors.<br />
+                      <strong>Navbar Title:</strong> If set, this appears in the navigation menu instead of the page title.<br />
+                      <strong>Images:</strong> Upload images for cards and navbar. Supported formats: JPG, PNG, GIF. Max size: 2MB.
+                    </small>
+                  </CCardBody>
+                </CCard>
+              </CCol>
+            </CRow>
+          </div>
+        )}
+
+        {/* Page Content Tab */}
+        {activeTab === 1 && (
+          <div className="mt-3">
+            <CCard>
+              <CCardBody>
+                <DynamicFormBuilder
+                  schema={pageSchema}
+                  formData={formData.content}
+                  onChange={handleContentChange}
+                  onError={handleFormError}
+                  onSectionsUpdate={handleSectionsUpdate}
+                  loading={submitting}
+                />
+              </CCardBody>
+            </CCard>
+          </div>
+        )}
+
+        {/* SEO Settings Tab */}
+        {activeTab === 2 && (
+          <div className="mt-3">
+            <CRow className="g-3">
+              <CCol md={6}>
+                <CFormLabel htmlFor="metaTitle">Meta Title</CFormLabel>
+                <CFormInput
+                  id="metaTitle"
+                  name="metaTitle"
+                  value={formData.metaTitle}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter meta title for SEO"
+                />
+                <div className="form-text">
+                  Recommended length: 50-60 characters. Current: {formData.metaTitle?.length || 0}
+                </div>
+              </CCol>
+              <CCol md={6}>
+                <CFormLabel htmlFor="metaDescription">Meta Description</CFormLabel>
+                <CFormTextarea
+                  id="metaDescription"
+                  name="metaDescription"
+                  value={formData.metaDescription}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter meta description for SEO (recommended: 150-160 characters)"
+                  rows={3}
+                />
+                <div className="form-text">
+                  {formData.metaDescription?.length || 0} characters (recommended: 150-160)
+                </div>
+              </CCol>
+            </CRow>
+
+            <CRow className="g-3 mt-3">
+              <CCol md={6}>
+                <CFormLabel htmlFor="metaKeywords">Meta Keywords</CFormLabel>
+                <CFormTextarea
+                  id="metaKeywords"
+                  name="metaKeywords"
+                  value={formData.metaKeywords}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter keywords separated by commas"
+                  rows={2}
+                />
+                <div className="form-text">
+                  Example: study abroad, university admission, education consultancy
+                </div>
+              </CCol>
+              <CCol md={6}>
+                <CFormLabel htmlFor="canonicalUrl">Canonical URL</CFormLabel>
+                <CFormInput
+                  id="canonicalUrl"
+                  name="canonicalUrl"
+                  value={formData.canonicalUrl}
+                  onChange={handleBasicInfoChange}
+                  placeholder="https://example.com/preferred-url"
+                />
+                <div className="form-text">
+                  Use absolute URL for canonical tag to prevent duplicate content issues
+                </div>
+              </CCol>
+            </CRow>
+
+            {/* SEO Help Section */}
+            <CRow className="mt-4">
+              <CCol md={12}>
+                <CCard className="bg-light">
+                  <CCardBody>
+                    <h6 className="mb-2">SEO Best Practices</h6>
+                    <small className="text-muted">
+                      <strong>Meta Title:</strong> Include primary keywords and keep under 60 characters.<br />
+                      <strong>Meta Description:</strong> Write a compelling summary that encourages clicks. Include key information.<br />
+                      <strong>Meta Keywords:</strong> Separate keywords with commas. Focus on relevant terms.<br />
+                      <strong>Canonical URL:</strong> Set this if you have multiple URLs pointing to the same content to avoid duplicate content penalties.
+                    </small>
+                  </CCardBody>
+                </CCard>
+              </CCol>
+            </CRow>
+          </div>
+        )}
       </div>
-
 
       <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
         <CButton color="secondary" onClick={onCancel} disabled={submitting}>
