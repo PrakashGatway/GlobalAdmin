@@ -1,5 +1,7 @@
 // components/DynamicFormBuilder.jsx
 import React, { useState, useEffect } from 'react'
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {
   CFormInput,
   CFormLabel,
@@ -54,7 +56,7 @@ export const uploadFile = async (file) => {
   if (file.size > 2 * 1024 * 1024) {
     throw new Error('Image size must be < 2MB')
   }
-  
+
   const res = await uploadService.uploadImage(file)
   if (res.success) {
     return res.data.url
@@ -108,39 +110,71 @@ const DynamicFormBuilder = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
-
+  console.log(schema)
   // Build sections from schema and formData
+  // In DynamicFormBuilder.jsx, update the useEffect
   useEffect(() => {
     if (!schema?.sections) return
 
-    // Get all sections that exist in formData (from backend)
-    const existingSections = Object.keys(formData || {}).map(sectionName => {
-      // Find the original schema section
-      const originalSchemaSection = schema.sections.find(s => s.name === sectionName.split('_copy_')[0])
-      
-      if (originalSchemaSection) {
+    let existingSections = []
+
+    // Check if we have formData with sections
+    const hasFormDataSections = formData && Object.keys(formData).length > 0 &&
+      Object.keys(formData).some(key => formData[key]?.__order__ !== undefined)
+
+    if (hasFormDataSections) {
+      // CASE 1: We have existing formData (editing existing page)
+      console.log('Building from existing formData')
+      existingSections = Object.keys(formData).map(sectionName => {
+        // Find the original schema section
+        const originalSchemaSection = schema.sections.find(s => s.name === sectionName.split('_copy_')[0])
+
+        if (originalSchemaSection) {
+          return {
+            id: sectionName,
+            name: sectionName,
+            label: sectionName.includes('_copy_') ? `${originalSchemaSection.label} (Copy)` : originalSchemaSection.label,
+            isDuplicate: sectionName.includes('_copy_'),
+            originalName: sectionName.split('_copy_')[0],
+            order: formData[sectionName]?.__order__ || 0,
+            fields: originalSchemaSection.fields.map(field => ({
+              ...field,
+              value: formData[sectionName]?.[field.name] ?? field.default ?? ''
+            }))
+          }
+        }
+        return null
+      }).filter(Boolean)
+    } else {
+      // CASE 2: No formData (creating new page) - build from schema
+      console.log('Building sections from schema for new page')
+      console.log('Schema sections count:', schema.sections.length)
+
+      existingSections = schema.sections.map((section, index) => {
+        console.log(`Creating section: ${section.name} with ${section.fields.length} fields`)
         return {
-          id: sectionName,
-          name: sectionName,
-          label: sectionName.includes('_copy_') ? `${originalSchemaSection.label} (Copy)` : originalSchemaSection.label,
-          isDuplicate: sectionName.includes('_copy_'),
-          originalName: sectionName.split('_copy_')[0],
-          order: formData[sectionName]?.__order__ || 0,
-          fields: originalSchemaSection.fields.map(field => ({
+          id: section.name,
+          name: section.name,
+          label: section.label,
+          isDuplicate: false,
+          originalName: section.name,
+          order: index,
+          fields: section.fields.map(field => ({
             ...field,
-            // Use the value from formData if exists, otherwise default
-            value: formData[sectionName]?.[field.name] ?? field.default ?? ''
+            value: field.default !== undefined ? field.default : ''
           }))
         }
-      }
-      return null
-    }).filter(Boolean)
+      })
+    }
 
     // Sort by order
     existingSections.sort((a, b) => (a.order || 0) - (b.order || 0))
-    
+
+    console.log('Total sections built:', existingSections.length)
+    console.log('Section names:', existingSections.map(s => s.name))
+
     setSections(existingSections)
-    
+
     // Set expanded sections if empty
     if (expandedSections.length === 0 && existingSections.length > 0) {
       setExpandedSections([existingSections[0].id])
@@ -167,7 +201,7 @@ const DynamicFormBuilder = ({
     const field = schema.sections
       .find(s => s.name === section.originalName)
       ?.fields.find(f => f.name === fieldName)
-    
+
     if (!field) return
 
     const error = validateField(field, value)
@@ -180,7 +214,7 @@ const DynamicFormBuilder = ({
     if (error && onError) {
       onError(fieldName, error)
     }
-    
+
     // Update the value in the section
     const updatedSections = sections.map(s => {
       if (s.id === sectionId) {
@@ -196,9 +230,9 @@ const DynamicFormBuilder = ({
       }
       return s
     })
-    
+
     setSections(updatedSections)
-    
+
     // Notify parent of the change
     if (onChange) {
       onChange(sectionId, fieldName, value)
@@ -213,10 +247,10 @@ const DynamicFormBuilder = ({
   const handleDuplicateSection = (sectionToDuplicate) => {
     const newSectionId = `${sectionToDuplicate.originalName}_copy_${Date.now()}`
     const nextOrder = getNextOrder()
-    
+
     // Create new section from original schema but with copied data
     const originalSchemaSection = schema.sections.find(s => s.name === sectionToDuplicate.originalName)
-    
+
     const newSection = {
       id: newSectionId,
       name: newSectionId,
@@ -230,10 +264,10 @@ const DynamicFormBuilder = ({
         value: sectionToDuplicate.fields.find(f => f.name === field.name)?.value || field.default || ''
       }))
     }
-    
+
     const updatedSections = [...sections, newSection]
     setSections(updatedSections)
-    
+
     // Prepare data for backend
     const updatedFormData = {}
     updatedSections.forEach(section => {
@@ -246,11 +280,11 @@ const DynamicFormBuilder = ({
         updatedFormData[section.id][field.name] = field.value
       })
     })
-    
+
     if (onSectionsUpdate) {
       onSectionsUpdate(updatedFormData, updatedSections)
     }
-    
+
     // Expand the new section
     setExpandedSections(prev => [...prev, newSectionId])
   }
@@ -259,7 +293,7 @@ const DynamicFormBuilder = ({
     const updatedSections = sections.filter(s => s.id !== sectionToDelete.id)
     setSections(updatedSections)
     setExpandedSections(prev => prev.filter(id => id !== sectionToDelete.id))
-    
+
     // Prepare data for backend
     const updatedFormData = {}
     updatedSections.forEach(section => {
@@ -272,11 +306,11 @@ const DynamicFormBuilder = ({
         updatedFormData[section.id][field.name] = field.value
       })
     })
-    
+
     if (onSectionsUpdate) {
       onSectionsUpdate(updatedFormData, updatedSections)
     }
-    
+
     setShowDeleteConfirm(false)
     setSectionToDelete(null)
   }
@@ -287,17 +321,17 @@ const DynamicFormBuilder = ({
     if (active.id !== over.id) {
       const oldIndex = sections.findIndex(s => s.id === active.id)
       const newIndex = sections.findIndex(s => s.id === over.id)
-      
+
       const newSections = arrayMove(sections, oldIndex, newIndex)
-      
+
       // Update order numbers
       const reorderedSections = newSections.map((section, index) => ({
         ...section,
         order: index
       }))
-      
+
       setSections(reorderedSections)
-      
+
       // Prepare data for backend with updated order
       const updatedFormData = {}
       reorderedSections.forEach(section => {
@@ -310,7 +344,7 @@ const DynamicFormBuilder = ({
           updatedFormData[section.id][field.name] = field.value
         })
       })
-      
+
       if (onSectionsUpdate) {
         onSectionsUpdate(updatedFormData, reorderedSections)
       }
@@ -362,11 +396,17 @@ const DynamicFormBuilder = ({
       case "richtext":
         return (
           <div className="position-relative">
-            <TinyEditor
-              height={300}
-              initialValue={commonProps.value || ""}
-              onChange={(value) => {
-                commonProps.onChange({ target: { value } });
+            <CKEditor
+              editor={ClassicEditor}
+              data={commonProps.value || ""}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+
+                commonProps.onChange({
+                  target: {
+                    value: data,
+                  },
+                });
               }}
             />
           </div>
@@ -487,21 +527,21 @@ const DynamicFormBuilder = ({
             items={sections.map(s => s.id)}
             strategy={verticalListSortingStrategy}
           >
-            <CAccordion 
-              activeItemKey={expandedSections[0]} 
+            <CAccordion
+              activeItemKey={expandedSections[0]}
               alwaysOpen
               flush
             >
               {sections.map((section) => (
                 <SortableSection key={section.id} id={section.id}>
                   {({ dragHandleProps }) => (
-                    <CAccordionItem 
+                    <CAccordionItem
                       itemKey={section.id}
                       visible={expandedSections.includes(section.id)}
                     >
                       <CAccordionHeader
                         onClick={() => {
-                          setExpandedSections(prev => 
+                          setExpandedSections(prev =>
                             prev.includes(section.id)
                               ? prev.filter(id => id !== section.id)
                               : [...prev, section.id]
@@ -510,9 +550,9 @@ const DynamicFormBuilder = ({
                       >
                         <div className="d-flex justify-content-between align-items-center w-100">
                           <div className="d-flex align-items-center gap-2">
-                            <div 
-                              {...dragHandleProps} 
-                              className="drag-handle" 
+                            <div
+                              {...dragHandleProps}
+                              className="drag-handle"
                               style={{ cursor: 'grab' }}
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -544,7 +584,7 @@ const DynamicFormBuilder = ({
                             >
                               <CIcon icon={cilCopy} />
                             </CButton>
-                            
+
                             {section.isDuplicate && (
                               <CButton
                                 size="sm"
@@ -739,11 +779,17 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
         )
       case "richtext":
         return (
-          <TinyEditor
-            header={false}
-            initialValue={commonProps.value || ""}
-            onChange={(value) => {
-              commonProps.onChange({ target: { value } });
+          <CKEditor
+            editor={ClassicEditor}
+            data={commonProps.value || ""}
+            onChange={(event, editor) => {
+              const data = editor.getData();
+
+              commonProps.onChange({
+                target: {
+                  value: data,
+                },
+              });
             }}
           />
         )
