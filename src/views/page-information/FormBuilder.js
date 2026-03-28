@@ -396,19 +396,7 @@ const DynamicFormBuilder = ({
       case "richtext":
         return (
           <div className="position-relative">
-            <CKEditor
-              editor={ClassicEditor}
-              data={commonProps.value || ""}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-
-                commonProps.onChange({
-                  target: {
-                    value: data,
-                  },
-                });
-              }}
-            />
+             <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }}/>
           </div>
         )
 
@@ -779,19 +767,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
         )
       case "richtext":
         return (
-          <CKEditor
-            editor={ClassicEditor}
-            data={commonProps.value || ""}
-            onChange={(event, editor) => {
-              const data = editor.getData();
-
-              commonProps.onChange({
-                target: {
-                  value: data,
-                },
-              });
-            }}
-          />
+         <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }}/>
         )
       case 'select':
         return (
