@@ -63,6 +63,8 @@ const managerRoutes = [
   { path: '/faq', name: 'Faq', element: FAQ },
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
+  { path: '/universities', name: 'Universities', element: Universities },
+
 ]
 
 const routes = {

@@ -219,6 +219,12 @@ const managerRoutes =[
         to: '/faq',
       }
     ],
+  },
+    {
+    component: CNavItem,
+    name: 'Universities',
+    to: '/universities',
+    icon: <CIcon icon={cilEducation} customClassName="nav-icon" />,
   }
 ]
 

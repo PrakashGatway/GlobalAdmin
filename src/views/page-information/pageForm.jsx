@@ -56,22 +56,32 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const pageSchema = getPageSchema(pageType)
   const [countries, setCountries] = useState([])
 
-  const fetchCountries = async () => {
-    try {
-      const res = await countryService.getCountries({ limit: 300 })
-      if (res.success) {
-        setCountries(res.data || [])
-      }
-    } catch (err) {
-      console.error('Failed to fetch countries', err)
+const fetchCountries = async () => {
+  try {
+    const res = await countryService.getCountries({ limit: 300 })
+    if (res.success) {
+      const countriesData = res.data || []
+  
+      setCountries(countriesData)
+      
+      // Also check after a short delay
+      setTimeout(() => {
+        console.log('After 1 second - countries state:', countries)
+      }, 1000)
     }
+  } catch (err) {
+    console.error('Failed to fetch countries', err)
   }
+}
+
+
+
 
   useEffect(() => {
-    if (page?.pageType === "country") {
+    if (formData?.pageType === "country") {
       fetchCountries()
     }
-  }, [page?.pageType])
+  }, [formData?.pageType])
 
   useEffect(() => {
     if (page) {
