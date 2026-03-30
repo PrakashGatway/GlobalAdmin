@@ -28,27 +28,27 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const [pageType, setPageType] = useState(page?.pageType || 'general')
   const [formData, setFormData] = useState({
     // Basic page info
-    title: page?.title || '',
-    subTitle: page?.subTitle || '',
-    description: page?.description || '',
-    slug: page?.slug || '',
-    pageType: page?.pageType || 'general',
+    title: '',
+    subTitle: '',
+    description: '',
+    slug: '',
+    pageType: '',
     // SEO fields
-    metaTitle: page?.metaTitle || '',
-    metaDescription: page?.metaDescription || '',
-    metaKeywords: page?.metaKeywords || '',
-    canonicalUrl: page?.canonicalUrl || '',
+    metaTitle: '',
+    metaDescription: '',
+    metaKeywords: '',
+    canonicalUrl: '',
     // Page settings
-    status: page?.status || 'Draft',
-    isFeatured: page?.isFeatured || false,
-    isNavbar: page?.isNavbar || false,
-    navbarTitle: page?.navbarTitle || '',
-    navbarImage: page?.navbarImage || '',
-    cardImage: page?.cardImage || '',
+    status: 'Draft',
+    isFeatured: false,
+    isNavbar: false,
+    navbarTitle: '',
+    navbarImage: '',
+    cardImage: '',
     // Country specific
-    country: page?.country || '',
+    country: '',
     // Content sections
-    content: page?.sections || {},
+    content: {},
   })
 
   const [slugError, setSlugError] = useState('')
@@ -56,26 +56,23 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const pageSchema = getPageSchema(pageType)
   const [countries, setCountries] = useState([])
 
-const fetchCountries = async () => {
-  try {
-    const res = await countryService.getCountries({ limit: 300 })
-    if (res.success) {
-      const countriesData = res.data || []
-  
-      setCountries(countriesData)
-      
-      // Also check after a short delay
-      setTimeout(() => {
-        console.log('After 1 second - countries state:', countries)
-      }, 1000)
+  console.log('Current formData:', formData)
+
+  const fetchCountries = async () => {
+    try {
+      const res = await countryService.getCountries({ limit: 300 })
+      if (res.success) {
+        const countriesData = res.data || []
+        setCountries(countriesData)
+        
+        setTimeout(() => {
+          console.log('After 1 second - countries state:', countries)
+        }, 1000)
+      }
+    } catch (err) {
+      console.error('Failed to fetch countries', err)
     }
-  } catch (err) {
-    console.error('Failed to fetch countries', err)
   }
-}
-
-
-
 
   useEffect(() => {
     if (formData?.pageType === "country") {
@@ -85,29 +82,67 @@ const fetchCountries = async () => {
 
   useEffect(() => {
     if (page) {
-      const { sections, seoMeta, ...extra } = page
+      console.log('Page data received:', page) // Debug log
+      
+      // Extract SEO data from seoMeta object (as shown in your payload)
+      const seoData = page.seoMeta || {}
+      
+      console.log('Extracted SEO data:', seoData) // Debug log
+      
       setPageType(page.pageType || 'general')
       setFormData({
+        // Basic info
         title: page.title || '',
         subTitle: page.subTitle || '',
         description: page.description || '',
         slug: page.slug || '',
         pageType: page.pageType || 'general',
-        metaTitle: page.metaTitle || seoMeta?.metaTitle || '',
-        metaDescription: page.metaDescription || seoMeta?.metaDescription || '',
-        metaKeywords: page.metaKeywords || seoMeta?.metaKeywords || '',
-        canonicalUrl: page.canonicalUrl || seoMeta?.canonicalUrl || '',
+        
+        // SEO fields - correctly mapping from seoMeta object
+        metaTitle: seoData.metaTitle || '',
+        metaDescription: seoData.metaDescription || '',
+        metaKeywords: seoData.metaKeywords || '',
+        canonicalUrl: seoData.canonicalUrl || page.canonicalUrl || '',
+        
+        // Page settings
         status: page.status || 'Draft',
         isFeatured: page.isFeatured || false,
         isNavbar: page.isNavbar || false,
         navbarTitle: page.navbarTitle || '',
         navbarImage: page.navbarImage || '',
         cardImage: page.cardImage || '',
+        
+        // Country specific
         country: page.country || '',
+        
+        // Content sections
         content: page.sections || {},
       })
+    } else {
+      // Reset form when creating new page
+      const defaultPageType = 'general'
+      setPageType(defaultPageType)
+      setFormData({
+        title: '',
+        subTitle: '',
+        description: '',
+        slug: '',
+        pageType: defaultPageType,
+        metaTitle: '',
+        metaDescription: '',
+        metaKeywords: '',
+        canonicalUrl: '',
+        status: 'Draft',
+        isFeatured: false,
+        isNavbar: false,
+        navbarTitle: '',
+        navbarImage: '',
+        cardImage: '',
+        country: '',
+        content: getDefaultValues(defaultPageType),
+      })
     }
-  }, [page])
+  }, [page]) // Add page as dependency
 
   const handleBasicInfoChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -203,12 +238,23 @@ const fetchCountries = async () => {
       return
     }
 
-    const { content, ...rest } = formData
+    // Prepare data for submission
+    const { content, metaTitle, metaDescription, metaKeywords, canonicalUrl, ...rest } = formData
+    
+    // Structure the data with seoMeta object
+    const submitData = {
+      ...rest,
+      sections: content,
+      seoMeta: {
+        metaTitle: metaTitle || '',
+        metaDescription: metaDescription || '',
+        metaKeywords: metaKeywords || '',
+        canonicalUrl: canonicalUrl || '',
+      }
+    }
 
-    onSubmit({ 
-      ...rest, 
-      sections: content
-    })
+    console.log('Submitting data:', submitData) // Debug log
+    onSubmit(submitData)
   }
 
   const handleFormError = (fieldName, error) => {
@@ -216,6 +262,16 @@ const fetchCountries = async () => {
   }
 
   const pageTypes = getPageTypes()
+
+  // Debug: Log SEO values when they change
+  useEffect(() => {
+    console.log('Current SEO values in form:', {
+      metaTitle: formData.metaTitle,
+      metaDescription: formData.metaDescription,
+      metaKeywords: formData.metaKeywords,
+      canonicalUrl: formData.canonicalUrl
+    })
+  }, [formData.metaTitle, formData.metaDescription, formData.metaKeywords, formData.canonicalUrl])
 
   return (
     <CForm onSubmit={handleSubmit}>
