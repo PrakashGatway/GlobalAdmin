@@ -113,73 +113,87 @@ const DynamicFormBuilder = ({
   console.log(schema)
   // Build sections from schema and formData
   // In DynamicFormBuilder.jsx, update the useEffect
-  useEffect(() => {
-    if (!schema?.sections) return
+  // In DynamicFormBuilder.jsx, update the useEffect that builds sections:
 
-    let existingSections = []
+useEffect(() => {
+  if (!schema?.sections) return;
 
-    // Check if we have formData with sections
-    const hasFormDataSections = formData && Object.keys(formData).length > 0 &&
-      Object.keys(formData).some(key => formData[key]?.__order__ !== undefined)
+  let existingSections = [];
 
-    if (hasFormDataSections) {
-      // CASE 1: We have existing formData (editing existing page)
-      console.log('Building from existing formData')
-      existingSections = Object.keys(formData).map(sectionName => {
-        // Find the original schema section
-        const originalSchemaSection = schema.sections.find(s => s.name === sectionName.split('_copy_')[0])
+  // Check if we have formData
+  const hasFormData = formData && Object.keys(formData).length > 0;
 
-        if (originalSchemaSection) {
-          return {
-            id: sectionName,
-            name: sectionName,
-            label: sectionName.includes('_copy_') ? `${originalSchemaSection.label} (Copy)` : originalSchemaSection.label,
-            isDuplicate: sectionName.includes('_copy_'),
-            originalName: sectionName.split('_copy_')[0],
-            order: formData[sectionName]?.__order__ || 0,
-            fields: originalSchemaSection.fields.map(field => ({
-              ...field,
-              value: formData[sectionName]?.[field.name] ?? field.default ?? ''
-            }))
+  if (hasFormData) {
+    // Build sections from schema and map formData values
+    existingSections = schema.sections.map((schemaSection, index) => {
+      const sectionName = schemaSection.name;
+      const sectionData = formData[sectionName];
+      
+      return {
+        id: sectionName,
+        name: sectionName,
+        label: schemaSection.label,
+        isDuplicate: false,
+        originalName: sectionName,
+        order: index,
+        fields: schemaSection.fields.map(field => {
+          let value;
+          
+          // Handle different field types
+          if (sectionData && sectionData[field.name] !== undefined) {
+            value = sectionData[field.name];
+          } else if (field.default !== undefined) {
+            value = field.default;
+          } else {
+            value = '';
           }
-        }
-        return null
-      }).filter(Boolean)
-    } else {
-      // CASE 2: No formData (creating new page) - build from schema
-      console.log('Building sections from schema for new page')
-      console.log('Schema sections count:', schema.sections.length)
-
-      existingSections = schema.sections.map((section, index) => {
-        console.log(`Creating section: ${section.name} with ${section.fields.length} fields`)
-        return {
-          id: section.name,
-          name: section.name,
-          label: section.label,
-          isDuplicate: false,
-          originalName: section.name,
-          order: index,
-          fields: section.fields.map(field => ({
+          
+          // For repeater fields, ensure value is an array
+          if (field.type === 'repeater' && !Array.isArray(value)) {
+            value = value || [];
+          }
+          
+          return {
             ...field,
-            value: field.default !== undefined ? field.default : ''
-          }))
-        }
-      })
-    }
+            value: value
+          };
+        })
+      };
+    });
+  } else {
+    // No formData - build from schema with defaults
+    existingSections = schema.sections.map((section, index) => ({
+      id: section.name,
+      name: section.name,
+      label: section.label,
+      isDuplicate: false,
+      originalName: section.name,
+      order: index,
+      fields: section.fields.map(field => ({
+        ...field,
+        value: field.default !== undefined ? field.default : 
+               (field.type === 'repeater' ? [] : '')
+      }))
+    }));
+  }
 
-    // Sort by order
-    existingSections.sort((a, b) => (a.order || 0) - (b.order || 0))
+  // Sort by order if order exists
+  existingSections.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    console.log('Total sections built:', existingSections.length)
-    console.log('Section names:', existingSections.map(s => s.name))
+  setSections(existingSections);
 
-    setSections(existingSections)
-
-    // Set expanded sections if empty
-    if (expandedSections.length === 0 && existingSections.length > 0) {
-      setExpandedSections([existingSections[0].id])
-    }
-  }, [schema, formData])
+  // Set expanded sections if empty
+  if (expandedSections.length === 0 && existingSections.length > 0) {
+    setExpandedSections([existingSections[0].id]);
+  }
+  
+  // Debug: Log what values are being mapped
+  console.log('Mapped sections:', existingSections.map(s => ({
+    name: s.name,
+    fields: s.fields.map(f => ({ name: f.name, value: f.value, type: f.type }))
+  })));
+  
+}, [schema, formData]);
 
   const validateField = (field, value) => {
     if (field.required && !value) {

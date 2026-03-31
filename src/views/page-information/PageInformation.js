@@ -114,7 +114,7 @@ const PageManagement = () => {
   useEffect(() => {
     fetchPages()
   }, [fetchPages])
-    
+      
 
 
   const handleFilterChange = (name, value) => {

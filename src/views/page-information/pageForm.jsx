@@ -1,5 +1,5 @@
 // components/PageForm.jsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   CForm,
   CFormInput,
@@ -46,7 +46,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     navbarImage: '',
     cardImage: '',
     // Country specific
-    country: '',
+    country: "",
     // Content sections
     content: {},
   })
@@ -55,8 +55,11 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const [formErrors, setFormErrors] = useState({})
   const pageSchema = getPageSchema(pageType)
   const [countries, setCountries] = useState([])
+  
+  // Add ref to track if initial load has been done
+  const previousPageIdRef = useRef(null)
 
-  console.log('Current formData:', formData)
+
 
   const fetchCountries = async () => {
     try {
@@ -80,76 +83,90 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     }
   }, [formData?.pageType])
 
-  useEffect(() => {
-    if (page) {
-      console.log('Page data received:', page) // Debug log
-      
-      // Extract SEO data from seoMeta object (as shown in your payload)
-      const seoData = page.seoMeta || {}
-      
-      console.log('Extracted SEO data:', seoData) // Debug log
-      
-      setPageType(page.pageType || 'general')
-      setFormData({
-        // Basic info
-        title: page.title || '',
-        subTitle: page.subTitle || '',
-        description: page.description || '',
-        slug: page.slug || '',
-        pageType: page.pageType || 'general',
-        
-        // SEO fields - correctly mapping from seoMeta object
-        metaTitle: seoData.metaTitle || '',
-        metaDescription: seoData.metaDescription || '',
-        metaKeywords: seoData.metaKeywords || '',
-        canonicalUrl: seoData.canonicalUrl || page.canonicalUrl || '',
-        
-        // Page settings
-        status: page.status || 'Draft',
-        isFeatured: page.isFeatured || false,
-        isNavbar: page.isNavbar || false,
-        navbarTitle: page.navbarTitle || '',
-        navbarImage: page.navbarImage || '',
-        cardImage: page.cardImage || '',
-        
-        // Country specific
-        country: page.country || '',
-        
-        // Content sections
-        content: page.sections || {},
-      })
-    } else {
-      // Reset form when creating new page
-      const defaultPageType = 'general'
-      setPageType(defaultPageType)
-      setFormData({
-        title: '',
-        subTitle: '',
-        description: '',
-        slug: '',
-        pageType: defaultPageType,
-        metaTitle: '',
-        metaDescription: '',
-        metaKeywords: '',
-        canonicalUrl: '',
-        status: 'Draft',
-        isFeatured: false,
-        isNavbar: false,
-        navbarTitle: '',
-        navbarImage: '',
-        cardImage: '',
-        country: '',
-        content: getDefaultValues(defaultPageType),
-      })
-    }
-  }, [page]) // Add page as dependency
+  // Fixed useEffect to prevent resetting form on every render
+ useEffect(() => {
+  // Get current page ID
+  const currentPageId = page?._id || null
+  
+  // Check if this is a new page or different page
+  const isNewPage = !page
+  const isDifferentPage = currentPageId !== previousPageIdRef.current
+  
+  // Only set form data if:
+  // 1. We have a page AND (it's a different page OR it's the first load)
+  // 2. OR we're creating a new page (page is null)
+  if (page && (isDifferentPage || previousPageIdRef.current === null)) {
+    console.log('Setting page data for:', page.title || page._id)
+    
+    const seoData = page.seoMeta || {}
+    
+    setPageType(page.pageType || 'general')
+    setFormData({
+      title: page.title || '',
+      subTitle: page.subTitle || '',
+      description: page.description || '',
+      slug: page.slug || '',
+      pageType: page.pageType || 'general',
+      metaTitle: seoData.metaTitle || '',
+      metaDescription: seoData.metaDescription || '',
+      metaKeywords: seoData.metaKeywords || '',
+      canonicalUrl: seoData.canonicalUrl || page.canonicalUrl || '',
+      status: page.status || 'Draft',
+      isFeatured: page.isFeatured || false,
+      isNavbar: page.isNavbar || false,
+      navbarTitle: page.navbarTitle || '',
+      navbarImage: page.navbarImage || '',
+      cardImage: page.cardImage || '',
+      country: page?.country && page?.country || null,
+      content: page.sections || {},
+    })
+    
+    // Store the current page ID
+    previousPageIdRef.current = currentPageId
+  }
+  
+  // Handle new page creation (when page becomes null)
+  if (!page && previousPageIdRef.current !== null) {
+   
+    const defaultPageType = 'general'
+    setPageType(defaultPageType)
+    setFormData({
+      title: '',
+      subTitle: '',
+      description: '',
+      slug: '',
+      pageType: defaultPageType,
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: '',
+      canonicalUrl: '',
+      status: 'Draft',
+      isFeatured: false,
+      isNavbar: false,
+      navbarTitle: '',
+      navbarImage: '',
+      cardImage: '',
+      country: null,
+      content: getDefaultValues(defaultPageType),
+    })
+    
+    previousPageIdRef.current = null
+  }
+}, [page]) // Keep dependency on page
 
   const handleBasicInfoChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+    
+    console.log('Input changed:', name, value)
+    
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }
+      console.log('New form data:', newData)
+      return newData
+    })
 
     // Auto-generate slug from title
     if (name === 'title' && !page) {
@@ -189,14 +206,12 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     }))
   }
 
-  // Handle sections updates (duplicate, delete, reorder)
   const handleSectionsUpdate = (updatedContent, updatedSections) => {
     setFormData(prev => ({
       ...prev,
       content: updatedContent
     }))
     
-    // Optional: Auto-save to backend
     console.log('Sections updated:', updatedSections)
   }
 
@@ -220,7 +235,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Basic validation
     if (!formData.title.trim()) {
       setFormErrors({ title: 'Title is required' })
       setActiveTab(0)
@@ -238,10 +252,8 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       return
     }
 
-    // Prepare data for submission
     const { content, metaTitle, metaDescription, metaKeywords, canonicalUrl, ...rest } = formData
     
-    // Structure the data with seoMeta object
     const submitData = {
       ...rest,
       sections: content,
@@ -253,7 +265,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       }
     }
 
-    console.log('Submitting data:', submitData) // Debug log
+    console.log('Submitting data:', submitData)
     onSubmit(submitData)
   }
 
@@ -263,7 +275,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
 
   const pageTypes = getPageTypes()
 
-  // Debug: Log SEO values when they change
   useEffect(() => {
     console.log('Current SEO values in form:', {
       metaTitle: formData.metaTitle,
@@ -312,18 +323,19 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
         </CNavItem>
       </CNav>
 
+      
+
       <div style={{ maxWidth: "1400px" }} className='mx-auto'>
-        {/* General Info Tab - COMPLETE VERSION */}
+        {/* General Info Tab */}
         {activeTab === 0 && (
           <div className="mt-3">
-            {/* Row 1: Title, Page Type, Status */}
             <CRow className="g-3">
               <CCol md={6}>
                 <CFormLabel htmlFor="title">Page Title *</CFormLabel>
                 <CFormInput
                   id="title"
                   name="title"
-                  value={formData.title}
+                  value={formData.title || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter page title"
                   required
@@ -384,14 +396,13 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-            {/* Row 2: Slug, Navbar Title */}
             <CRow className="g-3 mt-3">
               <CCol md={6}>
                 <CFormLabel htmlFor="slug">Slug *</CFormLabel>
                 <CFormInput
                   id="slug"
                   name="slug"
-                  value={formData.slug}
+                  value={formData.slug || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter URL slug"
                   required
@@ -412,7 +423,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 <CFormInput
                   id="navbarTitle"
                   name="navbarTitle"
-                  value={formData.navbarTitle}
+                  value={formData.navbarTitle || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter navbar title"
                 />
@@ -422,14 +433,13 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-            {/* Row 3: Subtitle, Description */}
             <CRow className="g-3 mt-3">
               <CCol md={6}>
                 <CFormLabel htmlFor="subTitle">Subtitle</CFormLabel>
                 <CFormTextarea
                   id="subTitle"
                   name="subTitle"
-                  value={formData.subTitle}
+                  value={formData.subTitle || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter subtitle (optional)"
                   rows={2}
@@ -444,7 +454,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 <CFormTextarea
                   id="description"
                   name="description"
-                  value={formData.description}
+                  value={formData.description || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter description (optional)"
                   rows={2}
@@ -455,7 +465,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-            {/* Row 4: Country (if page type is country) */}
             {formData?.pageType === 'country' && (
               <CRow className="g-3 mt-3">
                 <CCol md={12}>
@@ -463,13 +472,13 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                   <CFormSelect
                     id="country"
                     name="country"
-                    value={formData.country}
+                    value={formData?.country || null}
                     onChange={handleBasicInfoChange}
                   >
                     <option value="">Select Country</option>
                     {countries.map((country) => (
-                      <option key={country._id} value={country._id}>
-                        {country.name}
+                      <option key={country?._id} value={country?._id}>
+                        {country?.name}
                       </option>
                     ))}
                   </CFormSelect>
@@ -480,7 +489,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CRow>
             )}
 
-            {/* Row 5: Card Image, Navbar Logo */}
             <CRow className="g-3 mt-3">
               <CCol md={6}>
                 <CFormLabel htmlFor="cardImage">Card Image</CFormLabel>
@@ -570,7 +578,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-            {/* Row 6: Featured and Navbar checkboxes */}
             <CRow className="mt-4">
               <CCol md={12} className="d-flex gap-4">
                 <CFormCheck
@@ -598,7 +605,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-            {/* Help Text Section */}
             <CRow className="mt-4">
               <CCol md={12}>
                 <CCard className="bg-light">
@@ -646,7 +652,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 <CFormInput
                   id="metaTitle"
                   name="metaTitle"
-                  value={formData.metaTitle}
+                  value={formData.metaTitle || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter meta title for SEO"
                 />
@@ -659,7 +665,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 <CFormTextarea
                   id="metaDescription"
                   name="metaDescription"
-                  value={formData.metaDescription}
+                  value={formData.metaDescription || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter meta description for SEO (recommended: 150-160 characters)"
                   rows={3}
@@ -676,7 +682,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 <CFormTextarea
                   id="metaKeywords"
                   name="metaKeywords"
-                  value={formData.metaKeywords}
+                  value={formData.metaKeywords || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="Enter keywords separated by commas"
                   rows={2}
@@ -690,7 +696,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 <CFormInput
                   id="canonicalUrl"
                   name="canonicalUrl"
-                  value={formData.canonicalUrl}
+                  value={formData.canonicalUrl || ''}
                   onChange={handleBasicInfoChange}
                   placeholder="https://example.com/preferred-url"
                 />
@@ -700,7 +706,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-            {/* SEO Help Section */}
             <CRow className="mt-4">
               <CCol md={12}>
                 <CCard className="bg-light">
