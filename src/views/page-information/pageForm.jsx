@@ -92,9 +92,6 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const isNewPage = !page
   const isDifferentPage = currentPageId !== previousPageIdRef.current
   
-  // Only set form data if:
-  // 1. We have a page AND (it's a different page OR it's the first load)
-  // 2. OR we're creating a new page (page is null)
   if (page && (isDifferentPage || previousPageIdRef.current === null)) {
     console.log('Setting page data for:', page.title || page._id)
     
