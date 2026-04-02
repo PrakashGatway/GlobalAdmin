@@ -115,68 +115,78 @@ const DynamicFormBuilder = ({
   // In DynamicFormBuilder.jsx, update the useEffect
   // In DynamicFormBuilder.jsx, update the useEffect that builds sections:
 
-useEffect(() => {
-  if (!schema?.sections) return;
+  useEffect(() => {
+    if (!schema?.sections) return;
 
-  if (sections.length > 0) return;
+    if (sections.length > 0) return;
 
-  let builtSections = [];
+    let builtSections = [];
+    const hasFormData = formData && Object.keys(formData).length > 0;
 
-  const hasFormData = formData && Object.keys(formData).length > 0;
+    // 👉 Step 1: Build from formData (existing sections)
+    let formSectionsMap = {};
 
-  if (hasFormData) {
-    builtSections = Object.keys(formData).map((sectionKey, index) => {
-      const sectionData = formData[sectionKey];
+    if (hasFormData) {
+      builtSections = Object.keys(formData).map((sectionKey, index) => {
+        const sectionData = formData[sectionKey];
 
-      const originalName =
-        sectionData.__originalName__ ||
-        sectionKey.split("_copy_")[0];
+        const originalName =
+          sectionData.__originalName__ ||
+          sectionKey.split("_copy_")[0];
 
-      const schemaSection = schema.sections.find(
-        s => s.name === originalName
-      );
+        const schemaSection = schema.sections.find(
+          s => s.name === originalName
+        );
 
-      if (!schemaSection) return null;
+        if (!schemaSection) return null;
 
-      return {
-        id: sectionKey,
-        name: sectionKey,
-        label: schemaSection.label + (sectionData.__isDuplicate__ ? " (Copy)" : ""),
-        isDuplicate: sectionData.__isDuplicate__ || false,
-        originalName: originalName,
-        order: sectionData.__order__ ?? index,
-        fields: schemaSection.fields.map(field => ({
+        formSectionsMap[originalName] = true; // ✅ track existing
+
+        return {
+          id: sectionKey,
+          name: sectionKey,
+          label:
+            schemaSection.label +
+            (sectionData.__isDuplicate__ ? " (Copy)" : ""),
+          isDuplicate: sectionData.__isDuplicate__ || false,
+          originalName,
+          order: sectionData.__order__ ?? index,
+          fields: schemaSection.fields.map(field => ({
+            ...field,
+            value:
+              sectionData[field.name] ??
+              field.default ??
+              (field.type === "repeater" ? [] : "")
+          }))
+        };
+      }).filter(Boolean);
+    }
+
+    // 👉 Step 2: Add missing schema sections
+    const missingSections = schema.sections
+      .filter(section => !formSectionsMap[section.name]) // ❗ not in DB
+      .map((section, index) => ({
+        id: section.name,
+        name: section.name,
+        label: section.label,
+        isDuplicate: false,
+        originalName: section.name,
+        order: getNextOrder ? getNextOrder() + index : builtSections.length + index,
+        fields: section.fields.map(field => ({
           ...field,
-          value:
-            sectionData[field.name] ??
-            field.default ??
-            (field.type === "repeater" ? [] : "")
+          value: field.default ?? (field.type === "repeater" ? [] : "")
         }))
-      };
-    }).filter(Boolean);
+      }));
 
-  } else {
-    // fallback (no formData)
-    builtSections = schema.sections.map((section, index) => ({
-      id: section.name,
-      name: section.name,
-      label: section.label,
-      isDuplicate: false,
-      originalName: section.name,
-      order: index,
-      fields: section.fields.map(field => ({
-        ...field,
-        value: field.default ?? (field.type === 'repeater' ? [] : '')
-      }))
-    }));
-  }
+    // 👉 Step 3: Merge both
+    const finalSections = [...builtSections, ...missingSections];
 
-  // ✅ sort by order (IMPORTANT)
-  builtSections.sort((a, b) => a.order - b.order);
+    // 👉 Step 4: Sort
+    finalSections.sort((a, b) => a.order - b.order);
 
-  setSections(builtSections);
+    setSections(finalSections);
 
-}, [schema, formData]);
+  }, [schema, formData]);
 
   const validateField = (field, value) => {
     if (field.required && !value) {
@@ -393,7 +403,7 @@ useEffect(() => {
       case "richtext":
         return (
           <div className="position-relative">
-             <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }}/>
+            <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
           </div>
         )
 
@@ -764,7 +774,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
         )
       case "richtext":
         return (
-         <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }}/>
+          <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
         )
       case 'select':
         return (
