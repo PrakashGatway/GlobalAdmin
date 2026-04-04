@@ -26,6 +26,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import apiService from '../../services/apiService'
 // import citiesByCountry from '../../data/cities'
 import AsyncSelect from 'react-select/async'
+import TinyEditor from '../page-information/Editor'
 
 const UniversityForm = ({
     university = null,
@@ -158,7 +159,7 @@ const UniversityForm = ({
                     [{ section_key: 'overview', heading: 'Overview', content: '', order: 1 }],
                 isPublished: extra.isPublished ?? true,
                 extraStatus: extra.status || 'Active',
-                
+
             })
             setImagePreview(uni.uni_logo || '')
         } else {
@@ -554,7 +555,7 @@ const UniversityForm = ({
                                 placeholder="Enter acceptanceRate"
                             />
                         </CCol>
-                         <CCol md={6}>
+                        <CCol md={6}>
                             <CFormLabel>Offers To university</CFormLabel>
                             <CFormInput
                                 name="offers"
@@ -564,7 +565,7 @@ const UniversityForm = ({
                                 placeholder="Enter offers"
                             />
                         </CCol>
-                         <CCol md={6}>
+                        <CCol md={6}>
                             <CFormLabel>Tags</CFormLabel>
                             <CFormInput
                                 name="tags"
@@ -1261,9 +1262,10 @@ const UniversityForm = ({
                                     />
                                 </div>
 
-                              <div>
+                                <div>
                                     <CFormLabel>Content (HTML)</CFormLabel>
-                                    <CKEditor
+                                        <TinyEditor header={false} initialValue={section.content || ""} onChange={(value) => handleUpdateSection(index, 'content', value)} />
+                                    {/* <CKEditor
                                         editor={ClassicEditor}
                                         data={section.content}
                                         config={{
@@ -1275,7 +1277,7 @@ const UniversityForm = ({
                                             const data = editor.getData();
                                             handleUpdateSection(index, 'content', data);
                                         }}
-                                    />
+                                    /> */}
 
                                 </div>
                             </CCardBody>
