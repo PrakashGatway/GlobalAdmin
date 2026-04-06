@@ -102,6 +102,7 @@ const UniversityForm = ({
         if (university) {
             const uni = university
             const extra = uni.extra_content || {}
+            const extraData = extra.extra || {} 
 
             setFormData({
                 name: uni.name || '',
@@ -159,6 +160,8 @@ const UniversityForm = ({
                     [{ section_key: 'overview', heading: 'Overview', content: '', order: 1 }],
                 isPublished: extra.isPublished ?? true,
                 extraStatus: extra.status || 'Active',
+                ctatitle: extraData.ctatitle || '',
+ctadescription: extraData.ctadescription || '',
 
             })
             setImagePreview(uni.uni_logo || '')
@@ -415,6 +418,10 @@ const UniversityForm = ({
                 sections: formData.sections,
                 isPublished: formData.isPublished,
                 status: formData.extraStatus,
+                extra: {
+                    ctatitle : formData.ctatitle,
+                    ctadescription : formData.ctadescription,
+                }
             }
         }
 
@@ -1191,6 +1198,50 @@ const UniversityForm = ({
                     </CRow>
                 </CCardBody>
             </CCard>
+
+            <CCard className="mb-4">
+  <CCardHeader>
+    <h5>CTA Section</h5>
+  </CCardHeader>
+
+  <CCardBody>
+    <CRow className="g-3">
+
+      {/* CTA Title */}
+      <CCol md={12}>
+        <CFormLabel>CTA Title</CFormLabel>
+        <CFormInput
+          type="text"
+          placeholder="Enter CTA title (e.g. Apply Now)"
+          value={formData.ctatitle}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              ctatitle: e.target.value,
+            })
+          }
+        />
+      </CCol>
+
+      {/* CTA Description */}
+      <CCol md={12}>
+        <CFormLabel>CTA Description</CFormLabel>
+        <CFormTextarea
+          rows="3"
+          placeholder="Enter CTA description"
+          value={formData.ctadescription}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              ctadescription: e.target.value,
+            })
+          }
+        />
+      </CCol>
+
+    </CRow>
+  </CCardBody>
+</CCard>
 
             {/* Extra Content Sections */}
             <CCard className="mb-4">
