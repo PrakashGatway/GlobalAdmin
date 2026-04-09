@@ -1292,7 +1292,9 @@ ctadescription: extraData.ctadescription || '',
                             <CCardBody>
                                 <div className="d-flex justify-content-between align-items-start mb-3">
                                     <div>
-                                        <h6>{section.heading}</h6>
+                                        <h6 dangerouslySetInnerHTML={{
+                                            __html : section.heading
+                                        }} />
                                         <small className="text-muted">Key: {section.section_key} | Order: {section.order}</small>
                                     </div>
                                     <CButton
@@ -1306,11 +1308,14 @@ ctadescription: extraData.ctadescription || '',
 
                                 <div className="mb-3">
                                     <CFormLabel>Section Heading</CFormLabel>
-                                    <CFormInput
-                                        type="text"
-                                        value={section.heading}
-                                        onChange={(e) => handleUpdateSection(index, 'heading', e.target.value)}
-                                    />
+                                    <CKEditor
+  editor={ClassicEditor}
+  data={section.heading || ""}
+  onChange={(event, editor) => {
+    const data = editor.getData();
+    handleUpdateSection(index, "heading", data);
+  }}
+/>
                                 </div>
 
                                 <div>
