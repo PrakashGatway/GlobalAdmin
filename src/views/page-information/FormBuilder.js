@@ -407,6 +407,20 @@ const DynamicFormBuilder = ({
           </div>
         )
 
+      case "richtext2":
+        return (
+          <div className="position-relative">
+            <CKEditor
+              editor={ClassicEditor}
+              data={commonProps.value || ""}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                commonProps.onChange({ target: { value: data } });
+              }}
+            />
+          </div>
+        )
+
       case 'checkbox':
         return (
           <CFormCheck
@@ -745,6 +759,20 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
             rows={2}
             {...commonProps}
           />
+        )
+
+      case "richtext2":
+        return (
+          <div className="position-relative">
+            <CKEditor
+              editor={ClassicEditor}
+              data={commonProps.value || ""}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                commonProps.onChange({ target: { value: data } });
+              }}
+            />
+          </div>
         )
       case "file":
         return (
