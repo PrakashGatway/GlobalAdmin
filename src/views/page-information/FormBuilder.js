@@ -411,10 +411,7 @@ const DynamicFormBuilder = ({
       case "richtext2":
         return (
           <div className="position-relative">
-            <CKEditorComponent
-              value={commonProps.value}
-              onChange={commonProps.onChange}
-            />
+            <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
           </div>
         )
 
@@ -762,10 +759,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
       case "richtext2":
         return (
           <div className="position-relative">
-            <CKEditorComponent
-              value={commonProps.value}
-              onChange={commonProps.onChange}
-            />
+            <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
           </div>
         );
       case "file":
