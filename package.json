@@ -10,8 +10,6 @@
     "start": "vite"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
-    "@ckeditor/ckeditor5-react": "^11.0.1",
     "@coreui/chartjs": "^4.1.0",
     "@coreui/coreui": "^5.5.0",
     "@coreui/icons": "^3.0.1",

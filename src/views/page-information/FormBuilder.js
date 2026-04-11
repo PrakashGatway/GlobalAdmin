@@ -1,7 +1,7 @@
 // components/DynamicFormBuilder.jsx
 import React, { useState, useEffect } from 'react'
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import { CKEditor } from '@ckeditor/ckeditor5-react';
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {
   CFormInput,
   CFormLabel,
@@ -46,6 +46,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import CKEditorComponent from './Ckeditor'
 
 export const uploadFile = async (file) => {
   if (!file) return null
@@ -410,14 +411,14 @@ const DynamicFormBuilder = ({
       case "richtext2":
         return (
           <div className="position-relative">
-            <CKEditor
+            {/* <CKEditor
               editor={ClassicEditor}
               data={commonProps.value || ""}
               onChange={(event, editor) => {
                 const data = editor.getData();
                 commonProps.onChange({ target: { value: data } });
               }}
-            />
+            /> */}
           </div>
         )
 
@@ -761,19 +762,16 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
           />
         )
 
+
       case "richtext2":
         return (
           <div className="position-relative">
-            <CKEditor
-              editor={ClassicEditor}
-              data={commonProps.value || ""}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                commonProps.onChange({ target: { value: data } });
-              }}
+            <CKEditorComponent
+              value={commonProps.value}
+              onChange={commonProps.onChange}
             />
           </div>
-        )
+        );
       case "file":
         return (
           <>
