@@ -21,12 +21,13 @@ import {
 } from '@coreui/react'
 import { FaPlus, FaTrash, FaYoutube, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaMapMarkerAlt } from 'react-icons/fa'
 import uploadService from '../../services/uploadService'
-import { CKEditor } from '@ckeditor/ckeditor5-react'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+// import { CKEditor } from '@ckeditor/ckeditor5-react'
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import apiService from '../../services/apiService'
 // import citiesByCountry from '../../data/cities'
 import AsyncSelect from 'react-select/async'
 import TinyEditor from '../page-information/Editor'
+import CKEditorComponent from '../page-information/Ckeditor'
 
 const UniversityForm = ({
     university = null,
@@ -102,7 +103,7 @@ const UniversityForm = ({
         if (university) {
             const uni = university
             const extra = uni.extra_content || {}
-            const extraData = extra.extra || {} 
+            const extraData = extra.extra || {}
 
             setFormData({
                 name: uni.name || '',
@@ -161,7 +162,7 @@ const UniversityForm = ({
                 isPublished: extra.isPublished ?? true,
                 extraStatus: extra.status || 'Active',
                 ctatitle: extraData.ctatitle || '',
-ctadescription: extraData.ctadescription || '',
+                ctadescription: extraData.ctadescription || '',
 
             })
             setImagePreview(uni.uni_logo || '')
@@ -419,8 +420,8 @@ ctadescription: extraData.ctadescription || '',
                 isPublished: formData.isPublished,
                 status: formData.extraStatus,
                 extra: {
-                    ctatitle : formData.ctatitle,
-                    ctadescription : formData.ctadescription,
+                    ctatitle: formData.ctatitle,
+                    ctadescription: formData.ctadescription,
                 }
             }
         }
@@ -1200,48 +1201,48 @@ ctadescription: extraData.ctadescription || '',
             </CCard>
 
             <CCard className="mb-4">
-  <CCardHeader>
-    <h5>CTA Section</h5>
-  </CCardHeader>
+                <CCardHeader>
+                    <h5>CTA Section</h5>
+                </CCardHeader>
 
-  <CCardBody>
-    <CRow className="g-3">
+                <CCardBody>
+                    <CRow className="g-3">
 
-      {/* CTA Title */}
-      <CCol md={12}>
-        <CFormLabel>CTA Title</CFormLabel>
-        <CFormInput
-          type="text"
-          placeholder="Enter CTA title (e.g. Apply Now)"
-          value={formData.ctatitle}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              ctatitle: e.target.value,
-            })
-          }
-        />
-      </CCol>
+                        {/* CTA Title */}
+                        <CCol md={12}>
+                            <CFormLabel>CTA Title</CFormLabel>
+                            <CFormInput
+                                type="text"
+                                placeholder="Enter CTA title (e.g. Apply Now)"
+                                value={formData.ctatitle}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        ctatitle: e.target.value,
+                                    })
+                                }
+                            />
+                        </CCol>
 
-      {/* CTA Description */}
-      <CCol md={12}>
-        <CFormLabel>CTA Description</CFormLabel>
-        <CFormTextarea
-          rows="3"
-          placeholder="Enter CTA description"
-          value={formData.ctadescription}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              ctadescription: e.target.value,
-            })
-          }
-        />
-      </CCol>
+                        {/* CTA Description */}
+                        <CCol md={12}>
+                            <CFormLabel>CTA Description</CFormLabel>
+                            <CFormTextarea
+                                rows="3"
+                                placeholder="Enter CTA description"
+                                value={formData.ctadescription}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        ctadescription: e.target.value,
+                                    })
+                                }
+                            />
+                        </CCol>
 
-    </CRow>
-  </CCardBody>
-</CCard>
+                    </CRow>
+                </CCardBody>
+            </CCard>
 
             {/* Extra Content Sections */}
             <CCard className="mb-4">
@@ -1293,7 +1294,7 @@ ctadescription: extraData.ctadescription || '',
                                 <div className="d-flex justify-content-between align-items-start mb-3">
                                     <div>
                                         <h6 dangerouslySetInnerHTML={{
-                                            __html : section.heading
+                                            __html: section.heading
                                         }} />
                                         <small className="text-muted">Key: {section.section_key} | Order: {section.order}</small>
                                     </div>
@@ -1308,19 +1309,23 @@ ctadescription: extraData.ctadescription || '',
 
                                 <div className="mb-3">
                                     <CFormLabel>Section Heading</CFormLabel>
-                                    <CKEditor
-  editor={ClassicEditor}
-  data={section.heading || ""}
-  onChange={(event, editor) => {
-    const data = editor.getData();
-    handleUpdateSection(index, "heading", data);
-  }}
-/>
+                                    <CKEditorComponent
+                                        value={section.heading || ""}
+                                        onChange={(value) => handleUpdateSection(index, "heading", value)}
+                                    />
+                                    {/* <CKEditor
+                                        editor={ClassicEditor}
+                                        data={section.heading || ""}
+                                        onChange={(event, editor) => {
+                                            const data = editor.getData();
+                                            handleUpdateSection(index, "heading", data);
+                                        }}
+                                    /> */}
                                 </div>
 
                                 <div>
                                     <CFormLabel>Content (HTML)</CFormLabel>
-                                        <TinyEditor header={false} initialValue={section.content || ""} onChange={(value) => handleUpdateSection(index, 'content', value)} />
+                                    <TinyEditor header={false} initialValue={section.content || ""} onChange={(value) => handleUpdateSection(index, 'content', value)} />
                                     {/* <CKEditor
                                         editor={ClassicEditor}
                                         data={section.content}

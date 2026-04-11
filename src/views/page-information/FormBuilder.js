@@ -411,14 +411,10 @@ const DynamicFormBuilder = ({
       case "richtext2":
         return (
           <div className="position-relative">
-            {/* <CKEditor
-              editor={ClassicEditor}
-              data={commonProps.value || ""}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                commonProps.onChange({ target: { value: data } });
-              }}
-            /> */}
+            <CKEditorComponent
+              value={commonProps.value}
+              onChange={commonProps.onChange}
+            />
           </div>
         )
 

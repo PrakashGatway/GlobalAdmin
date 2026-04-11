@@ -20,8 +20,8 @@ import CIcon from '@coreui/icons-react';
 import { cilDollar, cilCalendar, cilTag, cilPlus, cilTrash } from '@coreui/icons';
 import apiService from '../../services/apiService';
 import { FaPlus, FaTrash } from 'react-icons/fa';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import { CKEditor } from '@ckeditor/ckeditor5-react';
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const CourseForm = ({ course, onSubmit, onCancel, error, submitting }) => {
     const [formData, setFormData] = useState({
@@ -964,7 +964,11 @@ const CourseForm = ({ course, onSubmit, onCancel, error, submitting }) => {
 
                                 <div>
                                     <CFormLabel>Content (HTML)</CFormLabel>
-                                    <CKEditor
+                                    <CKEditorComponent
+                                        value={section.content}
+                                        onChange={(e) => handleUpdateSection(index, 'content', e.target.value)}
+                                    />
+                                    {/* <CKEditor
                                         editor={ClassicEditor}
                                         data={section.content}
                                         config={{
@@ -976,7 +980,7 @@ const CourseForm = ({ course, onSubmit, onCancel, error, submitting }) => {
                                             const data = editor.getData();
                                             handleUpdateSection(index, 'content', data);
                                         }}
-                                    />
+                                    /> */}
                                 </div>
                             </CCardBody>
                         </CCard>

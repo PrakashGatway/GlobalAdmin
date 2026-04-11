@@ -17,6 +17,7 @@ import {
 } from '@coreui/react'
 import { FaYoutube, FaImage } from 'react-icons/fa'
 import uploadService from '../../services/uploadService'
+import CKEditorComponent from '../page-information/Ckeditor'
 // import { CKEditor } from '@ckeditor/ckeditor5-react'
 // import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
@@ -203,7 +204,11 @@ const TestimonialForm = ({
         <CCard className="mb-4">
           <CCardHeader><h5>Case Study Content</h5></CCardHeader>
           <CCardBody>
-            <CKEditor
+            <CKEditorComponent
+              value={formData.content}
+              onChange={(value) => handleChange({ target: { name: 'content', value } })}
+            />
+            {/* <CKEditor
               editor={ClassicEditor}
               data={formData.content}
               config={{
@@ -215,7 +220,7 @@ const TestimonialForm = ({
                 const data = editor.getData();
                 handleChange({target:{name: 'content', value: data}});
               }}
-            />
+            /> */}
           </CCardBody>
         </CCard>
       )}

@@ -26,6 +26,7 @@ import apiService from '../../services/apiService'
 // import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import uploadService from '../../services/uploadService'
 import { CustomMultiSelect } from '../scholarship/ScholarshipForm'
+import CKEditorComponent from '../page-information/Ckeditor'
 
 const blogService = {
     getBlog: (id) => apiService.get(`/blogs/${id}`).then(res => res.data),
@@ -330,14 +331,18 @@ const BlogForm = () => {
 
                                     <div className="mb-3">
                                         <CFormLabel>Content *</CFormLabel>
-                                        <CKEditor
+                                        <CKEditorComponent
+                                            value={formData.content}
+                                            onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+                                        />
+                                        {/* <CKEditor
                                             editor={ClassicEditor}
                                             data={formData.content}
                                             onChange={(event, editor) => {
                                                 const data = editor.getData();
                                                 setFormData(prev => ({ ...prev, content: data }));
                                             }}
-                                        />
+                                        /> */}
                                     </div>
                                 </CCol>
 
