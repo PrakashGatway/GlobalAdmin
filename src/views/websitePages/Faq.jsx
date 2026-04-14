@@ -46,6 +46,7 @@ import {
 
 import apiService from '../../services/apiService'
 import { BsEye, BsEyeSlash } from 'react-icons/bs'
+import CKEditorComponent from '../page-information/Ckeditor'
 
 const getFaqs = (params) =>
     apiService.get('/faqs', { params }).then(res => res)
@@ -397,10 +398,8 @@ const FAQ = () => {
                                             <CTableRow key={faq._id}>
                                                 <CTableDataCell>{index + 1}</CTableDataCell>
                                                 <CTableDataCell>
-                                                    <div className="fw-semibold">{faq.question}</div>
-                                                    <small className="text-muted">
-                                                        {faq.answer.substring(0, 100)}...
-                                                    </small>
+                                                    <div className="fw-semibold" dangerouslySetInnerHTML={{__html:faq.question}}/>
+                                                    <small className="text-muted" dangerouslySetInnerHTML={{__html :faq.answer.substring(0, 100)}}/>
                                                 </CTableDataCell>
                                                 <CTableDataCell>
                                                     <CBadge color="info">{faq.type}</CBadge>
@@ -505,7 +504,7 @@ const FAQ = () => {
                 </CCard>
 
                 {/* ADD / EDIT MODAL */}
-                <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg">
+                <CModal fullscreen visible={showModal} onClose={() => setShowModal(false)} size="lg">
                     <CModalHeader>
                         <CModalTitle>
                             {editing ? 'Edit FAQ' : 'Add FAQ'}
@@ -515,23 +514,32 @@ const FAQ = () => {
                         <CRow className="g-3">
                             <CCol xs={12}>
                                 <CFormLabel>Question *</CFormLabel>
-                                <CFormInput
+                                <CKEditorComponent
+                                    value={formData.question}
+                                    onChange={(value) => setFormData(prev => ({ ...prev, question: value }))}
+
+                                />
+                                {/* <CFormInput
                                     value={formData.question}
                                     onChange={e => setFormData({ ...formData, question: e.target.value })}
                                     placeholder="Enter question..."
                                     required
-                                />
+                                /> */}
                             </CCol>
 
                             <CCol xs={12}>
                                 <CFormLabel>Answer *</CFormLabel>
-                                <CFormTextarea
+                                <CKEditorComponent
+                                    value={formData.answer}
+                                    onChange={(value) => setFormData(prev => ({ ...prev, answer: value }))}
+                                />
+                                {/* <CFormTextarea
                                     value={formData.answer}
                                     onChange={e => setFormData({ ...formData, answer: e.target.value })}
                                     placeholder="Enter answer..."
                                     rows={4}
                                     required
-                                />
+                                /> */}
                             </CCol>
 
                             <CCol md={6}>
