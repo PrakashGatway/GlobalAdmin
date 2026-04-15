@@ -142,8 +142,8 @@ const TinyEditor = ({ initialValue = '', onChange, disabled = false, header = tr
       `}
             </style>
             <Editor
-                // apiKey="4euds1y9bett392xgru7z0puauv422tdjrrn1ilvxn0gqolv"
-                 apiKey="l4qgr6sy1p9dh0avnwki17s0jwa8a3t76imusey6nab2t0jn"
+                apiKey="4euds1y9bett392xgru7z0puauv422tdjrrn1ilvxn0gqolv"
+                //  apiKey="l4qgr6sy1p9dh0avnwki17s0jwa8a3t76imusey6nab2t0jn"
                 value={initialValue && initialValue}
                 onEditorChange={(e) => { onChange(e) }}
                 init={initConfig}
