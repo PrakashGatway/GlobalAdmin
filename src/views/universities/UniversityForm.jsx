@@ -253,6 +253,40 @@ const UniversityForm = ({
         }))
     }
 
+    // Add these functions inside your UniversityForm component (before the return statement)
+
+const handleMoveSectionUp = (index) => {
+    if (index === 0) return; // Can't move first item up
+    
+    const updatedSections = [...formData.sections];
+    // Swap the sections
+    [updatedSections[index - 1], updatedSections[index]] = 
+    [updatedSections[index], updatedSections[index - 1]];
+    
+    // Update order numbers
+    updatedSections.forEach((section, idx) => {
+        section.order = idx + 1;
+    });
+    
+    setFormData(prev => ({ ...prev, sections: updatedSections }));
+}
+
+const handleMoveSectionDown = (index) => {
+    if (index === formData.sections.length - 1) return; // Can't move last item down
+    
+    const updatedSections = [...formData.sections];
+    // Swap the sections
+    [updatedSections[index], updatedSections[index + 1]] = 
+    [updatedSections[index + 1], updatedSections[index]];
+    
+    // Update order numbers
+    updatedSections.forEach((section, idx) => {
+        section.order = idx + 1;
+    });
+    
+    setFormData(prev => ({ ...prev, sections: updatedSections }));
+}
+
     const handleLogoUpload = async (e, key) => {
         const file = e.target.files[0]
         if (!file) return
@@ -1288,6 +1322,7 @@ const UniversityForm = ({
                     </CRow>
 
                     {/* Existing Sections */}
+                    {/* Existing Sections */}
                     {formData.sections.map((section, index) => (
                         <CCard key={index} className="mb-3">
                             <CCardBody>
@@ -1298,13 +1333,39 @@ const UniversityForm = ({
                                         }} />
                                         <small className="text-muted">Key: {section.section_key} | Order: {section.order}</small>
                                     </div>
-                                    <CButton
-                                        color="danger"
-                                        size="sm"
-                                        onClick={() => handleRemoveSection(index)}
-                                    >
-                                        <FaTrash />
-                                    </CButton>
+                                    <div className="d-flex gap-2">
+                                        {/* Up Button */}
+                                        <CButton
+                                            color="secondary"
+                                            size="sm"
+                                            onClick={() => handleMoveSectionUp(index)}
+                                            disabled={index === 0}
+                                            title="Move Up"
+                                        >
+                                            ↑
+                                        </CButton>
+
+                                        {/* Down Button */}
+                                        <CButton
+                                            color="secondary"
+                                            size="sm"
+                                            onClick={() => handleMoveSectionDown(index)}
+                                            disabled={index === formData.sections.length - 1}
+                                            title="Move Down"
+                                        >
+                                            ↓
+                                        </CButton>
+
+                                        {/* Delete Button */}
+                                        <CButton
+                                            color="danger"
+                                            size="sm"
+                                            onClick={() => handleRemoveSection(index)}
+                                            title="Delete Section"
+                                        >
+                                            <FaTrash />
+                                        </CButton>
+                                    </div>
                                 </div>
 
                                 <div className="mb-3">
@@ -1313,33 +1374,15 @@ const UniversityForm = ({
                                         value={section.heading || ""}
                                         onChange={(value) => handleUpdateSection(index, "heading", value)}
                                     />
-                                    {/* <CKEditor
-                                        editor={ClassicEditor}
-                                        data={section.heading || ""}
-                                        onChange={(event, editor) => {
-                                            const data = editor.getData();
-                                            handleUpdateSection(index, "heading", data);
-                                        }}
-                                    /> */}
                                 </div>
 
                                 <div>
                                     <CFormLabel>Content (HTML)</CFormLabel>
-                                    <TinyEditor header={false} initialValue={section.content || ""} onChange={(value) => handleUpdateSection(index, 'content', value)} />
-                                    {/* <CKEditor
-                                        editor={ClassicEditor}
-                                        data={section.content}
-                                        config={{
-                                            simpleUpload: {
-                                                uploadUrl: 'http://localhost:5000/api/upload'
-                                            }
-                                        }}
-                                        onChange={(event, editor) => {
-                                            const data = editor.getData();
-                                            handleUpdateSection(index, 'content', data);
-                                        }}
-                                    /> */}
-
+                                    <TinyEditor
+                                        header={false}
+                                        initialValue={section.content || ""}
+                                        onChange={(value) => handleUpdateSection(index, 'content', value)}
+                                    />
                                 </div>
                             </CCardBody>
                         </CCard>
