@@ -95,22 +95,25 @@ const FAQ = () => {
     const [totalPages, setTotalPages] = useState(1)
 
     // ================= FETCH =================
-    const fetchFaqs = useCallback(async () => {
-        setLoading(true)
-        setError('')
-        try {
-            const res = await getFaqs(filters)
-            if (res.success) {
-                setFaqs(res.data || [])
-                setTotal(res.count || 0)
-                setTotalPages(Math.ceil(res.count / filters.limit) || 1)
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to fetch FAQs')
-        } finally {
-            setLoading(false)
+   const fetchFaqs = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+        const res = await getFaqs(filters)
+
+        if (res.success) {
+            setFaqs(res.data || [])
+            setTotal(res.total || 0) // ✅ FIX
+            setTotalPages(Math.ceil((res.total || 0) / filters.limit) || 1) // ✅ FIX
+           
         }
-    }, [filters])
+
+    } catch (err) {
+        setError(err.message || 'Failed to fetch FAQs')
+    } finally {
+        setLoading(false)
+    }
+}, [filters])
 
     useEffect(() => {
         fetchFaqs()
