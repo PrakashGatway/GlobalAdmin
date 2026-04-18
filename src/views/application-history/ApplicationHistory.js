@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+// ApplicationManagement.jsx
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   CCard,
   CCardBody,
@@ -26,356 +27,237 @@ import {
   CForm,
   CFormLabel,
   CFormSelect,
+  CFormTextarea,
+  CPagination,
+  CPaginationItem,
+  CTabContent,
+  CTabPane,
+  CFormCheck
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
   cilMagnifyingGlass,
   cilFilter,
   cilCloudDownload,
-  cilInfo,
-  cilX,
   cilReload,
-  cilArrowBottom,
   cilPlus,
   cilPencil,
+  cilTrash,
 } from '@coreui/icons'
 import applicationService from '../../services/applicationService'
 import userService from '../../services/userService'
 import universityService from '../../services/universityService'
 import courseService from '../../services/courseService'
+import countryService from '../../services/countryService'
+import DocumentUpload from './DocumentUpload'
+import ApplicationDetailModal from './Application'
+// import ApplicationStepper from './ApplicationStepper'
 
-const ApplicationHistory = () => {
-  const [searchTerm, setSearchTerm] = useState('')
+const ApplicationManagement = () => {
+  // State for applications list
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [sortBy, setSortBy] = useState('updatedAt')
-  const [sortOrder, setSortOrder] = useState('desc')
-  const [showModal, setShowModal] = useState(false)
-  const [editingId, setEditingId] = useState(null)
-  const [users, setUsers] = useState([])
-  const [universities, setUniversities] = useState([])
-  const [courses, setCourses] = useState([])
-  const [formData, setFormData] = useState({
-    camsId: '',
-    student: '',
-    studentName: '',
-    passportNo: '',
-    studentId: '',
-    university: '',
-    urmDetails: {
-      name: '',
-      phone: '',
-    },
-    course: '',
-    intake: '',
-    primaryStatus: 'Pending',
-    secondaryStatus: '',
-    status: 'Active',
+
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
   })
 
-  // Fetch applications
-  const fetchApplications = async () => {
+  // Filter state
+  const [filters, setFilters] = useState({
+    search: '',
+    primaryStatus: '',
+    paymentStatus: '',
+    country: '',
+    course: '',
+    intake: '',
+    startDate: '',
+    endDate: ''
+  })
+
+  const [showFilters, setShowFilters] = useState(false)
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortOrder, setSortOrder] = useState('desc')
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [activeTab, setActiveTab] = useState(0)
+
+  // Dropdown data
+  const [users, setUsers] = useState([])
+  const [universities, setUniversities] = useState([])
+  const [countries, setCountries] = useState([])
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [selectedApplication, setSelectedApplication] = useState(null)
+
+  // Add this function to handle viewing application details
+  const handleViewDetails = (application) => {
+    setSelectedApplication(application)
+    setShowDetailModal(true)
+  }
+
+  // Add this function to refresh after updates
+  const handleApplicationUpdate = () => {
+    fetchApplications()
+  }
+
+  // Form data
+  const [formData, setFormData] = useState({
+    applicationNumber: '',
+    student: '',
+    country: '',
+    course: '',
+    intake: '',
+    paymentStatus: 'Pending',
+    expectations: {
+      understood: false,
+      agreed: false
+    },
+    documents: [],
+    OoshasDocuments: [],
+    extraRequirements: {},
+    backups: [],
+    primaryStatus: 'Pending',
+    isWithdrawn: false,
+    userNotes: '',
+    adminNotes: ''
+  })
+
+  // Status options
+  const primaryStatusOptions = [
+    'Pending',
+    'Started',
+    'ReviewbyOoshas',
+    'SubmitToSchool',
+    'AwaitingSchoolResponse',
+    'AdmissionProcessing',
+    'Refused',
+    'Withdrawn',
+    'PreArrival',
+    'Arrived',
+    'Completed'
+  ]
+
+  const paymentStatusOptions = ['Pending', 'Completed', 'Failed']
+
+  // Fetch applications with pagination and filters
+  const fetchApplications = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
       const params = {
-        page: 1,
-        limit: 100,
+        page: pagination.page,
+        limit: pagination.limit,
         sortBy,
         sortOrder,
+        ...filters
       }
-      if (searchTerm) {
-        params.search = searchTerm
-      }
+
+      // Remove empty filters
+      Object.keys(params).forEach(key => {
+        if (!params[key] || params[key] === '') {
+          delete params[key]
+        }
+      })
+
       const response = await applicationService.getApplications(params)
       if (response.success) {
         setApplications(response.data || [])
+        setPagination({
+          page: response.page || 1,
+          limit: response.limit || 10,
+          total: response.total || 0,
+          pages: response.pages || 0
+        })
       }
     } catch (err) {
       setError(err.message || 'Failed to fetch applications')
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination.page, pagination.limit, sortBy, sortOrder, filters])
 
   useEffect(() => {
     fetchApplications()
-    fetchUsers()
-    fetchUniversities()
-  }, [sortBy, sortOrder])
+  }, [fetchApplications])
 
-  // Fetch users for dropdown
-  const fetchUsers = async () => {
+  // Fetch dropdown data
+  const fetchDropdownData = async () => {
     try {
-      const response = await userService.getUsers({ limit: 1000 })
-      if (response.success) {
-        setUsers(response.data || [])
-      }
+      const [usersRes, universitiesRes, countriesRes] = await Promise.all([
+        userService.getUsers({ limit: 1000 }),
+        universityService.getUniversities({ limit: 1000 }),
+        countryService.getCountries({ limit: 200 })
+      ])
+
+      if (usersRes.success) setUsers(usersRes.data || [])
+      if (universitiesRes.success) setUniversities(universitiesRes.data || [])
+      if (countriesRes.success) setCountries(countriesRes.data || [])
     } catch (err) {
-      console.error('Failed to fetch users:', err)
+      console.error('Failed to fetch dropdown data:', err)
     }
   }
 
-  // Fetch universities for dropdown
-  const fetchUniversities = async () => {
-    try {
-      const response = await universityService.getUniversities({ limit: 1000 })
-      if (response.success) {
-        setUniversities(response.data || [])
-      }
-    } catch (err) {
-      console.error('Failed to fetch universities:', err)
-    }
+  useEffect(() => {
+    fetchDropdownData()
+  }, [])
+
+  // Handle filter changes
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+    setPagination(prev => ({ ...prev, page: 1 }))
   }
 
-  // Fetch courses when university is selected
-  const fetchCourses = async (universityId) => {
-    if (!universityId) {
-      setCourses([])
-      return
-    }
-    try {
-      const response = await courseService.getCourses({ limit: 1000 })
-      if (response.success) {
-        // Filter courses by university
-        const filteredCourses = (response.data || []).filter(
-          (course) => course.university?._id === universityId || course.university === universityId
-        )
-        setCourses(filteredCourses)
-      }
-    } catch (err) {
-      console.error('Failed to fetch courses:', err)
-    }
-  }
-
-  // Handle download all data
-  const handleDownloadAll = async () => {
-    setLoading(true)
-    try {
-      const response = await applicationService.downloadAllApplications()
-      if (response.success) {
-        // Convert to CSV format
-        const csvData = convertToCSV(response.data)
-        downloadCSV(csvData, 'all_student_data.csv')
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to download data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Convert data to CSV
-  const convertToCSV = (data) => {
-    const headers = [
-      'CAMS ID',
-      'Student Name',
-      'Passport No',
-      'Student ID',
-      'University Name',
-      'URM Name',
-      'URM Phone',
-      'Course Name',
-      'Intake',
-      'Primary Status',
-      'Secondary Status',
-      'Date Added',
-      'Date Modified',
-    ]
-
-    const rows = data.map((app) => [
-      app.camsId || '',
-      app.studentName || '',
-      app.passportNo || '',
-      app.studentId || '',
-      app.university?.name || '',
-      app.urmDetails?.name || '',
-      app.urmDetails?.phone || '',
-      app.course?.name || '',
-      app.intake || '',
-      app.primaryStatus || '',
-      app.secondaryStatus || '',
-      app.createdAt ? new Date(app.createdAt).toLocaleString() : '',
-      app.updatedAt ? new Date(app.updatedAt).toLocaleString() : '',
-    ])
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
-    ].join('\n')
-
-    return csvContent
-  }
-
-  // Download CSV file
-  const downloadCSV = (csvContent, filename) => {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', filename)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
-  // Handle form input change
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    if (name === 'urmName') {
-      setFormData((prev) => ({
-        ...prev,
-        urmDetails: { ...prev.urmDetails, name: value },
-      }))
-    } else if (name === 'urmPhone') {
-      setFormData((prev) => ({
-        ...prev,
-        urmDetails: { ...prev.urmDetails, phone: value },
-      }))
-    } else if (name === 'university') {
-      setFormData((prev) => ({ ...prev, [name]: value, course: '' }))
-      fetchCourses(value)
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
-    }
-    setError('')
-    setSuccess('')
+  const resetFilters = () => {
+    setFilters({
+      search: '',
+      primaryStatus: '',
+      paymentStatus: '',
+      country: '',
+      course: '',
+      intake: '',
+      startDate: '',
+      endDate: ''
+    })
+    setPagination(prev => ({ ...prev, page: 1 }))
   }
 
   // Handle add new application
   const handleAdd = () => {
     setFormData({
-      camsId: '',
+      applicationNumber: '',
       student: '',
-      studentName: '',
-      passportNo: '',
-      studentId: '',
-      university: '',
-      urmDetails: {
-        name: '',
-        phone: '',
-      },
+      country: '',
       course: '',
       intake: '',
+      paymentStatus: 'Pending',
+      expectations: {
+        understood: false,
+        agreed: false
+      },
+      documents: [],
+      OoshasDocuments: [],
+      extraRequirements: {},
+      backups: [],
       primaryStatus: 'Pending',
-      secondaryStatus: '',
-      status: 'Active',
+      isWithdrawn: false,
+      userNotes: '',
+      adminNotes: ''
     })
     setEditingId(null)
+    setActiveTab(0)
     setError('')
     setSuccess('')
     setShowModal(true)
   }
-
-  // Handle edit - populate form with application data
-  const handleEdit = (application) => {
-    setFormData({
-      camsId: application.camsId || '',
-      student: application.student?._id || application.student || '',
-      studentName: application.studentName || '',
-      passportNo: application.passportNo || '',
-      studentId: application.studentId || '',
-      university: application.university?._id || application.university || '',
-      urmDetails: {
-        name: application.urmDetails?.name || '',
-        phone: application.urmDetails?.phone || '',
-      },
-      course: application.course?._id || application.course || '',
-      intake: application.intake || '',
-      primaryStatus: application.primaryStatus || 'Pending',
-      secondaryStatus: application.secondaryStatus || '',
-      status: application.status || 'Active',
-    })
-    setEditingId(application._id || application.id)
-    setError('')
-    setSuccess('')
-    setShowModal(true)
-    if (application.university?._id || application.university) {
-      fetchCourses(application.university?._id || application.university)
-    }
-  }
-
-  // Handle form submit
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    // Validation
-    if (
-      !formData.camsId ||
-      !formData.student ||
-      !formData.studentName ||
-      !formData.passportNo ||
-      !formData.studentId ||
-      !formData.university ||
-      !formData.urmDetails.name ||
-      !formData.urmDetails.phone ||
-      !formData.course ||
-      !formData.intake
-    ) {
-      setError('Please fill in all required fields')
-      return
-    }
-
-    setLoading(true)
-    try {
-      if (editingId) {
-        // Update application
-        const response = await applicationService.updateApplication(editingId, formData)
-        if (response.success) {
-          setSuccess('Application updated successfully')
-          setShowModal(false)
-          setEditingId(null)
-          fetchApplications()
-        }
-      } else {
-        // Create application
-        const response = await applicationService.createApplication(formData)
-        if (response.success) {
-          setSuccess('Application created successfully')
-          setShowModal(false)
-          fetchApplications()
-        }
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to save application')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Reset form
-  const handleReset = () => {
-    setFormData({
-      camsId: '',
-      student: '',
-      studentName: '',
-      passportNo: '',
-      studentId: '',
-      university: '',
-      urmDetails: {
-        name: '',
-        phone: '',
-      },
-      course: '',
-      intake: '',
-      primaryStatus: 'Pending',
-      secondaryStatus: '',
-      status: 'Active',
-    })
-    setEditingId(null)
-    setError('')
-    setSuccess('')
-    setCourses([])
-  }
-
-  // Handle delete
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this application?')) {
+    if (!window.confirm('Are you sure you want to withdraw this application?')) {
       return
     }
 
@@ -383,24 +265,41 @@ const ApplicationHistory = () => {
     try {
       const response = await applicationService.deleteApplication(id)
       if (response.success) {
-        setSuccess('Application deleted successfully')
+        setSuccess('Application withdrawn successfully')
         fetchApplications()
       }
     } catch (err) {
-      setError(err.message || 'Failed to delete application')
+      setError(err.message || 'Failed to withdraw application')
     } finally {
       setLoading(false)
     }
   }
 
-  // Handle sort
-  const handleSort = (column) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortBy(column)
-      setSortOrder('desc')
+  // Get status badge color
+  const getStatusBadgeColor = (status) => {
+    const colors = {
+      'Pending': 'warning',
+      'Started': 'info',
+      'ReviewbyOoshas': 'primary',
+      'SubmitToSchool': 'secondary',
+      'AwaitingSchoolResponse': 'dark',
+      'AdmissionProcessing': 'info',
+      'Refused': 'danger',
+      'Withdrawn': 'secondary',
+      'PreArrival': 'success',
+      'Arrived': 'success',
+      'Completed': 'success'
     }
+    return colors[status] || 'light'
+  }
+
+  const getPaymentBadgeColor = (status) => {
+    const colors = {
+      'Pending': 'warning',
+      'Completed': 'success',
+      'Failed': 'danger'
+    }
+    return colors[status] || 'light'
   }
 
   // Format date
@@ -412,19 +311,55 @@ const ApplicationHistory = () => {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit',
+      minute: '2-digit'
     })
   }
+  const convertToCSV = (data) => {
+    const headers = [
+      'Application Number',
+      'Student Name',
+      'Student Email',
+      'Country',
+      'Course',
+      'Intake',
+      'Primary Status',
+      'Payment Status',
+      'Created At',
+      'Updated At'
+    ]
 
-  // Filter applications based on search
-  const filteredApplications = applications.filter(
-    (app) =>
-      !searchTerm ||
-      app.camsId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.passportNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.studentId?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+    const rows = data.map((app) => [
+      app.applicationNumber || '',
+      app.student?.name || '',
+      app.student?.email || '',
+      app.country || '',
+      app.course?.name || '',
+      app.intake || '',
+      app.primaryStatus || '',
+      app.paymentStatus || '',
+      formatDate(app.createdAt),
+      formatDate(app.updatedAt)
+    ])
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))
+    ].join('\n')
+
+    return csvContent
+  }
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', filename)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <CRow>
@@ -439,22 +374,33 @@ const ApplicationHistory = () => {
             {success}
           </CAlert>
         )}
+
         <CCard className="mb-4">
-          <CCardHeader className="d-flex justify-content-between align-items-center">
+          <CCardHeader className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 className="mb-0">
-              <strong>Application History</strong>
+              <strong>Application Management</strong>
             </h5>
             <div className="d-flex gap-2">
               <CButton color="primary" onClick={handleAdd}>
                 <CIcon icon={cilPlus} className="me-2" />
-                Add Application
+                New Application
+              </CButton>
+              {/* <CButton color="success" variant="outline" onClick={handleDownloadAll}>
+                <CIcon icon={cilCloudDownload} className="me-2" />
+                Export CSV
+              </CButton> */}
+              <CButton color="secondary" variant="outline" onClick={() => setShowFilters(!showFilters)}>
+                <CIcon icon={cilFilter} className="me-2" />
+                Filters
               </CButton>
               <CButton color="secondary" variant="outline" size="sm" onClick={fetchApplications}>
                 <CIcon icon={cilReload} />
               </CButton>
             </div>
           </CCardHeader>
+
           <CCardBody>
+            {/* Search Bar */}
             <CRow className="mb-3">
               <CCol md={6}>
                 <CInputGroup>
@@ -462,449 +408,243 @@ const ApplicationHistory = () => {
                     <CIcon icon={cilMagnifyingGlass} />
                   </CInputGroupText>
                   <CFormInput
-                    placeholder="Enter CAMS / Name / Pass..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by application number, student name, email..."
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
                   />
                 </CInputGroup>
               </CCol>
-              <CCol md={6} className="d-flex justify-content-end gap-2">
-                <CButton color="danger" onClick={handleDownloadAll} disabled={loading}>
-                  <CIcon icon={cilCloudDownload} className="me-2" />
-                  Download All Student Data
-                </CButton>
-                <CButton color="danger" variant="outline">
-                  <CIcon icon={cilFilter} className="me-2" />
-                  ALL FILTERS
-                </CButton>
-              </CCol>
             </CRow>
+
+            {/* Advanced Filters */}
+            {showFilters && (
+              <CCard className="mb-3 bg-light">
+                <CCardBody>
+                  <CRow className="g-3">
+                    <CCol md={3}>
+                      <CFormLabel>Primary Status</CFormLabel>
+                      <CFormSelect
+                        value={filters.primaryStatus}
+                        onChange={(e) => handleFilterChange('primaryStatus', e.target.value)}
+                      >
+                        <option value="">All Status</option>
+                        {primaryStatusOptions.map(status => (
+                          <option key={status} value={status}>{status}</option>
+                        ))}
+                      </CFormSelect>
+                    </CCol>
+                    <CCol md={3}>
+                      <CFormLabel>Payment Status</CFormLabel>
+                      <CFormSelect
+                        value={filters.paymentStatus}
+                        onChange={(e) => handleFilterChange('paymentStatus', e.target.value)}
+                      >
+                        <option value="">All</option>
+                        {paymentStatusOptions.map(status => (
+                          <option key={status} value={status}>{status}</option>
+                        ))}
+                      </CFormSelect>
+                    </CCol>
+                    <CCol md={3}>
+                      <CFormLabel>Country</CFormLabel>
+                      <CFormSelect
+                        value={filters.country}
+                        onChange={(e) => handleFilterChange('country', e.target.value)}
+                      >
+                        <option value="">All Countries</option>
+                        {countries.map(country => (
+                          <option key={country._id} value={country._id}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </CFormSelect>
+                    </CCol>
+                    <CCol md={3}>
+                      <CFormLabel>Intake</CFormLabel>
+                      <CFormInput
+                        type="text"
+                        placeholder="e.g., September 2025"
+                        value={filters.intake}
+                        onChange={(e) => handleFilterChange('intake', e.target.value)}
+                      />
+                    </CCol>
+                    <CCol md={3}>
+                      <CFormLabel>Start Date</CFormLabel>
+                      <CFormInput
+                        type="date"
+                        value={filters.startDate}
+                        onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                      />
+                    </CCol>
+                    <CCol md={3}>
+                      <CFormLabel>End Date</CFormLabel>
+                      <CFormInput
+                        type="date"
+                        value={filters.endDate}
+                        onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                      />
+                    </CCol>
+                    <CCol md={12}>
+                      <CButton color="secondary" size="sm" onClick={resetFilters}>
+                        Reset Filters
+                      </CButton>
+                    </CCol>
+                  </CRow>
+                </CCardBody>
+              </CCard>
+            )}
+
+            {/* Applications Table */}
             {loading ? (
               <div className="text-center py-5">
                 <CSpinner />
               </div>
             ) : (
-              <CTable align="middle" className="mb-0 border" hover >
-                <CTableHead color="light">
-                  <CTableRow>
-                    <CTableHeaderCell>CAMS ID</CTableHeaderCell>
-                    <CTableHeaderCell>Student Name</CTableHeaderCell>
-                    <CTableHeaderCell>University Name</CTableHeaderCell>
-                    <CTableHeaderCell>Course Name</CTableHeaderCell>
-                    <CTableHeaderCell>Status</CTableHeaderCell>
-                    <CTableHeaderCell>Date Added</CTableHeaderCell>
-                    <CTableHeaderCell
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('updatedAt')}
-                    >
-                      Date Modified
-                      {sortBy === 'updatedAt' && (
-                        <CIcon
-                          icon={cilArrowBottom}
-                          className="ms-2"
-                          style={{
-                            transform: sortOrder === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)',
-                          }}
-                        />
-                      )}
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Action</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {filteredApplications.length === 0 ? (
+              <>
+                <CTable align="middle" className="mb-0 border" hover responsive>
+                  <CTableHead color="light">
                     <CTableRow>
-                      <CTableDataCell colSpan="8" className="text-center py-5">
-                        <div className="text-body-secondary">No applications found</div>
-                      </CTableDataCell>
+                      <CTableHeaderCell>App. Number</CTableHeaderCell>
+                      <CTableHeaderCell>Student</CTableHeaderCell>
+                      <CTableHeaderCell>Course</CTableHeaderCell>
+                      <CTableHeaderCell>Intake</CTableHeaderCell>
+                      <CTableHeaderCell>Primary Status</CTableHeaderCell>
+                      <CTableHeaderCell>Payment</CTableHeaderCell>
+                      <CTableHeaderCell>Created</CTableHeaderCell>
+                      <CTableHeaderCell className="text-center">Actions</CTableHeaderCell>
                     </CTableRow>
-                  ) : (
-                    filteredApplications.map((app, index) => (
-                      <CTableRow key={app._id || app.id}>
-                        <CTableDataCell>
-                          <a
-                            href={`#`}
-                            style={{ color: '#0d6efd', textDecoration: 'none' }}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              // Handle CAMS ID click - could navigate to detail page
-                            }}
-                          >
-                            {app.camsId}
-                          </a>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>
-                            <strong>{app.studentName}</strong>
-                            <br />
-                            <small className="text-body-secondary">
-                              Passport No: {app.passportNo}
-                            </small>
-                            <br />
-                            <small className="text-body-secondary">
-                              Student ID: {app.studentId}
-                            </small>
-                          </div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>
-                            <strong>{app.university?.name || 'N/A'}</strong>
-                            <br />
-                            <small className="text-body-secondary">
-                              URM Details: {app.urmDetails?.name || 'N/A'},{' '}
-                              {app.urmDetails?.phone || 'N/A'}
-                            </small>
-                          </div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>
-                            <strong>{app.course?.name || 'N/A'}</strong>
-                            <br />
-                            <small className="text-body-secondary">
-                              Intake: {app.intake || 'N/A'}
-                            </small>
-                          </div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <div>
-                            <CBadge
-                              color={
-                                app.primaryStatus === 'Case Closed'
-                                  ? 'success'
-                                  : app.primaryStatus === 'Application Refused'
-                                  ? 'danger'
-                                  : app.primaryStatus === 'Offer Received'
-                                  ? 'info'
-                                  : 'warning'
-                              }
-                              className="mb-1"
-                            >
-                              {app.primaryStatus || 'Pending'}
-                            </CBadge>
-                            {app.secondaryStatus && (
-                              <div>
-                                <small className="text-body-secondary">{app.secondaryStatus}</small>
-                              </div>
-                            )}
-                          </div>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <small>{formatDate(app.createdAt)}</small>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <small>{formatDate(app.updatedAt)}</small>
-                        </CTableDataCell>
-                        <CTableDataCell className="text-center">
-                          <CButton
-                            color="primary"
-                            variant="outline"
-                            size="sm"
-                            className="me-2"
-                            title="Edit Application"
-                            onClick={() => handleEdit(app)}
-                          >
-                            <CIcon icon={cilPencil} />
-                          </CButton>
-                          <CButton
-                            color="danger"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(app._id || app.id)}
-                            title="Delete"
-                          >
-                            <CIcon icon={cilX} />
-                          </CButton>
+                  </CTableHead>
+                  <CTableBody>
+                    {applications.length === 0 ? (
+                      <CTableRow>
+                        <CTableDataCell colSpan="8" className="text-center py-5">
+                          <div className="text-body-secondary">No applications found</div>
                         </CTableDataCell>
                       </CTableRow>
-                    ))
-                  )}
-                </CTableBody>
-              </CTable>
+                    ) : (
+                      applications.map((app) => (
+                        <CTableRow key={app._id}>
+                          <CTableDataCell>
+                            <strong>{app.applicationNumber}</strong>
+                          </CTableDataCell>
+                          <CTableDataCell>
+                            <div>
+                              <strong>{app.student?.name || 'N/A'}</strong>
+                              <br />
+                              <small className="text-body-secondary">{app.student?.email || 'N/A'}</small>
+                            </div>
+                          </CTableDataCell>
+                          <CTableDataCell>
+                            <div>
+                              <strong>{app.course?.name || 'N/A'}</strong>
+                              <br />
+                              <small className="text-body-secondary">
+                                {app.course?.university?.name || 'N/A'}
+                              </small>
+                            </div>
+                          </CTableDataCell>
+                          <CTableDataCell>{app.intake}</CTableDataCell>
+                          <CTableDataCell>
+                            <CBadge color={getStatusBadgeColor(app.primaryStatus)}>
+                              {app.primaryStatus}
+                            </CBadge>
+                          </CTableDataCell>
+                          <CTableDataCell>
+                            <CBadge color={getPaymentBadgeColor(app.paymentStatus)}>
+                              {app.paymentStatus}
+                            </CBadge>
+                          </CTableDataCell>
+                          <CTableDataCell>
+                            <small>{formatDate(app.createdAt)}</small>
+                          </CTableDataCell>
+                          <CTableDataCell className="text-center">
+                            <CButton
+                              color="info"
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                              title="View Details"
+                              onClick={() => handleViewDetails(app)}
+                            >
+                              <CIcon icon={cilPencil} />
+                            </CButton>
+
+                            {app.paymentStatus === 'Pending' && !app.isWithdrawn && (
+                              <CButton
+                                color="danger"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(app._id)}
+                                title="Withdraw"
+                              >
+                                <CIcon icon={cilTrash} />
+                              </CButton>
+                            )}
+                          </CTableDataCell>
+                        </CTableRow>
+                      ))
+                    )}
+                  </CTableBody>
+                </CTable>
+
+                {/* Pagination */}
+                {pagination.pages > 1 && (
+                  <div className="d-flex justify-content-center mt-3">
+                    <CPagination>
+                      <CPaginationItem
+                        disabled={pagination.page === 1}
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                      >
+                        Previous
+                      </CPaginationItem>
+                      {[...Array(Math.min(pagination.pages, 5))].map((_, i) => {
+                        let pageNum
+                        if (pagination.pages <= 5) {
+                          pageNum = i + 1
+                        } else if (pagination.page <= 3) {
+                          pageNum = i + 1
+                        } else if (pagination.page >= pagination.pages - 2) {
+                          pageNum = pagination.pages - 4 + i
+                        } else {
+                          pageNum = pagination.page - 2 + i
+                        }
+                        return (
+                          <CPaginationItem
+                            key={pageNum}
+                            active={pageNum === pagination.page}
+                            onClick={() => setPagination(prev => ({ ...prev, page: pageNum }))}
+                          >
+                            {pageNum}
+                          </CPaginationItem>
+                        )
+                      })}
+                      <CPaginationItem
+                        disabled={pagination.page === pagination.pages}
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                      >
+                        Next
+                      </CPaginationItem>
+                    </CPagination>
+                  </div>
+                )}
+              </>
             )}
           </CCardBody>
         </CCard>
-
-        {/* Add/Edit Application Modal */}
-        <CModal
-          visible={showModal}
-          onClose={() => {
-            setShowModal(false)
-            handleReset()
-          }}
-          size="lg"
-        >
-          <CModalHeader>
-            <CModalTitle>{editingId ? 'Edit Application' : 'Add New Application'}</CModalTitle>
-          </CModalHeader>
-          <CForm onSubmit={handleSubmit}>
-            <CModalBody>
-              {error && (
-                <CAlert color="danger" className="mb-3">
-                  {error}
-                </CAlert>
-              )}
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="camsId">
-                      CAMS ID <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="camsId"
-                      name="camsId"
-                      value={formData.camsId}
-                      onChange={handleInputChange}
-                      placeholder="Enter CAMS ID"
-                      required
-                      disabled={!!editingId}
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="student">
-                      Student <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormSelect
-                      id="student"
-                      name="student"
-                      value={formData.student}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Select Student</option>
-                      {users.map((user) => (
-                        <option key={user._id || user.id} value={user._id || user.id}>
-                          {user.name} ({user.email})
-                        </option>
-                      ))}
-                    </CFormSelect>
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="studentName">
-                      Student Name <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="studentName"
-                      name="studentName"
-                      value={formData.studentName}
-                      onChange={handleInputChange}
-                      placeholder="Enter student name"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="passportNo">
-                      Passport No <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="passportNo"
-                      name="passportNo"
-                      value={formData.passportNo}
-                      onChange={handleInputChange}
-                      placeholder="Enter passport number"
-                      required
-                    />
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="studentId">
-                      Student ID <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="studentId"
-                      name="studentId"
-                      value={formData.studentId}
-                      onChange={handleInputChange}
-                      placeholder="Enter student ID"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="university">
-                      University <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormSelect
-                      id="university"
-                      name="university"
-                      value={formData.university}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Select University</option>
-                      {universities.map((uni) => (
-                        <option key={uni._id || uni.id} value={uni._id || uni.id}>
-                          {uni.name}
-                        </option>
-                      ))}
-                    </CFormSelect>
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="urmName">
-                      URM Name <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="urmName"
-                      name="urmName"
-                      value={formData.urmDetails.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter URM name"
-                      required
-                    />
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="urmPhone">
-                      URM Phone <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="tel"
-                      id="urmPhone"
-                      name="urmPhone"
-                      value={formData.urmDetails.phone}
-                      onChange={handleInputChange}
-                      placeholder="Enter URM phone"
-                      required
-                    />
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="course">
-                      Course <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormSelect
-                      id="course"
-                      name="course"
-                      value={formData.course}
-                      onChange={handleInputChange}
-                      required
-                      disabled={!formData.university}
-                    >
-                      <option value="">{formData.university ? 'Select Course' : 'Select University first'}</option>
-                      {courses.map((course) => (
-                        <option key={course._id || course.id} value={course._id || course.id}>
-                          {course.name}
-                        </option>
-                      ))}
-                    </CFormSelect>
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="intake">
-                      Intake <span className="text-danger">*</span>
-                    </CFormLabel>
-                    <CFormInput
-                      type="text"
-                      id="intake"
-                      name="intake"
-                      value={formData.intake}
-                      onChange={handleInputChange}
-                      placeholder="e.g., January/February 2025"
-                      required
-                    />
-                  </div>
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="primaryStatus">Primary Status</CFormLabel>
-                    <CFormSelect
-                      id="primaryStatus"
-                      name="primaryStatus"
-                      value={formData.primaryStatus}
-                      onChange={handleInputChange}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Under Review">Under Review</option>
-                      <option value="Offer Received">Offer Received</option>
-                      <option value="Case Closed">Case Closed</option>
-                      <option value="Application Refused">Application Refused</option>
-                      <option value="Withdrawn">Withdrawn</option>
-                    </CFormSelect>
-                  </div>
-                </CCol>
-                <CCol md={6}>
-                  <div className="mb-3">
-                    <CFormLabel htmlFor="status">Status</CFormLabel>
-                    <CFormSelect
-                      id="status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                      <option value="Archived">Archived</option>
-                    </CFormSelect>
-                  </div>
-                </CCol>
-              </CRow>
-              <div className="mb-3">
-                <CFormLabel htmlFor="secondaryStatus">Secondary Status</CFormLabel>
-                <CFormInput
-                  type="text"
-                  id="secondaryStatus"
-                  name="secondaryStatus"
-                  value={formData.secondaryStatus}
-                  onChange={handleInputChange}
-                  placeholder="Enter secondary status (optional)"
-                />
-              </div>
-            </CModalBody>
-            <CModalFooter>
-              <CButton
-                color="secondary"
-                onClick={() => {
-                  setShowModal(false)
-                  handleReset()
-                }}
-              >
-                Cancel
-              </CButton>
-              <CButton color="primary" type="submit" disabled={loading}>
-                {loading ? (
-                  <>
-                    <CSpinner size="sm" className="me-2" />
-                    Saving...
-                  </>
-                ) : editingId ? (
-                  'Update Application'
-                ) : (
-                  'Add Application'
-                )}
-              </CButton>
-            </CModalFooter>
-          </CForm>
-        </CModal>
+        {showDetailModal && (
+          <ApplicationDetailModal
+            visible={showDetailModal}
+            application={selectedApplication}
+            onClose={() => {
+              setShowDetailModal(false)
+              setSelectedApplication(null)
+            }}
+            onUpdate={handleApplicationUpdate}
+          />
+        )}
       </CCol>
     </CRow>
   )
 }
 
-export default ApplicationHistory
+export default ApplicationManagement

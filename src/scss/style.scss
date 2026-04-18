@@ -9,6 +9,13 @@ body {
   background-color: var(--cui-tertiary-bg);
 }
 
+.line-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;   /* 👈 number of lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .wrapper {
   width: 100%;
   padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
