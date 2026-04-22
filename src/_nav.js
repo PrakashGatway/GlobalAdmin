@@ -124,6 +124,12 @@ const adminRoutes = [
   },
   {
     component: CNavItem,
+    name: 'Payments',
+    to: '/payments',
+    icon: <CIcon icon={cilWallet} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Application',
     to: '/application-history',
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
@@ -134,7 +140,7 @@ const adminRoutes = [
     to: '/countries',
     icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
   },
-    {
+  {
     component: CNavItem,
     name: 'Leads',
     to: '/contact',
@@ -147,13 +153,12 @@ const adminRoutes = [
     to: '/coupons',
     icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
   },
-    {
+  {
     component: CNavItem,
     name: 'Notification',
     to: '/notification',
     icon: <CIcon icon={cilBell} customClassName="nav-icon" />,
   },
-
   {
     component: CNavItem,
     name: 'Support',
@@ -162,12 +167,41 @@ const adminRoutes = [
   }
 ]
 
-const managerRoutes =[
+const managerRoutes = [
   {
     component: CNavItem,
     name: 'Dashboard',
     to: '/dashboard',
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+  },
+
+  {
+    component: CNavGroup,
+    name: 'Course Management',
+    to: '/',
+    icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Categories',
+        to: '/courses/categories',
+      },
+      {
+        component: CNavItem,
+        name: 'Subjects',
+        to: '/subjects',
+      },
+      {
+        component: CNavItem,
+        name: 'Programs',
+        to: '/courses',
+      },
+      {
+        component: CNavItem,
+        name: 'Scholarships',
+        to: '/scholarship',
+      },
+    ],
   },
   {
     component: CNavGroup,
@@ -220,7 +254,7 @@ const managerRoutes =[
       }
     ],
   },
-    {
+  {
     component: CNavItem,
     name: 'Universities',
     to: '/universities',

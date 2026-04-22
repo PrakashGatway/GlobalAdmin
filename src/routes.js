@@ -24,6 +24,7 @@ const ProfileSettings = React.lazy(() => import('./views/profile/ProfileSettings
 const Coupons = React.lazy(() => import('./views/coupons/Coupons'))
 const ApplicationHistory = React.lazy(() => import('./views/application-history/ApplicationHistory'))
 const PageInformation = React.lazy(() => import('./views/page-information/PageInformation'))
+const PaymentManagement = React.lazy(() => import('./views/payment/Payment'))
 
 
 const adminRoutes = [
@@ -40,6 +41,7 @@ const adminRoutes = [
   { path: '/website/pages', name: 'Pages', element: PageInformation },
   { path: '/categories', name: 'Blog Categories', element: BlogCategories },
   { path: '/blogs', name: 'Blog Categories', element: Blogs },
+  { path: '/payments', name: 'Payment', element: PaymentManagement },
   { path: '/blogs/create', name: 'Blog Categories', element: BlogForm },
   { path: '/blogs/:id', name: 'Blog Categories', element: BlogForm },
   { path: '/testimonials', name: 'Testimonials', element: Testimonials },
@@ -48,8 +50,7 @@ const adminRoutes = [
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/scholarship', name: 'Scholarships', element: Scholarships },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
-  { path: '/notification', name: 'Notification', element:  AdminNotifications},
-
+  { path: '/notification', name: 'Notification', element: AdminNotifications }
 ]
 
 const managerRoutes = [
@@ -64,7 +65,10 @@ const managerRoutes = [
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
   { path: '/universities', name: 'Universities', element: Universities },
-
+  { path: '/courses', name: 'Courses', element: Courses },
+  { path: '/courses/categories', name: 'Courses Categories', element: CourseCategories },
+  { path: '/subjects', name: 'Subjects', element: Subjects },
+  { path: '/scholarship', name: 'Scholarships', element: Scholarships }
 ]
 
 const routes = {
