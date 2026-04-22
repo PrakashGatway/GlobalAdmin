@@ -65,7 +65,7 @@ import applicationService from '../../services/applicationService'
 import courseService from '../../services/courseService'
 import DocumentUploadModal from './DocumentUpload'
 import CKEditorComponent from '../page-information/Ckeditor'
-import DocumentDetailModal from './doucmentMoal'
+import DocumentDetailModal from './DoucmentMoal'
 
 const ApplicationDetailModal = ({ visible, application, onClose, onUpdate }) => {
     const [activeTab, setActiveTab] = useState(0)
