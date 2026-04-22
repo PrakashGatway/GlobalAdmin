@@ -77,7 +77,7 @@ const ApplicationDetailModal = ({ visible, application, onClose, onUpdate }) => 
     const [showDocUpload, setShowDocUpload] = useState(false)
     const [showRequirementForm, setShowRequirementForm] = useState(false)
     const [selectedDoc, setSelectedDoc] = useState(null);
-const [showDocDetail, setShowDocDetail] = useState(false);
+    const [showDocDetail, setShowDocDetail] = useState(false);
     const [newRequirement, setNewRequirement] = useState({
         type: 'user',
         name: '',
@@ -1278,11 +1278,11 @@ const [showDocDetail, setShowDocDetail] = useState(false);
                     </div>
                 </CModalFooter>
             </CModal>
-<DocumentDetailModal
-  visible={showDocDetail}
-  doc={selectedDoc}
-  onClose={() => setShowDocDetail(false)}
-/>
+            <DocumentDetailModal
+                visible={showDocDetail}
+                doc={selectedDoc}
+                onClose={() => setShowDocDetail(false)}
+            />
             {/* Document Upload Modal */}
             <DocumentUploadModal
                 visible={showDocUpload}
