@@ -98,7 +98,10 @@ const DocumentDetailModal = ({ visible, onClose, doc }) => {
               ))
             )}
           </div>
-        )}
+        )}    
+
+
+        
 
         {/* Answer */}
         {doc.answer && (
