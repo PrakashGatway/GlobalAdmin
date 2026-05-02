@@ -42,6 +42,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     status: 'Draft',
     isFeatured: false,
     isNavbar: false,
+    isFooter: false,
     navbarTitle: '',
     navbarImage: '',
     cardImage: '',
@@ -110,6 +111,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       canonicalUrl: seoData.canonicalUrl || page.canonicalUrl || '',
       status: page.status || 'Draft',
       isFeatured: page.isFeatured || false,
+      isFooter: page.isFooter || false,
       isNavbar: page.isNavbar || false,
       navbarTitle: page.navbarTitle || '',
       navbarImage: page.navbarImage || '',
@@ -577,6 +579,18 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
 
             <CRow className="mt-4">
               <CCol md={12} className="d-flex gap-4">
+                <CFormCheck
+                  id="isFooter"
+                  name="isFooter"
+                  label="Show in Footer"
+                  checked={formData.isFooter}
+                  onChange={handleBasicInfoChange}
+                />
+                <div className="form-text ms-2">
+                  Featured pages appear on the footer
+                </div>
+              </CCol>
+              <CCol md={12} className="d-flex gap-4 mt-2">
                 <CFormCheck
                   id="isFeatured"
                   name="isFeatured"

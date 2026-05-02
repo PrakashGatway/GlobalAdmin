@@ -20,6 +20,7 @@ import CIcon from '@coreui/icons-react';
 import { cilDollar, cilCalendar, cilTag, cilPlus, cilTrash } from '@coreui/icons';
 import apiService from '../../services/apiService';
 import { FaPlus, FaTrash } from 'react-icons/fa';
+import CKEditorComponent from '../page-information/Ckeditor';
 // import { CKEditor } from '@ckeditor/ckeditor5-react';
 // import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 

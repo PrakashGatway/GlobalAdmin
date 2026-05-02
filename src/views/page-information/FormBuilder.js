@@ -404,14 +404,14 @@ const DynamicFormBuilder = ({
       case "richtext":
         return (
           <div className="position-relative">
-            <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+            <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
           </div>
         )
 
       case "richtext2":
         return (
           <div className="position-relative">
-            <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+            <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
           </div>
         )
 
@@ -759,7 +759,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
       case "richtext2":
         return (
           <div className="position-relative">
-            <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+            <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
           </div>
         );
       case "file":
@@ -790,7 +790,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
         )
       case "richtext":
         return (
-          <TinyEditor header={false} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+          <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
         )
       case 'select':
         return (
