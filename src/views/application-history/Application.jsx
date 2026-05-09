@@ -617,6 +617,9 @@ const ApplicationDetailModal = ({ visible, application, onClose, onUpdate }) => 
                                                 <strong>Intake:</strong> {application.intake || 'N/A'}
                                             </div>
                                             <div className="mb-3">
+                                                <strong>Assignto:</strong> {application.assignto || 'N/A'}
+                                            </div>
+                                            <div className="mb-3">
                                                 <strong>Payment Status:</strong>{' '}
                                                 <CBadge color={getStatusBadgeColor(application.paymentStatus)}>
                                                     {application.paymentStatus}

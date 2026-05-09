@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
-
+import { Toaster } from "react-hot-toast";
 import './scss/examples.scss'
 
 // Auth Context
@@ -12,6 +12,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
 import ErrorBoundary from './components/ErrorBoundary'
+import { requestNotificationPermission } from './notificaion'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -25,6 +26,11 @@ const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.theme)
+
+  useEffect(() => {
+    console.log("requestNotificationPermission...")
+    requestNotificationPermission()
+  },[requestNotificationPermission]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.href.split('?')[1])
@@ -43,6 +49,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <Toaster position="top-right" />
         <AuthProvider>
           <Suspense
             fallback={
