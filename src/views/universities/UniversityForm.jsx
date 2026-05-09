@@ -1379,7 +1379,7 @@ const handleMoveSectionDown = (index) => {
                                 <div>
                                     <CFormLabel>Content (HTML)</CFormLabel>
                                     <TinyEditor
-                                        header={false}
+                                        header={true}
                                         initialValue={section.content || ""}
                                         onChange={(value) => handleUpdateSection(index, 'content', value)}
                                     />
