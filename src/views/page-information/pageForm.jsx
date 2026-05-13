@@ -47,7 +47,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     navbarImage: '',
     cardImage: '',
     // Country specific
-    country: "",
+    country: null,
     // Content sections
     content: {},
   })
