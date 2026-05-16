@@ -472,6 +472,7 @@ const Users = () => {
                       <CTableHeaderCell>Role</CTableHeaderCell>
                       <CTableHeaderCell>Status</CTableHeaderCell>
                       <CTableHeaderCell>Profile Status</CTableHeaderCell>
+                      <CTableHeaderCell>Assign To</CTableHeaderCell>
                       <CTableHeaderCell>Joined</CTableHeaderCell>
                       <CTableHeaderCell>Last Login</CTableHeaderCell>
                       <CTableHeaderCell>Actions</CTableHeaderCell>
@@ -558,6 +559,13 @@ const Users = () => {
                           })()}
                         </CTableDataCell>
 
+                        <CTableDataCell>
+                          {user?.assignee ? (
+                            <div>
+                              {user?.assignee?.name}
+                            </div>
+                          ) : 'Never'}
+                        </CTableDataCell>
                         <CTableDataCell>
                           {user.lastLogin ? (
                             <div>

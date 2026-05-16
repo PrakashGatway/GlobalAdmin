@@ -78,6 +78,7 @@ const Countries = () => {
   const [deletingId, setDeletingId] = useState(null)
 
   const [imagePreview, setImagePreview] = useState('')
+  const [imagePreview1, setImagePreview1] = useState('')
   const [uploadingImage, setUploadingImage] = useState(false)
 
   // Filters + Pagination
@@ -100,57 +101,46 @@ const Countries = () => {
     currency: '',
     status: 'Active',
     isFeatured: 'No',
-    flg: '',
+    flg: "", image: "",
     sections: [],
     extraStatus: 'Active',
     faq: [],
     visa_details: {
       type: {
-                    source_country_iso: '',
-                    destination_country_iso: '',
-                    visa_type: '',
-                    title: '',
-                    description: '',
-                    last_updated: new Date().toISOString().split('T')[0],
-                    entry_classification: {
-                      type: 'Visa Required',
-                      is_interview_mandatory: false,
-                      visa_category: ''
-                    },
-                    validity_rules: {
-                      passport_validity_months_required: 0,
-                      blank_pages_required: 0,
-                      visa_validity_days: null,
-                      max_stay_duration_days: null,
-                      multiple_entry_allowed: false
-                    },
-                    fees: [],
-                    required_documents: {
-                      mandatory: [],
-                      supporting: [],
-                      financial_proof: {
-                        bank_statement_months: 0,
-                        // tax_returns_years: 0,
-                        min_liquid_balance: null,
-                        // blocked_account_required: false,
-                        // sponsor_allowed: false
-                      },
-                      // photo_specifications: {
-                      //   dimensions: '',
-                      //   background_color: '',
-                      //   digital_required: false,
-                      //   physical_copies_required: 0,
-                      //   biometric_required: false
-                      // }
-                    },
-                    process_steps: [],
-                    // biometrics_required: false,
-                    medical_insurance_required: false,
-                    aps_certificate_required: false,
-                    average_processing_time_days: 0,
-                    other: {},
-                    status: 'published'
-                  }
+        source_country_iso: '',
+        destination_country_iso: '',
+        visa_type: '',
+        title: '',
+        description: '',
+        last_updated: new Date().toISOString().split('T')[0],
+        entry_classification: {
+          type: 'Visa Required',
+          is_interview_mandatory: false,
+          visa_category: ''
+        },
+        validity_rules: {
+          passport_validity_months_required: 0,
+          blank_pages_required: 0,
+          visa_validity_days: null,
+          max_stay_duration_days: null,
+          multiple_entry_allowed: false
+        },
+        fees: [],
+        required_documents: {
+          mandatory: [],
+          supporting: [],
+          financial_proof: {
+            bank_statement_months: 0,
+            min_liquid_balance: null,
+          },
+        },
+        process_steps: [],
+        medical_insurance_required: false,
+        aps_certificate_required: false,
+        average_processing_time_days: 0,
+        other: {},
+        status: 'published'
+      }
     }
   })
 
@@ -372,7 +362,7 @@ const Countries = () => {
   const handleUpdateSection = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      sections: prev.sections.map((section, i) => 
+      sections: prev.sections.map((section, i) =>
         i === index ? { ...section, [field]: value } : section
       )
     }))
@@ -381,7 +371,7 @@ const Countries = () => {
   const handleUpdateFaq = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      faq: prev.faq.map((faq, i) => 
+      faq: prev.faq.map((faq, i) =>
         i === index ? { ...faq, [field]: value } : faq
       )
     }))
@@ -519,7 +509,8 @@ const Countries = () => {
   }
 
   // ================= IMAGE UPLOAD =================
-  const handleImageChange = async (e) => {
+  const handleImageChange = async (e, type) => {
+    console.log("E", type)
     const file = e.target.files[0]
     if (!file) return
 
@@ -539,8 +530,14 @@ const Countries = () => {
     try {
       const res = await uploadService.uploadImage(file)
       if (res.success) {
-        setFormData(prev => ({ ...prev, flg: res.data.url }))
-        setImagePreview(res.data.url)
+        if (type === 'flag') {
+          setFormData(prev => ({ ...prev, flg: res.data.url }))
+          setImagePreview(res.data.url)
+        } else {
+
+          setFormData(prev => ({ ...prev, image: res.data.url }))
+          setImagePreview1(res.data.url)
+        }
       } else {
         setError(res.message || 'Image upload failed')
       }
@@ -560,59 +557,39 @@ const Countries = () => {
       currency: country.currency || '',
       status: country.status || 'Active',
       flg: country.flg || '',
+      image: country.image || '',
       sections: country.extra_content?.[0]?.sections || [],
       extraStatus: country.extra_content?.[0]?.status || 'Active',
       faq: country.extra_content?.[0]?.faq || [],
       visa_details: country.visa_details || {
-         type: {
-                    source_country_iso: '',
-                    destination_country_iso: '',
-                    visa_type: '',
-                    title: '',
-                    description: '',
-                    last_updated: new Date().toISOString().split('T')[0],
-                    entry_classification: {
-                      type: 'Visa Required',
-                      is_interview_mandatory: false,
-                      visa_category: ''
-                    },
-                    validity_rules: {
-                      passport_validity_months_required: 0,
-                      blank_pages_required: 0,
-                      visa_validity_days: null,
-                      max_stay_duration_days: null,
-                      multiple_entry_allowed: false
-                    },
-                    fees: [],
-                    required_documents: {
-                      mandatory: [],
-                      supporting: [],
-                      financial_proof: {
-                        bank_statement_months: 0,
-                        // tax_returns_years: 0,
-                        min_liquid_balance: null,
-                        // blocked_account_required: false,
-                        // sponsor_allowed: false
-                      },
-                      // photo_specifications: {
-                      //   dimensions: '',
-                      //   background_color: '',
-                      //   digital_required: false,
-                      //   physical_copies_required: 0,
-                      //   biometric_required: false
-                      // }
-                    },
-                    process_steps: [],
-                    // biometrics_required: false,
-                    medical_insurance_required: false,
-                    aps_certificate_required: false,
-                    average_processing_time_days: 0,
-                    other: {},
-                    status: 'published'
-                  }
+        type: {
+          source_country_iso: country.extra_content?.[0]?.visa_details.type.source_country_iso || '',
+          destination_country_iso: country.extra_content?.[0]?.visa_details.type.destination_country_iso || '',
+          visa_type: country.extra_content?.[0]?.visa_details.type.visa_type || '',
+          title: country.extra_content?.[0]?.visa_details.type.title || '',
+          description: country.extra_content?.[0]?.visa_details.type.description || '',
+          last_updated: new Date().toISOString().split('T')[0],
+          entry_classification: country.extra_content?.[0]?.visa_details.type.entry_classification || {},
+          // {
+          //   type: 'Visa Required',
+          //   is_interview_mandatory: false,
+          //   visa_category: country.extra_content?.[0]?.visa_details.type.visa_category || ''
+          // },
+          validity_rules: country.extra_content?.[0]?.visa_details.type.validity_rules || {},
+          fees: [],
+          required_documents: country.extra_content?.[0]?.visa_details.type.required_documents || {},
+          process_steps:country.extra_content?.[0]?.visa_details.type.process_steps || [],
+          // biometrics_required: false,
+          medical_insurance_required: country.extra_content?.[0]?.visa_details.type.medical_insurance_required || false,
+          aps_certificate_required: country.extra_content?.[0]?.visa_details.type.medical_insurance_required || false,
+          average_processing_time_days: country.extra_content?.[0]?.visa_details.type.medical_insurance_required || 0,
+          other: country.extra_content?.[0]?.visa_details.type.medical_insurance_required || {},
+          status: country.extra_content?.[0]?.visa_details.type.medical_insurance_required || 'published'
+        }
       }
     })
     setImagePreview(country.flg || '')
+    setImagePreview1(country.image || '')
     setEditingId(country._id)
     setShowModal(true)
   }
@@ -659,6 +636,7 @@ const Countries = () => {
         status: formData.status,
         isFeatured: formData.isFeatured,
         flg: formData.flg,
+        image: formData.image,
         extra_details: {
           sections: formData.sections,
           status: formData.extraStatus,
@@ -666,7 +644,7 @@ const Countries = () => {
         },
         visa_details: formData.visa_details
       }
-      
+
       let res
       if (editingId) {
         res = await countryService.updateCountry(editingId, payload)
@@ -679,63 +657,63 @@ const Countries = () => {
       if (res.success) {
         setShowModal(false)
         setEditingId(null)
-        setFormData({ 
-          name: '', 
-          code: '', 
-          currency: '', 
-          status: 'Active', 
+        setFormData({
+          name: '',
+          code: '',
+          currency: '',
+          status: 'Active',
           isFeatured: 'No',
-          flg: '',
+          flg: "", image: "",
           sections: [],
           extraStatus: 'Active',
           faq: [],
           visa_details: {
-             type: {
-                    source_country_iso: '',
-                    destination_country_iso: '',
-                    visa_type: '',
-                    title: '',
-                    description: '',
-                    last_updated: new Date().toISOString().split('T')[0],
-                    entry_classification: {
-                      type: 'Visa Required',
-                      is_interview_mandatory: false,
-                      visa_category: ''
-                    },
-                    validity_rules: {
-                      passport_validity_months_required: 0,
-                      blank_pages_required: 0,
-                      visa_validity_days: null,
-                      max_stay_duration_days: null,
-                      multiple_entry_allowed: false
-                    },
-                    fees: [],
-                    required_documents: {
-                      mandatory: [],
-                      supporting: [],
-                      financial_proof: {
-                        bank_statement_months: 0,
-                        // tax_returns_years: 0,
-                        min_liquid_balance: null,
-                        // blocked_account_required: false,
-                        // sponsor_allowed: false
-                      },
-                      // photo_specifications: {
-                      //   dimensions: '',
-                      //   background_color: '',
-                      //   digital_required: false,
-                      //   physical_copies_required: 0,
-                      //   biometric_required: false
-                      // }
-                    },
-                    process_steps: [],
-                    // biometrics_required: false,
-                    medical_insurance_required: false,
-                    aps_certificate_required: false,
-                    average_processing_time_days: 0,
-                    other: {},
-                    status: 'published'
-                  }
+            type: {
+              source_country_iso: '',
+              destination_country_iso: '',
+              visa_type: '',
+              title: '',
+              description: '',
+              last_updated: new Date().toISOString().split('T')[0],
+              entry_classification: {
+                type: 'Visa Required',
+                is_interview_mandatory: false,
+                visa_category: ''
+              },
+              validity_rules: {
+                passport_validity_months_required: 0,
+                blank_pages_required: 0,
+                visa_validity_days: null,
+                max_stay_duration_days: null,
+                multiple_entry_allowed: false
+              },
+              fees: [],
+              required_documents: {
+                mandatory: [],
+                supporting: [],
+                financial_proof: {
+                  bank_statement_months: 0,
+                  // tax_returns_years: 0,
+                  min_liquid_balance: null,
+                  // blocked_account_required: false,
+                  // sponsor_allowed: false
+                },
+                // photo_specifications: {
+                //   dimensions: '',
+                //   background_color: '',
+                //   digital_required: false,
+                //   physical_copies_required: 0,
+                //   biometric_required: false
+                // }
+              },
+              process_steps: [],
+              // biometrics_required: false,
+              medical_insurance_required: false,
+              aps_certificate_required: false,
+              average_processing_time_days: 0,
+              other: {},
+              status: 'published'
+            }
           }
         })
         setImagePreview('')
@@ -790,67 +768,67 @@ const Countries = () => {
                 <h5 className="mb-1 fw-bold">Countries Management</h5>
                 <small className="text-muted">Manage country information, flags, and currencies</small>
               </div>
-              <CButton 
-                color="primary" 
+              <CButton
+                color="primary"
                 onClick={() => {
                   setEditingId(null)
-                  setFormData({ 
-                    name: '', 
-                    code: '', 
-                    currency: '', 
-                    status: 'Active', 
+                  setFormData({
+                    name: '',
+                    code: '',
+                    currency: '',
+                    status: 'Active',
                     isFeatured: 'No',
-                    flg: '',
+                    flg: "", image: "",
                     sections: [],
                     extraStatus: 'Active',
                     faq: [],
                     visa_details: {
-                     type: {
-                    source_country_iso: '',
-                    destination_country_iso: '',
-                    visa_type: '',
-                    title: '',
-                    description: '',
-                    last_updated: new Date().toISOString().split('T')[0],
-                    entry_classification: {
-                      type: 'Visa Required',
-                      is_interview_mandatory: false,
-                      visa_category: ''
-                    },
-                    validity_rules: {
-                      passport_validity_months_required: 0,
-                      blank_pages_required: 0,
-                      visa_validity_days: null,
-                      max_stay_duration_days: null,
-                      multiple_entry_allowed: false
-                    },
-                    fees: [],
-                    required_documents: {
-                      mandatory: [],
-                      supporting: [],
-                      financial_proof: {
-                        bank_statement_months: 0,
-                        // tax_returns_years: 0,
-                        min_liquid_balance: null,
-                        // blocked_account_required: false,
-                        // sponsor_allowed: false
-                      },
-                      // photo_specifications: {
-                      //   dimensions: '',
-                      //   background_color: '',
-                      //   digital_required: false,
-                      //   physical_copies_required: 0,
-                      //   biometric_required: false
-                      // }
-                    },
-                    process_steps: [],
-                    // biometrics_required: false,
-                    medical_insurance_required: false,
-                    aps_certificate_required: false,
-                    average_processing_time_days: 0,
-                    other: {},
-                    status: 'published'
-                  }
+                      type: {
+                        source_country_iso: '',
+                        destination_country_iso: '',
+                        visa_type: '',
+                        title: '',
+                        description: '',
+                        last_updated: new Date().toISOString().split('T')[0],
+                        entry_classification: {
+                          type: 'Visa Required',
+                          is_interview_mandatory: false,
+                          visa_category: ''
+                        },
+                        validity_rules: {
+                          passport_validity_months_required: 0,
+                          blank_pages_required: 0,
+                          visa_validity_days: null,
+                          max_stay_duration_days: null,
+                          multiple_entry_allowed: false
+                        },
+                        fees: [],
+                        required_documents: {
+                          mandatory: [],
+                          supporting: [],
+                          financial_proof: {
+                            bank_statement_months: 0,
+                            // tax_returns_years: 0,
+                            min_liquid_balance: null,
+                            // blocked_account_required: false,
+                            // sponsor_allowed: false
+                          },
+                          // photo_specifications: {
+                          //   dimensions: '',
+                          //   background_color: '',
+                          //   digital_required: false,
+                          //   physical_copies_required: 0,
+                          //   biometric_required: false
+                          // }
+                        },
+                        process_steps: [],
+                        // biometrics_required: false,
+                        medical_insurance_required: false,
+                        aps_certificate_required: false,
+                        average_processing_time_days: 0,
+                        other: {},
+                        status: 'published'
+                      }
                     }
                   })
                   setImagePreview('')
@@ -1002,10 +980,10 @@ const Countries = () => {
                         <CTableRow key={c._id} className={index % 2 === 0 ? 'bg-white' : 'bg-light'}>
                           <CTableDataCell className="text-center">
                             {c.flg ? (
-                              <img 
-                                src={c.flg} 
-                                width="36" 
-                                height="24" 
+                              <img
+                                src={c.flg}
+                                width="36"
+                                height="24"
                                 className="rounded border"
                                 alt={c.name}
                                 style={{ objectFit: 'cover' }}
@@ -1030,8 +1008,8 @@ const Countries = () => {
                           </CTableDataCell>
                           <CTableDataCell>{c.currency || 'N/A'}</CTableDataCell>
                           <CTableDataCell>
-                            <CBadge 
-                              color={c.status === 'Active' ? 'success' : 'secondary'} 
+                            <CBadge
+                              color={c.status === 'Active' ? 'success' : 'secondary'}
                               shape="rounded-pill"
                               className="px-3"
                             >
@@ -1039,8 +1017,8 @@ const Countries = () => {
                             </CBadge>
                           </CTableDataCell>
                           <CTableDataCell>
-                            <CBadge 
-                              color={c.isFeatured === 'Yes' ? 'success' : 'secondary'} 
+                            <CBadge
+                              color={c.isFeatured === 'Yes' ? 'success' : 'secondary'}
                               shape="rounded-pill"
                               className="px-3"
                             >
@@ -1050,9 +1028,9 @@ const Countries = () => {
                           <CTableDataCell className="text-center">
                             <div className="btn-group" role="group">
                               <CTooltip content="Edit">
-                                <CButton 
-                                  size="sm" 
-                                  color="primary" 
+                                <CButton
+                                  size="sm"
+                                  color="primary"
                                   variant="outline"
                                   onClick={() => handleEdit(c)}
                                   className="me-1"
@@ -1091,13 +1069,13 @@ const Countries = () => {
                     Showing {((filters.page - 1) * filters.limit) + 1} to {Math.min(filters.page * filters.limit, total)} of {total} entries
                   </div>
                   <CPagination aria-label="Page navigation" className="mb-0">
-                    <CPaginationItem 
+                    <CPaginationItem
                       disabled={filters.page === 1}
                       onClick={() => handlePageChange(filters.page - 1)}
                     >
                       <CIcon icon={cilChevronLeft} />
                     </CPaginationItem>
-                    
+
                     {getPaginationRange().map((pageNum, index) => (
                       pageNum === '...' ? (
                         <CPaginationItem key={`dots-${index}`} disabled>
@@ -1113,15 +1091,15 @@ const Countries = () => {
                         </CPaginationItem>
                       )
                     ))}
-                    
-                    <CPaginationItem 
+
+                    <CPaginationItem
                       disabled={filters.page === totalPages}
                       onClick={() => handlePageChange(filters.page + 1)}
                     >
                       <CIcon icon={cilChevronRight} />
                     </CPaginationItem>
                   </CPagination>
-                  
+
                   <div className="d-flex align-items-center">
                     <span className="text-muted small me-2">Go to page:</span>
                     <CFormSelect
@@ -1144,18 +1122,18 @@ const Countries = () => {
           </CCard>
 
           {/* ADD/EDIT MODAL */}
-          <CModal 
-            visible={showModal} 
+          <CModal
+            visible={showModal}
             onClose={() => {
               setShowModal(false)
               setEditingId(null)
-              setFormData({ 
-                name: '', 
-                code: '', 
-                currency: '', 
-                status: 'Active', 
+              setFormData({
+                name: '',
+                code: '',
+                currency: '',
+                status: 'Active',
                 isFeatured: 'No',
-                flg: '',
+                flg: "", image: "",
                 sections: [],
                 extraStatus: 'Active',
                 faq: [],
@@ -1210,7 +1188,7 @@ const Countries = () => {
               })
               setImagePreview('')
               setError('')
-            }} 
+            }}
             size="xl"
             scrollable
           >
@@ -1232,73 +1210,72 @@ const Countries = () => {
                     {success}
                   </CAlert>
                 )}
-                
+
                 <CRow className="g-3">
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">
                       Country Name <span className="text-danger">*</span>
                     </CFormLabel>
-                    <CFormInput 
-                      name="name" 
-                      value={formData.name} 
+                    <CFormInput
+                      name="name"
+                      value={formData.name}
                       onChange={handleInputChange}
                       placeholder="Enter country name"
                       required
                     />
                   </CCol>
-                  
+
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">
                       Country Code <span className="text-danger">*</span>
                     </CFormLabel>
-                    <CFormInput 
-                      name="code" 
-                      value={formData.code} 
+                    <CFormInput
+                      name="code"
+                      value={formData.code}
                       onChange={handleInputChange}
                       placeholder="e.g., US, UK, IN"
                       className="text-uppercase"
-                      maxLength="3"
                       required
                     />
                     <small className="text-muted">ISO 3166-1 alpha-2/3 code</small>
                   </CCol>
-                  
+
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">
                       Currency <span className="text-danger">*</span>
                     </CFormLabel>
-                    <CFormInput 
-                      name="currency" 
-                      value={formData.currency} 
+                    <CFormInput
+                      name="currency"
+                      value={formData.currency}
                       onChange={handleInputChange}
                       placeholder="e.g., USD, EUR, INR"
                     />
                   </CCol>
-                  
+
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">Status</CFormLabel>
-                    <CFormSelect 
-                      name="status" 
-                      value={formData.status} 
+                    <CFormSelect
+                      name="status"
+                      value={formData.status}
                       onChange={handleInputChange}
                     >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </CFormSelect>
                   </CCol>
-                  
+
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">Featured</CFormLabel>
-                    <CFormSelect 
-                      name="isFeatured" 
-                      value={formData.isFeatured} 
+                    <CFormSelect
+                      name="isFeatured"
+                      value={formData.isFeatured}
                       onChange={handleInputChange}
                     >
                       <option value="No">No</option>
                       <option value="Yes">Yes</option>
                     </CFormSelect>
                   </CCol>
-                  
+
                   <CCol md={12}>
                     <CFormLabel className="fw-semibold">
                       <CIcon icon={cilImage} className="me-2" />
@@ -1307,10 +1284,11 @@ const Countries = () => {
                     <div className="border rounded p-3 bg-light">
                       <div className="d-flex align-items-center flex-wrap gap-3">
                         <div className="flex-grow-1">
-                          <CFormInput 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={handleImageChange}
+                          <CFormInput
+                            name='flag'
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'flag')}
                             id="flag-upload"
                           />
                         </div>
@@ -1326,19 +1304,67 @@ const Countries = () => {
                           )}
                         </div>
                       </div>
-                      
+
                       {imagePreview && (
                         <div className="mt-3">
                           <p className="text-muted small mb-2">Preview:</p>
-                          <img 
-                            src={imagePreview} 
-                            height="60" 
+                          <img
+                            src={imagePreview}
+                            height="60"
                             className="rounded border p-1 bg-white"
                             alt="Flag preview"
                             style={{ objectFit: 'contain' }}
                             onError={(e) => {
                               e.target.onerror = null
                               e.target.src = `https://via.placeholder.com/100x60/cccccc/ffffff?text=Flag`
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </CCol>
+
+                  <CCol md={12}>
+                    <CFormLabel className="fw-semibold">
+                      <CIcon icon={cilImage} className="me-2" />
+                      Country Cover Image
+                    </CFormLabel>
+                    <div className="border rounded p-3 bg-light">
+                      <div className="d-flex align-items-center flex-wrap gap-3">
+                        <div className="flex-grow-1">
+                          <CFormInput
+                            name='cover'
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'cover')}
+                            id="cover-upload"
+                          />
+                        </div>
+                        <div>
+                          <small className="text-muted d-block">
+                            Upload cover image (PNG, JPG, SVG up to 5MB)
+                          </small>
+                          {uploadingImage && (
+                            <div className="d-flex align-items-center mt-1">
+                              <CSpinner size="sm" className="me-2" />
+                              <span className="text-muted small">Uploading...</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {imagePreview1 && (
+                        <div className="mt-3">
+                          <p className="text-muted small mb-2">Preview:</p>
+                          <img
+                            src={imagePreview1}
+                            height="60"
+                            className="rounded border p-1 bg-white"
+                            alt="cover preview"
+                            style={{ objectFit: 'contain' }}
+                            onError={(e) => {
+                              e.target.onerror = null
+                              e.target.src = `https://via.placeholder.com/100x60/cccccc/ffffff?text=cover`
                             }}
                           />
                         </div>
@@ -1384,9 +1410,9 @@ const Countries = () => {
                         />
                       </CCol>
                       <CCol md={2} className="d-flex align-items-end">
-                        <CButton 
-                          color="primary" 
-                          onClick={handleAddSection} 
+                        <CButton
+                          color="primary"
+                          onClick={handleAddSection}
                           disabled={!newSection.section_key || !newSection.heading}
                         >
                           <FaPlus className="me-1" /> Add
@@ -1494,9 +1520,9 @@ const Countries = () => {
                         />
                       </CCol>
                       <CCol md={2} className="d-flex align-items-end">
-                        <CButton 
-                          color="primary" 
-                          onClick={handleAddFaq} 
+                        <CButton
+                          color="primary"
+                          onClick={handleAddFaq}
                           disabled={!newFaq.question || !newFaq.answer}
                         >
                           <FaPlus className="me-1" /> Add FAQ
@@ -1572,12 +1598,12 @@ const Countries = () => {
                               <CFormLabel>Source Country ISO <span className="text-danger">*</span></CFormLabel>
                               <CFormInput
                                 type="text"
-                                maxLength="3"
+                                name="source_country_iso"
                                 className="text-uppercase"
                                 placeholder="e.g., USA, IND"
                                 value={formData.visa_details.type.source_country_iso}
                                 onChange={(e) => handleVisaDetailsChange('type.source_country_iso', e.target.value.toUpperCase())}
-                                required
+                                
                               />
                             </CCol>
                             <CCol md={6}>
@@ -1589,17 +1615,16 @@ const Countries = () => {
                                 placeholder="e.g., USA, IND"
                                 value={formData.visa_details.type.destination_country_iso}
                                 onChange={(e) => handleVisaDetailsChange('type.destination_country_iso', e.target.value.toUpperCase())}
-                                required
                               />
                             </CCol>
                             <CCol md={6}>
                               <CFormLabel>Visa Type <span className="text-danger">*</span></CFormLabel>
                               <CFormInput
                                 type="text"
+                                name='visa_type'
                                 placeholder="e.g., Tourist, Business, Student"
                                 value={formData.visa_details.type.visa_type}
                                 onChange={(e) => handleVisaDetailsChange('type.visa_type', e.target.value)}
-                                required
                               />
                             </CCol>
                             <CCol md={6}>
@@ -1800,9 +1825,9 @@ const Countries = () => {
                               />
                             </CCol>
                             <CCol md={1} className="d-flex align-items-end">
-                              <CButton 
-                                color="primary" 
-                                onClick={handleAddFee} 
+                              <CButton
+                                color="primary"
+                                onClick={handleAddFee}
                                 disabled={!newFee.type || !newFee.amount}
                               >
                                 <FaPlus />
@@ -1907,8 +1932,8 @@ const Countries = () => {
                               {formData.visa_details.type.required_documents.mandatory.map((doc, idx) => (
                                 <CBadge key={idx} color="info" className="p-2">
                                   {doc}
-                                  <FaTimes 
-                                    className="ms-2" 
+                                  <FaTimes
+                                    className="ms-2"
                                     style={{ cursor: 'pointer' }}
                                     onClick={() => handleRemoveMandatoryDocument(idx)}
                                   />
@@ -1936,8 +1961,8 @@ const Countries = () => {
                               {formData.visa_details.type.required_documents.supporting.map((doc, idx) => (
                                 <CBadge key={idx} color="secondary" className="p-2">
                                   {doc}
-                                  <FaTimes 
-                                    className="ms-2" 
+                                  <FaTimes
+                                    className="ms-2"
                                     style={{ cursor: 'pointer' }}
                                     onClick={() => handleRemoveSupportingDocument(idx)}
                                   />
@@ -2103,9 +2128,9 @@ const Countries = () => {
                                   />
                                 </CCol>
                                 <CCol md={12}>
-                                  <CButton 
-                                    color="primary" 
-                                    onClick={handleAddProcessStep} 
+                                  <CButton
+                                    color="primary"
+                                    onClick={handleAddProcessStep}
                                     disabled={!newProcessStep.title || !newProcessStep.action || !newProcessStep.location}
                                   >
                                     <FaPlus className="me-1" /> Add Step
@@ -2246,68 +2271,68 @@ const Countries = () => {
                 </CCard>
               </CModalBody>
               <CModalFooter className="bg-light">
-                <CButton 
-                  color="secondary" 
+                <CButton
+                  color="secondary"
                   onClick={() => {
                     setShowModal(false)
                     setEditingId(null)
-                    setFormData({ 
-                      name: '', 
-                      code: '', 
-                      currency: '', 
-                      status: 'Active', 
+                    setFormData({
+                      name: '',
+                      code: '',
+                      currency: '',
+                      status: 'Active',
                       isFeatured: 'No',
-                      flg: '',
+                      flg: "", image: "",
                       sections: [],
                       extraStatus: 'Active',
                       faq: [],
                       visa_details: {
                         type: {
-                    source_country_iso: '',
-                    destination_country_iso: '',
-                    visa_type: '',
-                    title: '',
-                    description: '',
-                    last_updated: new Date().toISOString().split('T')[0],
-                    entry_classification: {
-                      type: 'Visa Required',
-                      is_interview_mandatory: false,
-                      visa_category: ''
-                    },
-                    validity_rules: {
-                      passport_validity_months_required: 0,
-                      blank_pages_required: 0,
-                      visa_validity_days: null,
-                      max_stay_duration_days: null,
-                      multiple_entry_allowed: false
-                    },
-                    fees: [],
-                    required_documents: {
-                      mandatory: [],
-                      supporting: [],
-                      financial_proof: {
-                        bank_statement_months: 0,
-                        // tax_returns_years: 0,
-                        min_liquid_balance: null,
-                        // blocked_account_required: false,
-                        // sponsor_allowed: false
-                      },
-                      // photo_specifications: {
-                      //   dimensions: '',
-                      //   background_color: '',
-                      //   digital_required: false,
-                      //   physical_copies_required: 0,
-                      //   biometric_required: false
-                      // }
-                    },
-                    process_steps: [],
-                    // biometrics_required: false,
-                    medical_insurance_required: false,
-                    aps_certificate_required: false,
-                    average_processing_time_days: 0,
-                    other: {},
-                    status: 'published'
-                  }
+                          source_country_iso: '',
+                          destination_country_iso: '',
+                          visa_type: '',
+                          title: '',
+                          description: '',
+                          last_updated: new Date().toISOString().split('T')[0],
+                          entry_classification: {
+                            type: 'Visa Required',
+                            is_interview_mandatory: false,
+                            visa_category: ''
+                          },
+                          validity_rules: {
+                            passport_validity_months_required: 0,
+                            blank_pages_required: 0,
+                            visa_validity_days: null,
+                            max_stay_duration_days: null,
+                            multiple_entry_allowed: false
+                          },
+                          fees: [],
+                          required_documents: {
+                            mandatory: [],
+                            supporting: [],
+                            financial_proof: {
+                              bank_statement_months: 0,
+                              // tax_returns_years: 0,
+                              min_liquid_balance: null,
+                              // blocked_account_required: false,
+                              // sponsor_allowed: false
+                            },
+                            // photo_specifications: {
+                            //   dimensions: '',
+                            //   background_color: '',
+                            //   digital_required: false,
+                            //   physical_copies_required: 0,
+                            //   biometric_required: false
+                            // }
+                          },
+                          process_steps: [],
+                          // biometrics_required: false,
+                          medical_insurance_required: false,
+                          aps_certificate_required: false,
+                          average_processing_time_days: 0,
+                          other: {},
+                          status: 'published'
+                        }
                       }
                     })
                     setImagePreview('')
@@ -2317,8 +2342,8 @@ const Countries = () => {
                 >
                   Cancel
                 </CButton>
-                <CButton 
-                  type="submit" 
+                <CButton
+                  type="submit"
                   color="primary"
                   disabled={uploadingImage}
                   className="px-4"
@@ -2335,8 +2360,8 @@ const Countries = () => {
           </CModal>
 
           {/* DELETE MODAL */}
-          <CModal 
-            visible={showDeleteModal} 
+          <CModal
+            visible={showDeleteModal}
             onClose={() => setShowDeleteModal(false)}
             alignment="center"
           >
@@ -2354,15 +2379,15 @@ const Countries = () => {
               </p>
             </CModalBody>
             <CModalFooter className="justify-content-center">
-              <CButton 
-                color="secondary" 
+              <CButton
+                color="secondary"
                 onClick={() => setShowDeleteModal(false)}
                 className="px-4"
               >
                 Cancel
               </CButton>
-              <CButton 
-                color="danger" 
+              <CButton
+                color="danger"
                 onClick={handleDelete}
                 className="px-4"
               >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   CForm,
   CFormLabel,
@@ -30,6 +30,7 @@ import {
   cilX,
   cilCheckCircle,
 } from '@coreui/icons';
+import userService from '../../services/userService';
 
 const UserForm = ({
   user,
@@ -48,11 +49,36 @@ const UserForm = ({
     role: 'User',
     status: 'Active',
     dateOfBirth: '',
+    assignto : '',
     gender: ''
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
+    const [users, setUsers] = useState([]);
+
+    // Fetch users
+    const fetchUsers = useCallback(async () => {
+      try {
+        const params = {
+          page: 1,
+          limit: 40,
+        };
+  
+        const res = await userService.getUsers(params);
+        if (res.success) {
+          setUsers(res.data || []);
+          console.log(res.data || []);
+          
+        }
+      } catch (err) {
+        console.error(err.message || 'Failed to fetch users');
+      } 
+    }, []);
+  
+    useEffect(() => {
+      fetchUsers();
+    }, [fetchUsers]);
 
   useEffect(() => {
     if (user) {
@@ -64,6 +90,7 @@ const UserForm = ({
         confirmPassword: '',
         role: user.role || 'User',
         status: user.status || 'Active',
+        assignto: user?.assignee?._id,
         dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
         gender: user.gender || ''
       });
@@ -265,6 +292,23 @@ const UserForm = ({
             <option value="">Select Gender</option>
             {genderOptions.map(gender => (
               <option key={gender} value={gender}>{gender}</option>
+            ))}
+          </CFormSelect>
+        </CCol>
+      </CRow>
+      
+      <CRow className="g-3 mb-4">
+      
+        <CCol md={6}>
+          <CFormLabel className="fw-semibold">Assign To</CFormLabel>
+          <CFormSelect
+            name="assignto"
+            value={formData.assignto}
+            onChange={handleChange}
+          >
+            <option value="">Select user</option>
+            {users.filter(ele => ele.role === "counsellor").map(ele => (
+              <option key={ele?._id} value={ele?._id}>{ele?.name}</option>
             ))}
           </CFormSelect>
         </CCol>
