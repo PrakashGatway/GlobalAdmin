@@ -243,7 +243,7 @@ const Countries = () => {
     }))
   }
 
-  
+
   const handleAddtop = () => {
     if (!newtop.trim()) return
 
@@ -261,7 +261,7 @@ const Countries = () => {
     }))
   }
 
-  
+
   const handleUpdatetop = (index, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -741,7 +741,7 @@ const Countries = () => {
           keyHightlights: formData.keyHightlights,
           visa_details: formData.visa_details,
         },
-        
+
       }
 
       let res
@@ -784,7 +784,7 @@ const Countries = () => {
       tuitionfee: '',
       psw: '',
       keyHightlights: [],
-      topcourse : [],
+      topcourse: [],
       visa_details: {
         type: {
           source_country_iso: '',
@@ -2432,7 +2432,7 @@ const Countries = () => {
                                       disabled={
                                         index ===
                                         (formData.visa_details?.type?.process_steps || []).length -
-                                          1
+                                        1
                                       }
                                     >
                                       <FaArrowDown />

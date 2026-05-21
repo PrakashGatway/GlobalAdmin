@@ -62,6 +62,7 @@ const managerRoutes = [
   { path: '/blogs/:id', name: 'Blog Categories', element: BlogForm },
   { path: '/testimonials', name: 'Testimonials', element: Testimonials },
   { path: '/faq', name: 'Faq', element: FAQ },
+  { path: '/countries', name: 'Countries', element: Countries },
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
   { path: '/universities', name: 'Universities', element: Universities },

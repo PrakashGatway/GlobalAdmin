@@ -254,6 +254,12 @@ const managerRoutes = [
       }
     ],
   },
+    {
+    component: CNavItem,
+    name: 'Countries',
+    to: '/countries',
+    icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
+  },
   {
     component: CNavItem,
     name: 'Universities',
