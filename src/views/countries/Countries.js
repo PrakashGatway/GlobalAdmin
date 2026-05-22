@@ -203,571 +203,7 @@ const Countries = () => {
     fetchCountries()
   }, [fetchCountries])
 
-  // ================= HANDLERS =================
-
-  const handleAddSection = () => {
-    if (!newSection.section_key || !newSection.heading) return
-
-    const order = newSection.order || formData.sections.length + 1
-    setFormData((prev) => ({
-      ...prev,
-      sections: [...prev.sections, { ...newSection, order }],
-    }))
-    setNewSection({ section_key: '', heading: '', content: '', order: 0 })
-  }
-
-  const handleAddFaq = () => {
-    if (!newFaq.question || !newFaq.answer) return
-
-    setFormData((prev) => ({
-      ...prev,
-      faq: [...prev.faq, { question: newFaq.question, answer: newFaq.answer }],
-    }))
-    setNewFaq({ question: '', answer: '' })
-  }
-
-  const handleAddHighlight = () => {
-    if (!newHighlight.trim()) return
-
-    setFormData((prev) => ({
-      ...prev,
-      keyHightlights: [...prev.keyHightlights, newHighlight.trim()],
-    }))
-    setNewHighlight('')
-  }
-
-  const handleRemoveHighlight = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      keyHightlights: prev.keyHightlights.filter((_, i) => i !== index),
-    }))
-  }
-
-
-  const handleAddtop = () => {
-    if (!newtop.trim()) return
-
-    setFormData((prev) => ({
-      ...prev,
-      topcourse: [...prev.topcourse, newtop.trim()],
-    }))
-    setNewtop('')
-  }
-
-  const handleRemovetop = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      topcourse: prev.topcourse.filter((_, i) => i !== index),
-    }))
-  }
-
-
-  const handleUpdatetop = (index, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      topcourse: prev.topcourse.map((ele, i) => (i === index ? value : ele)),
-    }))
-  }
-
-
-  const handleAddFee = () => {
-    if (!newFee.type || !newFee.amount) return
-
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          fees: [...prev.visa_details.type.fees, { ...newFee, amount: parseFloat(newFee.amount) }],
-        },
-      },
-    }))
-    setNewFee({ type: '', amount: '', currency: 'USD', is_refundable: false, notes: '' })
-  }
-
-  const handleAddProcessStep = () => {
-    if (!newProcessStep.title || !newProcessStep.action || !newProcessStep.location) return
-
-    const stepNumber =
-      newProcessStep.step_number || formData.visa_details.type.process_steps.length + 1
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          process_steps: [
-            ...prev.visa_details.type.process_steps,
-            { ...newProcessStep, step_number: stepNumber },
-          ],
-        },
-      },
-    }))
-    setNewProcessStep({
-      step_number: formData.visa_details.type.process_steps.length + 2,
-      title: '',
-      action: '',
-      location: '',
-      description: '',
-      documents_required: [],
-      tips: [],
-      possible_questions: [],
-      estimated_duration_days: null,
-    })
-  }
-
-  const handleAddMandatoryDocument = () => {
-    if (!newMandatoryDocument.trim()) return
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          required_documents: {
-            ...prev.visa_details.type.required_documents,
-            mandatory: [
-              ...prev.visa_details.type.required_documents.mandatory,
-              newMandatoryDocument.trim(),
-            ],
-          },
-        },
-      },
-    }))
-    setNewMandatoryDocument('')
-  }
-
-  const handleAddSupportingDocument = () => {
-    if (!newSupportingDocument.trim()) return
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          required_documents: {
-            ...prev.visa_details.type.required_documents,
-            supporting: [
-              ...prev.visa_details.type.required_documents.supporting,
-              newSupportingDocument.trim(),
-            ],
-          },
-        },
-      },
-    }))
-    setNewSupportingDocument('')
-  }
-
-  const handleRemoveSection = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      sections: prev.sections.filter((_, i) => i !== index),
-    }))
-  }
-
-  const handleRemoveFaq = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      faq: prev.faq.filter((_, i) => i !== index),
-    }))
-  }
-
-  const handleRemoveFee = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          fees: prev.visa_details.type.fees.filter((_, i) => i !== index),
-        },
-      },
-    }))
-  }
-
-  const handleRemoveProcessStep = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          process_steps: prev.visa_details.type.process_steps.filter((_, i) => i !== index),
-        },
-      },
-    }))
-  }
-
-  const handleRemoveMandatoryDocument = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          required_documents: {
-            ...prev.visa_details.type.required_documents,
-            mandatory: prev.visa_details.type.required_documents.mandatory.filter(
-              (_, i) => i !== index,
-            ),
-          },
-        },
-      },
-    }))
-  }
-
-  const handleRemoveSupportingDocument = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          required_documents: {
-            ...prev.visa_details.type.required_documents,
-            supporting: prev.visa_details.type.required_documents.supporting.filter(
-              (_, i) => i !== index,
-            ),
-          },
-        },
-      },
-    }))
-  }
-
-  const handleUpdateSection = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      sections: prev.sections.map((section, i) =>
-        i === index ? { ...section, [field]: value } : section,
-      ),
-    }))
-  }
-
-  const handleUpdateFaq = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      faq: prev.faq.map((faq, i) => (i === index ? { ...faq, [field]: value } : faq)),
-    }))
-  }
-
-  const handleUpdateHighlight = (index, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      keyHightlights: prev.keyHightlights.map((highlight, i) => (i === index ? value : highlight)),
-    }))
-  }
-
-  const handleUpdateFee = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          fees: prev.visa_details.type.fees.map((fee, i) =>
-            i === index ? { ...fee, [field]: field === 'amount' ? parseFloat(value) : value } : fee,
-          ),
-        },
-      },
-    }))
-  }
-
-  const handleUpdateProcessStep = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      visa_details: {
-        ...prev.visa_details,
-        type: {
-          ...prev.visa_details.type,
-          process_steps: prev.visa_details.type.process_steps.map((step, i) =>
-            i === index ? { ...step, [field]: value } : step,
-          ),
-        },
-      },
-    }))
-  }
-
-  const handleMoveSectionUp = (index) => {
-    if (index === 0) return
-    setFormData((prev) => {
-      const newSections = [...prev.sections]
-      const temp = newSections[index]
-      newSections[index] = newSections[index - 1]
-      newSections[index - 1] = temp
-      newSections.forEach((section, i) => {
-        section.order = i + 1
-      })
-      return { ...prev, sections: newSections }
-    })
-  }
-
-  const handleMoveSectionDown = (index) => {
-    if (index === formData.sections.length - 1) return
-    setFormData((prev) => {
-      const newSections = [...prev.sections]
-      const temp = newSections[index]
-      newSections[index] = newSections[index + 1]
-      newSections[index + 1] = temp
-      newSections.forEach((section, i) => {
-        section.order = i + 1
-      })
-      return { ...prev, sections: newSections }
-    })
-  }
-
-  const handleMoveProcessStepUp = (index) => {
-    if (index === 0) return
-    setFormData((prev) => {
-      const newSteps = [...prev.visa_details.type.process_steps]
-      const temp = newSteps[index]
-      newSteps[index] = newSteps[index - 1]
-      newSteps[index - 1] = temp
-      newSteps.forEach((step, i) => {
-        step.step_number = i + 1
-      })
-      return {
-        ...prev,
-        visa_details: {
-          ...prev.visa_details,
-          type: {
-            ...prev.visa_details.type,
-            process_steps: newSteps,
-          },
-        },
-      }
-    })
-  }
-
-  const handleMoveProcessStepDown = (index) => {
-    if (index === formData.visa_details.type.process_steps.length - 1) return
-    setFormData((prev) => {
-      const newSteps = [...prev.visa_details.type.process_steps]
-      const temp = newSteps[index]
-      newSteps[index] = newSteps[index + 1]
-      newSteps[index + 1] = temp
-      newSteps.forEach((step, i) => {
-        step.step_number = i + 1
-      })
-      return {
-        ...prev,
-        visa_details: {
-          ...prev.visa_details,
-          type: {
-            ...prev.visa_details.type,
-            process_steps: newSteps,
-          },
-        },
-      }
-    })
-  }
-
-  const handleFilterChange = (name, value) => {
-    setFilters((prev) => ({ ...prev, [name]: value, page: 1 }))
-  }
-
-  const handlePageChange = (page) => {
-    if (page < 1 || page > totalPages) return
-    setFilters((prev) => ({ ...prev, page }))
-  }
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleVisaDetailsChange = (path, value) => {
-    setFormData((prev) => {
-      const newVisaDetails = { ...prev.visa_details }
-      const keys = path.split('.')
-      let current = newVisaDetails
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) current[keys[i]] = {}
-        current = current[keys[i]]
-      }
-      current[keys[keys.length - 1]] = value
-      return { ...prev, visa_details: newVisaDetails }
-    })
-  }
-
-  // ================= IMAGE UPLOAD =================
-  const handleImageChange = async (e, type) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file')
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB')
-      return
-    }
-
-    setUploadingImage(true)
-    setError('')
-
-    try {
-      const res = await uploadService.uploadImage(file)
-      if (res.success) {
-        if (type === 'flag') {
-          setFormData((prev) => ({ ...prev, flg: res.data.url }))
-          setImagePreview(res.data.url)
-        } else {
-          setFormData((prev) => ({ ...prev, image: res.data.url }))
-          setImagePreview1(res.data.url)
-        }
-      } else {
-        setError(res.message || 'Image upload failed')
-      }
-    } catch (err) {
-      setError(err.message || 'Image upload failed')
-    } finally {
-      setUploadingImage(false)
-    }
-  }
-
-  const handleEdit = (country) => {
-    setFormData({
-      name: country.name || '',
-      code: country.code || '',
-      isFeatured: country.isFeatured || 'No',
-      currency: country.currency || '',
-      status: country.status || 'Active',
-      flg: country.flg || '',
-      image: country.image || '',
-      sections: country.extra_content?.sections || [],
-      extraStatus: country.extra_content?.status || 'Active',
-      faq: country.extra_content?.faq || [],
-      rating: country.extra_content?.rating || '',
-      tuitionfee: country.extra_content?.tuitionfee || '',
-      psw: country.extra_content?.psw || '',
-      keyHightlights: country.extra_content?.keyHightlights || [],
-      topcourse: country.extra_content?.topcourse || [],
-      visa_details: {
-        type: {
-          // Added ?. after visa_details
-          source_country_iso:
-            country.extra_content?.visa_details?.type?.source_country_iso || '',
-          destination_country_iso:
-            country.extra_content?.visa_details?.type?.destination_country_iso || '',
-          visa_type: country.extra_content?.visa_details?.type?.visa_type || '',
-          title: country.extra_content?.visa_details?.type?.title || '',
-          description: country.extra_content?.visa_details?.type?.description || '',
-          last_updated: new Date().toISOString().split('T')[0],
-          entry_classification:
-            country.extra_content?.visa_details?.type?.entry_classification || {},
-          validity_rules: country.extra_content?.visa_details?.type?.validity_rules || {},
-          fees: [],
-          required_documents:
-            country.extra_content?.visa_details?.type?.required_documents || {},
-          process_steps: country.extra_content?.visa_details?.type?.process_steps || [],
-
-          medical_insurance_required:
-            country.extra_content?.visa_details?.type?.medical_insurance_required || false,
-          aps_certificate_required:
-            country.extra_content?.visa_details?.type?.medical_insurance_required || false,
-          average_processing_time_days:
-            country.extra_content?.visa_details?.type?.medical_insurance_required || 0,
-          other: country.extra_content?.visa_details?.type?.medical_insurance_required || {},
-          status:
-            country.extra_content?.visa_details?.type?.medical_insurance_required ||
-            'published',
-        },
-      },
-    })
-    setImagePreview(country.flg || '')
-    setImagePreview1(country.image || '')
-    setEditingId(`${country._id},${country.extra_content?._id}`)
-    setShowModal(true)
-  }
-
-  const handleDelete = async () => {
-    try {
-      const res = await countryService.deleteCountry(deletingId)
-      if (res.success) {
-        setSuccess('Country deleted successfully')
-        setShowDeleteModal(false)
-        setDeletingId(null)
-        fetchCountries()
-        setTimeout(() => setSuccess(''), 3000)
-      } else {
-        setError(res.message || 'Delete failed')
-      }
-    } catch (err) {
-      setError(err.message || 'Delete failed')
-    }
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-
-    if (!formData.name.trim()) {
-      setError('Country name is required')
-      return
-    }
-    if (!formData.code.trim()) {
-      setError('Country code is required')
-      return
-    }
-    if (!formData.currency.trim()) {
-      setError('Currency is required')
-      return
-    }
-
-    try {
-      const payload = {
-        name: formData.name.trim(),
-        code: formData.code.trim().toUpperCase(),
-        currency: formData.currency.trim().toUpperCase(),
-        status: formData.status,
-        isFeatured: formData.isFeatured,
-        flg: formData.flg,
-        image: formData.image,
-        extra_details: {
-          rating: formData.rating,
-          tuitionfee: formData.tuitionfee,
-          psw: formData.psw,
-          keyHightlights: formData.keyHightlights,
-          topcourse: formData.topcourse,
-          sections: formData.sections,
-          status: formData.extraStatus,
-          faq: formData.faq,
-          rating: formData.rating,
-          tuitionfee: formData.tuitionfee,
-          psw: formData.psw,
-          keyHightlights: formData.keyHightlights,
-          visa_details: formData.visa_details,
-        },
-
-      }
-
-      let res
-      if (editingId) {
-        // console.log(editingId.split(','))
-        res = await countryService.updateCountry(editingId, payload)
-        if (res.success) setSuccess('Country updated successfully')
-      } else {
-        res = await countryService.createCountry(payload)
-        if (res.success) setSuccess('Country created successfully')
-      }
-
-      if (res.success) {
-        setShowModal(false)
-        setEditingId(null)
-        resetForm()
-        fetchCountries()
-        setTimeout(() => setSuccess(''), 3000)
-      } else {
-        setError(res.message || 'Operation failed')
-      }
-    } catch (err) {
-      setError(err.message || 'Operation failed')
-    }
-  }
-
+  // ================= RESET FORM =================
   const resetForm = () => {
     setFormData({
       name: '',
@@ -825,6 +261,613 @@ const Countries = () => {
     })
     setImagePreview('')
     setImagePreview1('')
+  }
+
+  // ================= HANDLERS =================
+
+  const handleAddSection = () => {
+    if (!newSection.section_key || !newSection.heading) return
+
+    const order = newSection.order || formData.sections.length + 1
+    setFormData((prev) => ({
+      ...prev,
+      sections: [...prev.sections, { ...newSection, order }],
+    }))
+    setNewSection({ section_key: '', heading: '', content: '', order: 0 })
+  }
+
+  const handleAddFaq = () => {
+    if (!newFaq.question || !newFaq.answer) return
+
+    setFormData((prev) => ({
+      ...prev,
+      faq: [...prev.faq, { question: newFaq.question, answer: newFaq.answer }],
+    }))
+    setNewFaq({ question: '', answer: '' })
+  }
+
+  const handleAddHighlight = () => {
+    if (!newHighlight.trim()) return
+
+    setFormData((prev) => ({
+      ...prev,
+      keyHightlights: [...prev.keyHightlights, newHighlight.trim()],
+    }))
+    setNewHighlight('')
+  }
+
+  const handleRemoveHighlight = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      keyHightlights: prev.keyHightlights.filter((_, i) => i !== index),
+    }))
+  }
+
+  const handleAddtop = () => {
+    if (!newtop.trim()) return
+
+    setFormData((prev) => ({
+      ...prev,
+      topcourse: [...prev.topcourse, newtop.trim()],
+    }))
+    setNewtop('')
+  }
+
+  const handleRemovetop = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      topcourse: prev.topcourse.filter((_, i) => i !== index),
+    }))
+  }
+
+  const handleUpdatetop = (index, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      topcourse: prev.topcourse.map((ele, i) => (i === index ? value : ele)),
+    }))
+  }
+
+  const handleAddFee = () => {
+    if (!newFee.type || !newFee.amount) return
+
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          fees: [...(prev.visa_details?.type?.fees || []), { 
+            ...newFee, 
+            amount: parseFloat(newFee.amount) 
+          }],
+        },
+      },
+    }))
+    setNewFee({ type: '', amount: '', currency: 'USD', is_refundable: false, notes: '' })
+  }
+
+  const handleAddProcessStep = () => {
+    if (!newProcessStep.title || !newProcessStep.action || !newProcessStep.location) return
+
+    const currentSteps = formData.visita_details?.type?.process_steps || []
+    const stepNumber = newProcessStep.step_number || currentSteps.length + 1
+    
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          process_steps: [...currentSteps, { ...newProcessStep, step_number: stepNumber }],
+        },
+      },
+    }))
+    
+    setNewProcessStep({
+      step_number: currentSteps.length + 2,
+      title: '',
+      action: '',
+      location: '',
+      description: '',
+      documents_required: [],
+      tips: [],
+      possible_questions: [],
+      estimated_duration_days: null,
+    })
+  }
+
+  const handleAddMandatoryDocument = () => {
+    if (!newMandatoryDocument.trim()) return
+    
+    setFormData((prev) => {
+      const currentMandatory = prev.visa_details?.type?.required_documents?.mandatory || []
+      return {
+        ...prev,
+        visa_details: {
+          ...(prev.visa_details || { type: {} }),
+          type: {
+            ...(prev.visa_details?.type || {}),
+            required_documents: {
+              ...(prev.visa_details?.type?.required_documents || {}),
+              mandatory: [...currentMandatory, newMandatoryDocument.trim()],
+              supporting: prev.visa_details?.type?.required_documents?.supporting || [],
+              financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
+                bank_statement_months: 0,
+                min_liquid_balance: null,
+              },
+            },
+          },
+        },
+      }
+    })
+    setNewMandatoryDocument('')
+  }
+
+  const handleAddSupportingDocument = () => {
+    if (!newSupportingDocument.trim()) return
+    
+    setFormData((prev) => {
+      const currentSupporting = prev.visa_details?.type?.required_documents?.supporting || []
+      return {
+        ...prev,
+        visa_details: {
+          ...(prev.visa_details || { type: {} }),
+          type: {
+            ...(prev.visa_details?.type || {}),
+            required_documents: {
+              ...(prev.visa_details?.type?.required_documents || {}),
+              mandatory: prev.visa_details?.type?.required_documents?.mandatory || [],
+              supporting: [...currentSupporting, newSupportingDocument.trim()],
+              financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
+                bank_statement_months: 0,
+                min_liquid_balance: null,
+              },
+            },
+          },
+        },
+      }
+    })
+    setNewSupportingDocument('')
+  }
+
+  const handleRemoveSection = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.filter((_, i) => i !== index),
+    }))
+  }
+
+  const handleRemoveFaq = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: prev.faq.filter((_, i) => i !== index),
+    }))
+  }
+
+  const handleRemoveFee = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          fees: (prev.visa_details?.type?.fees || []).filter((_, i) => i !== index),
+        },
+      },
+    }))
+  }
+
+  const handleRemoveProcessStep = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          process_steps: (prev.visa_details?.type?.process_steps || []).filter((_, i) => i !== index),
+        },
+      },
+    }))
+  }
+
+  const handleRemoveMandatoryDocument = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          required_documents: {
+            ...(prev.visa_details?.type?.required_documents || {}),
+            mandatory: (prev.visa_details?.type?.required_documents?.mandatory || []).filter(
+              (_, i) => i !== index,
+            ),
+            supporting: prev.visa_details?.type?.required_documents?.supporting || [],
+            financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
+              bank_statement_months: 0,
+              min_liquid_balance: null,
+            },
+          },
+        },
+      },
+    }))
+  }
+
+  const handleRemoveSupportingDocument = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          required_documents: {
+            ...(prev.visa_details?.type?.required_documents || {}),
+            mandatory: prev.visa_details?.type?.required_documents?.mandatory || [],
+            supporting: (prev.visa_details?.type?.required_documents?.supporting || []).filter(
+              (_, i) => i !== index,
+            ),
+            financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
+              bank_statement_months: 0,
+              min_liquid_balance: null,
+            },
+          },
+        },
+      },
+    }))
+  }
+
+  const handleUpdateSection = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, i) =>
+        i === index ? { ...section, [field]: value } : section,
+      ),
+    }))
+  }
+
+  const handleUpdateFaq = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: prev.faq.map((faq, i) => (i === index ? { ...faq, [field]: value } : faq)),
+    }))
+  }
+
+  const handleUpdateHighlight = (index, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      keyHightlights: prev.keyHightlights.map((highlight, i) => (i === index ? value : highlight)),
+    }))
+  }
+
+  const handleUpdateFee = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          fees: (prev.visa_details?.type?.fees || []).map((fee, i) =>
+            i === index 
+              ? { ...fee, [field]: field === 'amount' ? parseFloat(value) || 0 : value } 
+              : fee
+          ),
+        },
+      },
+    }))
+  }
+
+  const handleUpdateProcessStep = (index, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          process_steps: (prev.visa_details?.type?.process_steps || []).map((step, i) =>
+            i === index ? { ...step, [field]: value } : step,
+          ),
+        },
+      },
+    }))
+  }
+
+  const handleMoveSectionUp = (index) => {
+    if (index === 0) return
+    setFormData((prev) => {
+      const newSections = [...prev.sections]
+      const temp = newSections[index]
+      newSections[index] = newSections[index - 1]
+      newSections[index - 1] = temp
+      newSections.forEach((section, i) => {
+        section.order = i + 1
+      })
+      return { ...prev, sections: newSections }
+    })
+  }
+
+  const handleMoveSectionDown = (index) => {
+    if (index === formData.sections.length - 1) return
+    setFormData((prev) => {
+      const newSections = [...prev.sections]
+      const temp = newSections[index]
+      newSections[index] = newSections[index + 1]
+      newSections[index + 1] = temp
+      newSections.forEach((section, i) => {
+        section.order = i + 1
+      })
+      return { ...prev, sections: newSections }
+    })
+  }
+
+  const handleMoveProcessStepUp = (index) => {
+    if (index === 0) return
+    setFormData((prev) => {
+      const newSteps = [...(prev.visa_details?.type?.process_steps || [])]
+      const temp = newSteps[index]
+      newSteps[index] = newSteps[index - 1]
+      newSteps[index - 1] = temp
+      newSteps.forEach((step, i) => {
+        step.step_number = i + 1
+      })
+      return {
+        ...prev,
+        visa_details: {
+          ...(prev.visa_details || { type: {} }),
+          type: {
+            ...(prev.visa_details?.type || {}),
+            process_steps: newSteps,
+          },
+        },
+      }
+    })
+  }
+
+  const handleMoveProcessStepDown = (index) => {
+    const currentSteps = formData.visa_details?.type?.process_steps || []
+    if (index === currentSteps.length - 1) return
+    setFormData((prev) => {
+      const newSteps = [...currentSteps]
+      const temp = newSteps[index]
+      newSteps[index] = newSteps[index + 1]
+      newSteps[index + 1] = temp
+      newSteps.forEach((step, i) => {
+        step.step_number = i + 1
+      })
+      return {
+        ...prev,
+        visa_details: {
+          ...(prev.visa_details || { type: {} }),
+          type: {
+            ...(prev.visa_details?.type || {}),
+            process_steps: newSteps,
+          },
+        },
+      }
+    })
+  }
+
+  const handleFilterChange = (name, value) => {
+    setFilters((prev) => ({ ...prev, [name]: value, page: 1 }))
+  }
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return
+    setFilters((prev) => ({ ...prev, page }))
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleVisaDetailsChange = (path, value) => {
+    setFormData((prev) => {
+      const newVisaDetails = {
+        type: { ...(prev.visa_details?.type || {}) }
+      }
+      
+      const keys = path.split('.')
+      let current = newVisaDetails
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {}
+        current = current[keys[i]]
+      }
+      current[keys[keys.length - 1]] = value
+      
+      return { 
+        ...prev, 
+        visa_details: newVisaDetails 
+      }
+    })
+  }
+
+  // ================= IMAGE UPLOAD =================
+  const handleImageChange = async (e, type) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB')
+      return
+    }
+
+    setUploadingImage(true)
+    setError('')
+
+    try {
+      const res = await uploadService.uploadImage(file)
+      if (res.success) {
+        if (type === 'flag') {
+          setFormData((prev) => ({ ...prev, flg: res.data.url }))
+          setImagePreview(res.data.url)
+        } else {
+          setFormData((prev) => ({ ...prev, image: res.data.url }))
+          setImagePreview1(res.data.url)
+        }
+      } else {
+        setError(res.message || 'Image upload failed')
+      }
+    } catch (err) {
+      setError(err.message || 'Image upload failed')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  const handleEdit = (country) => {
+    // Safely get nested properties with fallbacks
+    const extraContent = country.extra_content || {}
+    const visaDetails = extraContent.visa_details || {}
+    const visaType = visaDetails.type || {}
+    const entryClassification = visaType.entry_classification || {}
+    const validityRules = visaType.validity_rules || {}
+    const requiredDocuments = visaType.required_documents || {}
+    const financialProof = requiredDocuments.financial_proof || {}
+    
+    setFormData({
+      name: country.name || '',
+      code: country.code || '',
+      isFeatured: country.isFeatured || 'No',
+      currency: country.currency || '',
+      status: country.status || 'Active',
+      flg: country.flg || '',
+      image: country.image || '',
+      sections: Array.isArray(extraContent.sections) ? extraContent.sections : [],
+      extraStatus: extraContent.status || 'Active',
+      faq: Array.isArray(extraContent.faq) ? extraContent.faq : [],
+      rating: extraContent.rating || '',
+      tuitionfee: extraContent.tuitionfee || '',
+      psw: extraContent.psw || '',
+      keyHightlights: Array.isArray(extraContent.keyHightlights) ? extraContent.keyHightlights : [],
+      topcourse: Array.isArray(extraContent.topcourse) ? extraContent.topcourse : [],
+      visa_details: {
+        type: {
+          source_country_iso: visaType.source_country_iso || '',
+          destination_country_iso: visaType.destination_country_iso || '',
+          visa_type: visaType.visa_type || '',
+          title: visaType.title || '',
+          description: visaType.description || '',
+          last_updated: visaType.last_updated || new Date().toISOString().split('T')[0],
+          entry_classification: {
+            type: entryClassification.type || 'Visa Required',
+            is_interview_mandatory: entryClassification.is_interview_mandatory || false,
+            visa_category: entryClassification.visa_category || '',
+          },
+          validity_rules: {
+            passport_validity_months_required: validityRules.passport_validity_months_required || 0,
+            blank_pages_required: validityRules.blank_pages_required || 0,
+            visa_validity_days: validityRules.visa_validity_days || null,
+            max_stay_duration_days: validityRules.max_stay_duration_days || null,
+            multiple_entry_allowed: validityRules.multiple_entry_allowed || false,
+          },
+          fees: Array.isArray(visaType.fees) ? visaType.fees : [],
+          required_documents: {
+            mandatory: Array.isArray(requiredDocuments.mandatory) ? requiredDocuments.mandatory : [],
+            supporting: Array.isArray(requiredDocuments.supporting) ? requiredDocuments.supporting : [],
+            financial_proof: {
+              bank_statement_months: financialProof.bank_statement_months || 0,
+              min_liquid_balance: financialProof.min_liquid_balance || null,
+            },
+          },
+          process_steps: Array.isArray(visaType.process_steps) ? visaType.process_steps : [],
+          medical_insurance_required: visaType.medical_insurance_required || false,
+          aps_certificate_required: visaType.aps_certificate_required || false,
+          average_processing_time_days: visaType.average_processing_time_days || 0,
+          other: visaType.other || {},
+          status: visaType.status || 'published',
+        },
+      },
+    })
+    
+    setImagePreview(country.flg || '')
+    setImagePreview1(country.image || '')
+    const extraContentId = extraContent._id ? `,${extraContent._id}` : ''
+    setEditingId(country._id ? `${country._id}${extraContentId}` : null)
+    setShowModal(true)
+  }
+
+  const handleDelete = async () => {
+    try {
+      const res = await countryService.deleteCountry(deletingId)
+      if (res.success) {
+        setSuccess('Country deleted successfully')
+        setShowDeleteModal(false)
+        setDeletingId(null)
+        fetchCountries()
+        setTimeout(() => setSuccess(''), 3000)
+      } else {
+        setError(res.message || 'Delete failed')
+      }
+    } catch (err) {
+      setError(err.message || 'Delete failed')
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (!formData.name.trim()) {
+      setError('Country name is required')
+      return
+    }
+    if (!formData.code.trim()) {
+      setError('Country code is required')
+      return
+    }
+    if (!formData.currency.trim()) {
+      setError('Currency is required')
+      return
+    }
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        code: formData.code.trim().toUpperCase(),
+        currency: formData.currency.trim().toUpperCase(),
+        status: formData.status,
+        isFeatured: formData.isFeatured,
+        flg: formData.flg,
+        image: formData.image,
+        extra_details: {
+          rating: formData.rating,
+          tuitionfee: formData.tuitionfee,
+          psw: formData.psw,
+          keyHightlights: formData.keyHightlights,
+          topcourse: formData.topcourse,
+          sections: formData.sections,
+          status: formData.extraStatus,
+          faq: formData.faq,
+          visa_details: formData.visa_details,
+        },
+      }
+
+      let res
+      if (editingId) {
+        res = await countryService.updateCountry(editingId, payload)
+        if (res.success) setSuccess('Country updated successfully')
+      } else {
+        res = await countryService.createCountry(payload)
+        if (res.success) setSuccess('Country created successfully')
+      }
+
+      if (res.success) {
+        setShowModal(false)
+        setEditingId(null)
+        resetForm()
+        fetchCountries()
+        setTimeout(() => setSuccess(''), 3000)
+      } else {
+        setError(res.message || 'Operation failed')
+      }
+    } catch (err) {
+      setError(err.message || 'Operation failed')
+    }
   }
 
   // ================= PAGINATION HELPERS =================
@@ -1270,7 +1313,7 @@ const Countries = () => {
 
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">
-                      Rating <span className="text-danger">*</span>
+                      Rating
                     </CFormLabel>
                     <CFormInput
                       name="rating"
@@ -1282,7 +1325,7 @@ const Countries = () => {
 
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">
-                      Tuition Fee <span className="text-danger">*</span>
+                      Tuition Fee
                     </CFormLabel>
                     <CFormInput
                       name="tuitionfee"
@@ -1294,7 +1337,7 @@ const Countries = () => {
 
                   <CCol md={6}>
                     <CFormLabel className="fw-semibold">
-                      PSW <span className="text-danger">*</span>
+                      PSW
                     </CFormLabel>
                     <CFormInput
                       name="psw"
@@ -1393,11 +1436,10 @@ const Countries = () => {
                   </CCol>
                 </CRow>
 
-
                 {/* Highlights Section */}
                 <CCard className="mb-4 mt-4">
                   <CCardHeader>
-                    <h5 className="mb-0"> Highlights</h5>
+                    <h5 className="mb-0">Highlights</h5>
                   </CCardHeader>
                   <CCardBody>
                     <CRow className="g-3 mb-4">
@@ -1450,8 +1492,7 @@ const Countries = () => {
                   </CCardBody>
                 </CCard>
 
-
-                {/* Highlights Section */}
+                {/* Top Course Section */}
                 <CCard className="mb-4 mt-4">
                   <CCardHeader>
                     <h5 className="mb-0">Top Course</h5>
@@ -1749,7 +1790,7 @@ const Countries = () => {
                           <CRow className="g-3">
                             <CCol md={6}>
                               <CFormLabel>
-                                Source Country ISO <span className="text-danger">*</span>
+                                Source Country ISO
                               </CFormLabel>
                               <CFormInput
                                 type="text"
@@ -1766,7 +1807,7 @@ const Countries = () => {
                             </CCol>
                             <CCol md={6}>
                               <CFormLabel>
-                                Destination Country ISO <span className="text-danger">*</span>
+                                Destination Country ISO
                               </CFormLabel>
                               <CFormInput
                                 type="text"
@@ -1783,7 +1824,7 @@ const Countries = () => {
                             </CCol>
                             <CCol md={6}>
                               <CFormLabel>
-                                Visa Type <span className="text-danger">*</span>
+                                Visa Type
                               </CFormLabel>
                               <CFormInput
                                 type="text"
@@ -1818,7 +1859,7 @@ const Countries = () => {
                             </CCol>
                             <CCol md={6}>
                               <CFormLabel>
-                                Last Updated <span className="text-danger">*</span>
+                                Last Updated
                               </CFormLabel>
                               <CFormInput
                                 type="date"
@@ -1826,7 +1867,6 @@ const Countries = () => {
                                 onChange={(e) =>
                                   handleVisaDetailsChange('type.last_updated', e.target.value)
                                 }
-                                required
                               />
                             </CCol>
                             <CCol md={6}>
@@ -1856,7 +1896,7 @@ const Countries = () => {
                           <CRow className="g-3">
                             <CCol md={6}>
                               <CFormLabel>
-                                Entry Type <span className="text-danger">*</span>
+                                Entry Type
                               </CFormLabel>
                               <CFormSelect
                                 value={
@@ -1923,8 +1963,7 @@ const Countries = () => {
                           <CRow className="g-3">
                             <CCol md={6}>
                               <CFormLabel>
-                                Passport Validity Required (months){' '}
-                                <span className="text-danger">*</span>
+                                Passport Validity Required (months)
                               </CFormLabel>
                               <CFormInput
                                 type="number"
@@ -1943,7 +1982,7 @@ const Countries = () => {
                             </CCol>
                             <CCol md={6}>
                               <CFormLabel>
-                                Blank Pages Required <span className="text-danger">*</span>
+                                Blank Pages Required
                               </CFormLabel>
                               <CFormInput
                                 type="number"
@@ -2196,7 +2235,7 @@ const Countries = () => {
                           {/* Mandatory Documents */}
                           <div className="mb-4">
                             <h6>Mandatory Documents</h6>
-                            <div className="flex gap-2 mb-2">
+                            <div className="d-flex gap-2 mb-2">
                               <CFormInput
                                 type="text"
                                 placeholder="Enter document name"
@@ -2214,7 +2253,7 @@ const Countries = () => {
                                 <FaPlus /> Add
                               </CButton>
                             </div>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="d-flex flex-wrap gap-2">
                               {(
                                 formData.visa_details?.type?.required_documents?.mandatory || []
                               ).map((doc, idx) => (
@@ -2432,7 +2471,7 @@ const Countries = () => {
                                       disabled={
                                         index ===
                                         (formData.visa_details?.type?.process_steps || []).length -
-                                        1
+                                          1
                                       }
                                     >
                                       <FaArrowDown />
