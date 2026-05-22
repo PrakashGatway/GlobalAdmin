@@ -56,6 +56,48 @@ const BlogForm = () => {
     const [success, setSuccess] = useState('')
     const [imagePreview, setImagePreview] = useState('')
     const [uploadingImage, setUploadingImage] = useState(false)
+
+
+    const [faq, setFaq] = useState([
+  {
+    question: "",
+    answer: "",
+  },
+]);
+
+// Add FAQ
+const addFaq = () => {
+  setFaq([
+    ...faq,
+    {
+      question: "",
+      answer: "",
+    },
+  ]);
+};
+
+// Remove FAQ
+const removeFaq = (index) => {
+  const updatedFaq = [...faq];
+
+  updatedFaq.splice(index, 1);
+
+  setFaq(updatedFaq);
+};
+
+// Handle Change
+const handleFaqChange = (
+  index,
+  field,
+  value
+) => {
+  const updatedFaq = [...faq];
+
+  updatedFaq[index][field] = value;
+
+  setFaq(updatedFaq);
+};
+
     // Fetch categories and blog data (if editing)
     useEffect(() => {
         const fetchData = async () => {
@@ -193,7 +235,8 @@ const BlogForm = () => {
             const payload = {
                 ...formData,
                 description: formData.content || undefined,
-                category: formData.category || undefined
+                category: formData.category || undefined,
+                faq: JSON.stringify(faq)
             }
 
             let res
@@ -344,6 +387,109 @@ const BlogForm = () => {
                                             }}
                                         /> */}
                                     </div>
+
+                                    <div className="mb-4">
+  <div className="flex items-center justify-between mb-3">
+
+    <button
+      type="button"
+      onClick={addFaq}
+      className="
+        px-4 py-2
+        rounded-lg
+        bg-primary
+        text-white
+        text-sm
+        font-medium
+        border-0
+      "
+    >
+      + Add FAQ
+    </button>
+  </div>
+
+  <div className="space-y-4">
+    {faq.map((item, index) => (
+      <div
+        key={index}
+        className="
+          border border-gray-200
+          rounded-xl
+          p-4
+          bg-light
+          position-relative
+        "
+      >
+        {/* Top */}
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h6 className="mb-0 fw-semibold">
+            FAQ {index + 1}
+          </h6>
+
+          <button
+            type="button"
+            onClick={() => removeFaq(index)}
+            className="
+              btn btn-sm btn-danger
+              rounded-circle
+              d-flex align-items-center justify-content-center
+            "
+            style={{
+              width: "32px",
+              height: "32px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Question */}
+        <div className="mb-3">
+          <CFormLabel>
+            Question *
+          </CFormLabel>
+
+          <CFormInput
+            type="text"
+            value={item.question}
+            onChange={(e) =>
+              handleFaqChange(
+                index,
+                "question",
+                e.target.value
+              )
+            }
+            placeholder="Enter question"
+          />
+        </div>
+
+        {/* Answer */}
+        <div>
+          <CFormLabel>
+            Answer *
+          </CFormLabel>
+
+          <CFormTextarea
+            rows={4}
+            value={item.answer}
+            onChange={(e) =>
+              handleFaqChange(
+                index,
+                "answer",
+                e.target.value
+              )
+            }
+            placeholder="Enter answer"
+          />
+        </div>
+      </div>
+    ))}
+  </div>
+
+ 
+</div>
+
+                                  
                                 </CCol>
 
                                 <CCol md={4}>
