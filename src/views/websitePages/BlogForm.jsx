@@ -1,5 +1,5 @@
 // src/views/blogs/BlogForm.js
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
     CCard,
     CCardBody,
@@ -48,6 +48,8 @@ const BlogForm = () => {
         category: [],
         status: 'Draft',
         isFeatured: false,
+        faq: [],
+        country: ''
     })
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
@@ -56,47 +58,68 @@ const BlogForm = () => {
     const [success, setSuccess] = useState('')
     const [imagePreview, setImagePreview] = useState('')
     const [uploadingImage, setUploadingImage] = useState(false)
+    const [countries, setCountries] = useState([])
+
 
 
     const [faq, setFaq] = useState([
-  {
-    question: "",
-    answer: "",
-  },
-]);
+        {
+            question: "",
+            answer: "",
+        },
+    ]);
 
-// Add FAQ
-const addFaq = () => {
-  setFaq([
-    ...faq,
-    {
-      question: "",
-      answer: "",
-    },
-  ]);
-};
 
-// Remove FAQ
-const removeFaq = (index) => {
-  const updatedFaq = [...faq];
+    const fetchCountries = useCallback(async () => {
+        try {
+            const response = await apiService.get('/countries?limit=300')
+            const data = response.data
+            let formatData = data.map(country => ({ label: country.name, value: country.name }))
+            // console.log(formatData)
+            setCountries(formatData)
+        } catch (error) {
+            console.error('Error fetching countries:', error)
+        }
+    }, [])
 
-  updatedFaq.splice(index, 1);
 
-  setFaq(updatedFaq);
-};
+    useEffect(() => {
+        fetchCountries()
+    }, [fetchCountries])
 
-// Handle Change
-const handleFaqChange = (
-  index,
-  field,
-  value
-) => {
-  const updatedFaq = [...faq];
+    // Add FAQ
+    const addFaq = () => {
+        setFaq([
+            ...faq,
+            {
+                question: "",
+                answer: "",
+            },
+        ]);
+    };
 
-  updatedFaq[index][field] = value;
+    // Remove FAQ
+    const removeFaq = (index) => {
+        const updatedFaq = [...faq];
 
-  setFaq(updatedFaq);
-};
+        updatedFaq.splice(index, 1);
+
+        setFaq(updatedFaq);
+    };
+
+    // Handle Change
+    const handleFaqChange = (index, field, value) => {
+        setFaq((prevFaq) => {
+            const updatedFaq = [...prevFaq];
+
+            updatedFaq[index] = {
+                ...updatedFaq[index],
+                [field]: value,
+            };
+
+            return updatedFaq;
+        });
+    };
 
     // Fetch categories and blog data (if editing)
     useEffect(() => {
@@ -109,13 +132,14 @@ const handleFaqChange = (
                 ])
 
                 setCategories(cats)
+
                 if (isEditing && blog) {
                     setFormData({
                         title: blog.title || '',
                         slug: blog.slug || '',
                         shortDescription: blog.shortDescription || '',
                         content: blog.description || '',
-                        category: blog.category || [],
+                        category: blog?.category?.map((item) => item._id) || [],
                         status: blog.status || 'Draft',
                         isFeatured: blog.isFeatured || false,
                         coverImage: blog.coverImage || '',
@@ -125,8 +149,11 @@ const handleFaqChange = (
                             metaDescription: blog.seo?.metaDescription || '',
                             keywords: blog.seo?.keywords || ''
                         },
-                        extraMetadata: blog.extraMetadata
+                        extraMetadata: blog.extraMetadata,
+                        faq: blog.faq,
+                        country: blog?.country?.name || ""
                     })
+                    setFaq(blog.faq || [])
                 }
 
             } catch (err) {
@@ -389,12 +416,12 @@ const handleFaqChange = (
                                     </div>
 
                                     <div className="mb-4">
-  <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center justify-between mb-3">
 
-    <button
-      type="button"
-      onClick={addFaq}
-      className="
+                                            <button
+                                                type="button"
+                                                onClick={addFaq}
+                                                className="
         px-4 py-2
         rounded-lg
         bg-primary
@@ -403,93 +430,93 @@ const handleFaqChange = (
         font-medium
         border-0
       "
-    >
-      + Add FAQ
-    </button>
-  </div>
+                                            >
+                                                + Add FAQ
+                                            </button>
+                                        </div>
 
-  <div className="space-y-4">
-    {faq.map((item, index) => (
-      <div
-        key={index}
-        className="
+                                        <div className="space-y-4">
+                                            {faq.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="
           border border-gray-200
           rounded-xl
           p-4
           bg-light
           position-relative
         "
-      >
-        {/* Top */}
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h6 className="mb-0 fw-semibold">
-            FAQ {index + 1}
-          </h6>
+                                                >
+                                                    {/* Top */}
+                                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                                        <h6 className="mb-0 fw-semibold">
+                                                            FAQ {index + 1}
+                                                        </h6>
 
-          <button
-            type="button"
-            onClick={() => removeFaq(index)}
-            className="
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeFaq(index)}
+                                                            className="
               btn btn-sm btn-danger
               rounded-circle
               d-flex align-items-center justify-content-center
             "
-            style={{
-              width: "32px",
-              height: "32px",
-            }}
-          >
-            ✕
-          </button>
-        </div>
+                                                            style={{
+                                                                width: "32px",
+                                                                height: "32px",
+                                                            }}
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
 
-        {/* Question */}
-        <div className="mb-3">
-          <CFormLabel>
-            Question *
-          </CFormLabel>
+                                                    {/* Question */}
+                                                    <div className="mb-3">
+                                                        <CFormLabel>
+                                                            Question *
+                                                        </CFormLabel>
 
-          <CFormInput
-            type="text"
-            value={item.question}
-            onChange={(e) =>
-              handleFaqChange(
-                index,
-                "question",
-                e.target.value
-              )
-            }
-            placeholder="Enter question"
-          />
-        </div>
+                                                        <CFormInput
+                                                            type="text"
+                                                            value={item.question}
+                                                            onChange={(e) =>
+                                                                handleFaqChange(
+                                                                    index,
+                                                                    "question",
+                                                                    e.target.value
+                                                                )
+                                                            }
+                                                            placeholder="Enter question"
+                                                        />
+                                                    </div>
 
-        {/* Answer */}
-        <div>
-          <CFormLabel>
-            Answer *
-          </CFormLabel>
+                                                    {/* Answer */}
+                                                    <div>
+                                                        <CFormLabel>
+                                                            Answer *
+                                                        </CFormLabel>
 
-          <CFormTextarea
-            rows={4}
-            value={item.answer}
-            onChange={(e) =>
-              handleFaqChange(
-                index,
-                "answer",
-                e.target.value
-              )
-            }
-            placeholder="Enter answer"
-          />
-        </div>
-      </div>
-    ))}
-  </div>
+                                                        <CFormTextarea
+                                                            rows={4}
+                                                            value={item.answer}
+                                                            onChange={(e) =>
+                                                                handleFaqChange(
+                                                                    index,
+                                                                    "answer",
+                                                                    e.target.value
+                                                                )
+                                                            }
+                                                            placeholder="Enter answer"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
 
- 
-</div>
 
-                                  
+                                    </div>
+
+
                                 </CCol>
 
                                 <CCol md={4}>
@@ -548,7 +575,7 @@ const handleFaqChange = (
                                                     <CFormLabel htmlFor="category">Category *</CFormLabel>
                                                     <CustomMultiSelect
                                                         options={categories}
-                                                        value={formData.category}
+                                                        value={Array.isArray(formData.category) ? formData.category : []}
                                                         onChange={(value) =>
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -558,6 +585,34 @@ const handleFaqChange = (
                                                         placeholder="Search and select categories..."
                                                         required
                                                     />
+                                                </div>
+                                                <div className="mb-3">
+                                                    <CFormLabel htmlFor="country">
+                                                        Country *
+                                                    </CFormLabel>
+
+                                                    <CFormSelect
+                                                        id="country"
+                                                        name="country"
+                                                        value={formData.country || ""}
+                                                        onChange={(e) =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                country: e.target.value,
+                                                            }))
+                                                        }
+                                                    >
+                                                        <option value="">Select Country</option>
+
+                                                        {countries.map((country) => (
+                                                            <option
+                                                                key={country?.label}
+                                                                value={country?.label}
+                                                            >
+                                                                {country?.label}
+                                                            </option>
+                                                        ))}
+                                                    </CFormSelect>
                                                 </div>
 
                                                 <div className="mb-3">
