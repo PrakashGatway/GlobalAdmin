@@ -59,44 +59,46 @@ const BlogForm = () => {
 
 
     const [faq, setFaq] = useState([
-  {
-    question: "",
-    answer: "",
-  },
-]);
+        {
+            question: "",
+            answer: "",
+        },
+    ]);
 
-// Add FAQ
-const addFaq = () => {
-  setFaq([
-    ...faq,
-    {
-      question: "",
-      answer: "",
-    },
-  ]);
-};
+    console.log("FAQ State:", faq);
 
-// Remove FAQ
-const removeFaq = (index) => {
-  const updatedFaq = [...faq];
+    // Add FAQ
+    const addFaq = () => {
+        setFaq([
+            ...faq,
+            {
+                question: "",
+                answer: "",
+            },
+        ]);
+    };
 
-  updatedFaq.splice(index, 1);
+    // Remove FAQ
+    const removeFaq = (index) => {
+        const updatedFaq = [...faq];
 
-  setFaq(updatedFaq);
-};
+        updatedFaq.splice(index, 1);
 
-// Handle Change
-const handleFaqChange = (
-  index,
-  field,
-  value
-) => {
-  const updatedFaq = [...faq];
+        setFaq(updatedFaq);
+    };
 
-  updatedFaq[index][field] = value;
+    // Handle Change
+    const handleFaqChange = (
+        index,
+        field,
+        value
+    ) => {
+        const updatedFaq = [...faq];
 
-  setFaq(updatedFaq);
-};
+        updatedFaq[index][field] = value;
+
+        setFaq(updatedFaq);
+    };
 
     // Fetch categories and blog data (if editing)
     useEffect(() => {
@@ -125,8 +127,10 @@ const handleFaqChange = (
                             metaDescription: blog.seo?.metaDescription || '',
                             keywords: blog.seo?.keywords || ''
                         },
-                        extraMetadata: blog.extraMetadata
+                        extraMetadata: blog.extraMetadata,
+                        // faq: blog.faq ? blog.faq : []
                     })
+                    setFaq(blog.faq ? blog.faq : [])
                 }
 
             } catch (err) {
@@ -389,12 +393,12 @@ const handleFaqChange = (
                                     </div>
 
                                     <div className="mb-4">
-  <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center justify-between mb-3">
 
-    <button
-      type="button"
-      onClick={addFaq}
-      className="
+                                            <button
+                                                type="button"
+                                                onClick={addFaq}
+                                                className="
         px-4 py-2
         rounded-lg
         bg-primary
@@ -403,93 +407,112 @@ const handleFaqChange = (
         font-medium
         border-0
       "
-    >
-      + Add FAQ
-    </button>
-  </div>
+                                            >
+                                                + Add FAQ
+                                            </button>
+                                        </div>
 
-  <div className="space-y-4">
-    {faq.map((item, index) => (
-      <div
-        key={index}
-        className="
+                                        <div className="space-y-4">
+                                            {faq.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="
           border border-gray-200
           rounded-xl
           p-4
           bg-light
           position-relative
         "
-      >
-        {/* Top */}
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h6 className="mb-0 fw-semibold">
-            FAQ {index + 1}
-          </h6>
+                                                >
+                                                    {/* Top */}
+                                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                                        <h6 className="mb-0 fw-semibold">
+                                                            FAQ {index + 1}
+                                                        </h6>
 
-          <button
-            type="button"
-            onClick={() => removeFaq(index)}
-            className="
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeFaq(index)}
+                                                            className="
               btn btn-sm btn-danger
               rounded-circle
               d-flex align-items-center justify-content-center
             "
-            style={{
-              width: "32px",
-              height: "32px",
-            }}
-          >
-            ✕
-          </button>
-        </div>
+                                                            style={{
+                                                                width: "32px",
+                                                                height: "32px",
+                                                            }}
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
 
-        {/* Question */}
-        <div className="mb-3">
-          <CFormLabel>
-            Question *
-          </CFormLabel>
+                                                    {/* Question */}
+                                                    <div className="mb-3">
+                                                        <CFormLabel>
+                                                            Question *
+                                                        </CFormLabel>
+                                                        <CKEditorComponent
+                                                            value={item.question}
+                                                            onChange={(value) =>
+                                                                handleFaqChange(
+                                                                    index,
+                                                                    "question",
+                                                                    value
+                                                                )
+                                                            }
+                                                        />
+                                                        {/* <CFormInput
+                                                            type="text"
+                                                            value={item.question}
+                                                            onChange={(e) =>
+                                                                handleFaqChange(
+                                                                    index,
+                                                                    "question",
+                                                                    e.target.value
+                                                                )
+                                                            }
+                                                            placeholder="Enter question"
+                                                        /> */}
+                                                    </div>
 
-          <CFormInput
-            type="text"
-            value={item.question}
-            onChange={(e) =>
-              handleFaqChange(
-                index,
-                "question",
-                e.target.value
-              )
-            }
-            placeholder="Enter question"
-          />
-        </div>
+                                                    {/* Answer */}
+                                                    <div>
+                                                        <CFormLabel>
+                                                            Answer *
+                                                        </CFormLabel>
+                                                        <CKEditorComponent
+                                                            value={item.answer}
+                                                            onChange={(value) =>
+                                                                handleFaqChange(
+                                                                    index,
+                                                                    "answer",
+                                                                    value
+                                                                )
+                                                            }
+                                                        />
 
-        {/* Answer */}
-        <div>
-          <CFormLabel>
-            Answer *
-          </CFormLabel>
+                                                        {/* <CFormTextarea
+                                                            rows={4}
+                                                            value={item.answer}
+                                                            onChange={(e) =>
+                                                                handleFaqChange(
+                                                                    index,
+                                                                    "answer",
+                                                                    e.target.value
+                                                                )
+                                                            }
+                                                            placeholder="Enter answer"
+                                                        /> */}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
 
-          <CFormTextarea
-            rows={4}
-            value={item.answer}
-            onChange={(e) =>
-              handleFaqChange(
-                index,
-                "answer",
-                e.target.value
-              )
-            }
-            placeholder="Enter answer"
-          />
-        </div>
-      </div>
-    ))}
-  </div>
 
- 
-</div>
+                                    </div>
 
-                                  
+
                                 </CCol>
 
                                 <CCol md={4}>
