@@ -332,7 +332,7 @@ export const CustomMultiSelect = ({
 
     const selectValue = useMemo(() => {
         return value?.map(id => {
-            const option = options.find(opt => opt._id === id);
+            const option = options?.find(opt => opt._id === id);
             return option ? {
                 value: option._id,
                 label: option.name || option.label || option.value

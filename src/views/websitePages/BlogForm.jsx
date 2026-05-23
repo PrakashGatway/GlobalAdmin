@@ -1,5 +1,5 @@
 // src/views/blogs/BlogForm.js
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
     CCard,
     CCardBody,
@@ -48,6 +48,8 @@ const BlogForm = () => {
         category: [],
         status: 'Draft',
         isFeatured: false,
+        faq: [],
+        country: ''
     })
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
@@ -56,6 +58,8 @@ const BlogForm = () => {
     const [success, setSuccess] = useState('')
     const [imagePreview, setImagePreview] = useState('')
     const [uploadingImage, setUploadingImage] = useState(false)
+    const [countries, setCountries] = useState([])
+
 
 
     const [faq, setFaq] = useState([
@@ -111,13 +115,14 @@ const BlogForm = () => {
                 ])
 
                 setCategories(cats)
+
                 if (isEditing && blog) {
                     setFormData({
                         title: blog.title || '',
                         slug: blog.slug || '',
                         shortDescription: blog.shortDescription || '',
                         content: blog.description || '',
-                        category: blog.category || [],
+                        category: blog?.category?.map((item) => item._id) || [],
                         status: blog.status || 'Draft',
                         isFeatured: blog.isFeatured || false,
                         coverImage: blog.coverImage || '',
@@ -571,7 +576,7 @@ const BlogForm = () => {
                                                     <CFormLabel htmlFor="category">Category *</CFormLabel>
                                                     <CustomMultiSelect
                                                         options={categories}
-                                                        value={formData.category}
+                                                        value={Array.isArray(formData.category) ? formData.category : []}
                                                         onChange={(value) =>
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -581,6 +586,34 @@ const BlogForm = () => {
                                                         placeholder="Search and select categories..."
                                                         required
                                                     />
+                                                </div>
+                                                <div className="mb-3">
+                                                    <CFormLabel htmlFor="country">
+                                                        Country *
+                                                    </CFormLabel>
+
+                                                    <CFormSelect
+                                                        id="country"
+                                                        name="country"
+                                                        value={formData.country || ""}
+                                                        onChange={(e) =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                country: e.target.value,
+                                                            }))
+                                                        }
+                                                    >
+                                                        <option value="">Select Country</option>
+
+                                                        {countries.map((country) => (
+                                                            <option
+                                                                key={country?.label}
+                                                                value={country?.label}
+                                                            >
+                                                                {country?.label}
+                                                            </option>
+                                                        ))}
+                                                    </CFormSelect>
                                                 </div>
 
                                                 <div className="mb-3">
