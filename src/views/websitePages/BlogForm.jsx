@@ -76,6 +76,17 @@ console.log(formData)
 
     console.log("FAQ State:", faq);
 
+    const fetchcountry = async()=>{
+        try{
+            const res = await apiService.get("/countries?limit=50")
+            setCountries(res.data)
+
+        }
+        catch{
+            console.error("error..")
+        }
+    }
+
     // Add FAQ
     const addFaq = () => {
         setFaq([
@@ -152,6 +163,7 @@ console.log(formData)
         }
 
         fetchData()
+        fetchcountry()
     }, [id, isEditing])
 
     const handleImageChange = async (e) => {
@@ -660,10 +672,10 @@ console.log(formData)
 
                                                         {countries.map((country) => (
                                                             <option
-                                                                key={country?.label}
-                                                                value={country?.label}
+                                                                key={country?.name}
+                                                                value={country?.name}
                                                             >
-                                                                {country?.label}
+                                                                {country?.name}
                                                             </option>
                                                         ))}
                                                     </CFormSelect>
