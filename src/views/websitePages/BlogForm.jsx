@@ -45,11 +45,16 @@ const BlogForm = () => {
         slug: '',
         shortDescription: '',
         content: '',
+        content2: '',
         category: [],
         status: 'Draft',
         isFeatured: false,
         faq: [],
-        country: ''
+        country: '',
+          extraMetadata: {
+    ctaTitle: '',
+    ctaDescription: '',
+  }
     })
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
@@ -61,7 +66,7 @@ const BlogForm = () => {
     const [countries, setCountries] = useState([])
 
 
-
+console.log(formData)
     const [faq, setFaq] = useState([
         {
             question: "",
@@ -122,6 +127,7 @@ const BlogForm = () => {
                         slug: blog.slug || '',
                         shortDescription: blog.shortDescription || '',
                         content: blog.description || '',
+                        content2: blog.description2 || '',
                         category: blog?.category?.map((item) => item._id) || [],
                         status: blog.status || 'Draft',
                         isFeatured: blog.isFeatured || false,
@@ -244,6 +250,7 @@ const BlogForm = () => {
             const payload = {
                 ...formData,
                 description: formData.content || undefined,
+                description2: formData.content2 || undefined,
                 category: formData.category || undefined,
                 faq: JSON.stringify(faq)
             }
@@ -396,6 +403,52 @@ const BlogForm = () => {
                                             }}
                                         /> */}
                                     </div>
+
+                                     <div className="mb-3">
+                                        <CFormLabel>Content2 *</CFormLabel>
+                                        <CKEditorComponent
+                                            value={formData.content2}
+                                            onChange={(value) => setFormData(prev => ({ ...prev, content2: value }))}
+                                        />
+                                        {/* <CKEditor
+                                            editor={ClassicEditor}
+                                            data={formData.content}
+                                            onChange={(event, editor) => {
+                                                const data = editor.getData();
+                                                setFormData(prev => ({ ...prev, content: data }));
+                                            }}
+                                        /> */}
+                                    </div>
+
+
+                                    <div className="mb-3">
+  <CFormLabel htmlFor="ctaTitle">
+    CTA Title
+  </CFormLabel>
+
+  <CFormInput
+    id="ctaTitle"
+    name="extraMetadata.ctaTitle"
+    value={formData?.extraMetadata?.ctaTitle || ''}
+    onChange={handleChange}
+    placeholder="Enter CTA Title"
+  />
+</div>
+
+<div className="mb-3">
+  <CFormLabel htmlFor="ctaDescription">
+    CTA Description
+  </CFormLabel>
+
+  <CFormTextarea
+    id="ctaDescription"
+    name="extraMetadata.ctaDescription"
+    value={formData?.extraMetadata?.ctaDescription || ''}
+    onChange={handleChange}
+    rows={3}
+    placeholder="Enter CTA Description"
+  />
+</div>
 
                                     <div className="mb-4">
                                         <div className="flex items-center justify-between mb-3">
