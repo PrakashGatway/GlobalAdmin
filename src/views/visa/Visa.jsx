@@ -1071,7 +1071,7 @@ function StepEditor({
 
     const statusOptions = ["Pending", "In Progress", "Completed", "Approved", "Scheduled", "Under Review"];
     const bannerTypeOptions = ["info", "success"];
-    const importantInfoTypeOptions = ["info", "warning", "danger", "success"];
+    const importantInfoTypeOptions = ["info", "warning", "requirement", "success"];
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
