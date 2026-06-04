@@ -25,10 +25,12 @@ const Coupons = React.lazy(() => import('./views/coupons/Coupons'))
 const ApplicationHistory = React.lazy(() => import('./views/application-history/ApplicationHistory'))
 const PageInformation = React.lazy(() => import('./views/page-information/PageInformation'))
 const PaymentManagement = React.lazy(() => import('./views/payment/Payment'))
+const Visa = React.lazy(() => import('./views/visa/Visa'))
 
 
 const adminRoutes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/visa', name: "Visa", element : Visa},
   { path: '/user-management', name: 'User Management', element: UserList },
   { path: '/universities', name: 'Universities', element: Universities },
   { path: '/courses', name: 'Courses', element: Courses },

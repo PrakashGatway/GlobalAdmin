@@ -285,6 +285,7 @@ const ApplicationManagement = () => {
       'AwaitingSchoolResponse': 'dark',
       'AdmissionProcessing': 'info',
       'Refused': 'danger',
+      'VisaProcessing': 'info',
       'Withdrawn': 'secondary',
       'PreArrival': 'success',
       'Arrived': 'success',

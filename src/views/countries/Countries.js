@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect, useCallback } from 'react'
 import {
   CAvatar,
@@ -79,6 +90,35 @@ const Countries = () => {
   const [imagePreview, setImagePreview] = useState('')
   const [imagePreview1, setImagePreview1] = useState('')
   const [uploadingImage, setUploadingImage] = useState(false)
+  
+  const visaStepsOptions = [
+    {
+      label: "APS Applied",
+      route: "aps-applied",
+    },
+    {
+      label: "APS Approval",
+      route: "aps-approval",
+    },
+    {
+      label: "Visa Application",
+      route: "visa-application",
+    },
+    {
+      label: "Biometrics",
+      route: "biometrics",
+    },
+    {
+      label: "Visa Decision",
+      route: "visa-decision",
+    },
+  ]
+
+  const [newVisaStep, setNewVisaStep] = useState({
+    label: "",
+    route: "",
+    order: "",
+  })
 
   // Filters + Pagination
   const [filters, setFilters] = useState({
@@ -110,6 +150,7 @@ const Countries = () => {
     psw: '',
     keyHightlights: [],
     topcourse: [],
+    visaSteps: [], // Added visaSteps array
     visa_details: {
       type: {
         source_country_iso: '',
@@ -221,6 +262,7 @@ const Countries = () => {
       psw: '',
       keyHightlights: [],
       topcourse: [],
+      visaSteps: [],
       visa_details: {
         type: {
           source_country_iso: '',
@@ -264,6 +306,27 @@ const Countries = () => {
   }
 
   // ================= HANDLERS =================
+
+  // Visa Step Handlers
+  const handleAddVisaStep = () => {
+    if (!newVisaStep.route || !newVisaStep.order) return
+
+    setFormData((prev) => ({
+      ...prev,
+      visaSteps: [...(prev.visaSteps || []), { 
+        ...newVisaStep, 
+        order: parseInt(newVisaStep.order) 
+      }],
+    }))
+    setNewVisaStep({ label: "", route: "", order: "" })
+  }
+
+  const handleRemoveVisaStep = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      visaSteps: (prev.visaSteps || []).filter((_, i) => i !== index),
+    }))
+  }
 
   const handleAddSection = () => {
     if (!newSection.section_key || !newSection.heading) return
@@ -349,7 +412,7 @@ const Countries = () => {
   const handleAddProcessStep = () => {
     if (!newProcessStep.title || !newProcessStep.action || !newProcessStep.location) return
 
-    const currentSteps = formData.visita_details?.type?.process_steps || []
+    const currentSteps = formData.visa_details?.type?.process_steps || []
     const stepNumber = newProcessStep.step_number || currentSteps.length + 1
     
     setFormData((prev) => ({
@@ -379,54 +442,48 @@ const Countries = () => {
   const handleAddMandatoryDocument = () => {
     if (!newMandatoryDocument.trim()) return
     
-    setFormData((prev) => {
-      const currentMandatory = prev.visa_details?.type?.required_documents?.mandatory || []
-      return {
-        ...prev,
-        visa_details: {
-          ...(prev.visa_details || { type: {} }),
-          type: {
-            ...(prev.visa_details?.type || {}),
-            required_documents: {
-              ...(prev.visa_details?.type?.required_documents || {}),
-              mandatory: [...currentMandatory, newMandatoryDocument.trim()],
-              supporting: prev.visa_details?.type?.required_documents?.supporting || [],
-              financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
-                bank_statement_months: 0,
-                min_liquid_balance: null,
-              },
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          required_documents: {
+            ...(prev.visa_details?.type?.required_documents || {}),
+            mandatory: [...(prev.visa_details?.type?.required_documents?.mandatory || []), newMandatoryDocument.trim()],
+            supporting: prev.visa_details?.type?.required_documents?.supporting || [],
+            financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
+              bank_statement_months: 0,
+              min_liquid_balance: null,
             },
           },
         },
-      }
-    })
+      },
+    }))
     setNewMandatoryDocument('')
   }
 
   const handleAddSupportingDocument = () => {
     if (!newSupportingDocument.trim()) return
     
-    setFormData((prev) => {
-      const currentSupporting = prev.visa_details?.type?.required_documents?.supporting || []
-      return {
-        ...prev,
-        visa_details: {
-          ...(prev.visa_details || { type: {} }),
-          type: {
-            ...(prev.visa_details?.type || {}),
-            required_documents: {
-              ...(prev.visa_details?.type?.required_documents || {}),
-              mandatory: prev.visa_details?.type?.required_documents?.mandatory || [],
-              supporting: [...currentSupporting, newSupportingDocument.trim()],
-              financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
-                bank_statement_months: 0,
-                min_liquid_balance: null,
-              },
+    setFormData((prev) => ({
+      ...prev,
+      visa_details: {
+        ...(prev.visa_details || { type: {} }),
+        type: {
+          ...(prev.visa_details?.type || {}),
+          required_documents: {
+            ...(prev.visa_details?.type?.required_documents || {}),
+            mandatory: prev.visa_details?.type?.required_documents?.mandatory || [],
+            supporting: [...(prev.visa_details?.type?.required_documents?.supporting || []), newSupportingDocument.trim()],
+            financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
+              bank_statement_months: 0,
+              min_liquid_balance: null,
             },
           },
         },
-      }
-    })
+      },
+    }))
     setNewSupportingDocument('')
   }
 
@@ -482,11 +539,6 @@ const Countries = () => {
             mandatory: (prev.visa_details?.type?.required_documents?.mandatory || []).filter(
               (_, i) => i !== index,
             ),
-            supporting: prev.visa_details?.type?.required_documents?.supporting || [],
-            financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
-              bank_statement_months: 0,
-              min_liquid_balance: null,
-            },
           },
         },
       },
@@ -502,14 +554,9 @@ const Countries = () => {
           ...(prev.visa_details?.type || {}),
           required_documents: {
             ...(prev.visa_details?.type?.required_documents || {}),
-            mandatory: prev.visa_details?.type?.required_documents?.mandatory || [],
             supporting: (prev.visa_details?.type?.required_documents?.supporting || []).filter(
               (_, i) => i !== index,
             ),
-            financial_proof: prev.visa_details?.type?.required_documents?.financial_proof || {
-              bank_statement_months: 0,
-              min_liquid_balance: null,
-            },
           },
         },
       },
@@ -662,9 +709,7 @@ const Countries = () => {
 
   const handleVisaDetailsChange = (path, value) => {
     setFormData((prev) => {
-      const newVisaDetails = {
-        type: { ...(prev.visa_details?.type || {}) }
-      }
+      const newVisaDetails = JSON.parse(JSON.stringify(prev.visa_details || { type: {} }))
       
       const keys = path.split('.')
       let current = newVisaDetails
@@ -745,6 +790,7 @@ const Countries = () => {
       psw: extraContent.psw || '',
       keyHightlights: Array.isArray(extraContent.keyHightlights) ? extraContent.keyHightlights : [],
       topcourse: Array.isArray(extraContent.topcourse) ? extraContent.topcourse : [],
+      visaSteps: Array.isArray(extraContent.visaSteps) ? extraContent.visaSteps : [],
       visa_details: {
         type: {
           source_country_iso: visaType.source_country_iso || '',
@@ -786,8 +832,7 @@ const Countries = () => {
     
     setImagePreview(country.flg || '')
     setImagePreview1(country.image || '')
-    const extraContentId = extraContent._id ? `,${extraContent._id}` : ''
-    setEditingId(country._id ? `${country._id}${extraContentId}` : null)
+    setEditingId(country._id)
     setShowModal(true)
   }
 
@@ -834,6 +879,7 @@ const Countries = () => {
         isFeatured: formData.isFeatured,
         flg: formData.flg,
         image: formData.image,
+        visaSteps: formData.visaSteps,
         extra_details: {
           rating: formData.rating,
           tuitionfee: formData.tuitionfee,
@@ -1770,6 +1816,93 @@ const Countries = () => {
                   </CCardBody>
                 </CCard>
 
+                {/* Visa Processing Step Section */}
+                <CCard className="mb-4 mt-4">
+                  <CCardHeader>
+                    <h5 className="mb-0">Visa Processing Step</h5>
+                  </CCardHeader>
+                  <CCardBody>
+                    <CRow className="g-3 mb-4">
+                      <CCol md={5}>
+                        <CFormLabel>Step</CFormLabel>
+                        <CFormSelect
+                          value={newVisaStep.route}
+                          onChange={(e) =>
+                            setNewVisaStep((prev) => ({
+                              ...prev,
+                              route: e.target.value,
+                              label:
+                                visaStepsOptions.find(
+                                  (item) => item.route === e.target.value
+                                )?.label || "",
+                            }))
+                          }
+                        >
+                          <option value="">Select Step</option>
+                          {visaStepsOptions.map((item) => (
+                            <option key={item.route} value={item.route}>
+                              {item.label}
+                            </option>
+                          ))}
+                        </CFormSelect>
+                      </CCol>
+
+                      <CCol md={5}>
+                        <CFormLabel>Order</CFormLabel>
+                        <CFormInput
+                          type="number"
+                          placeholder="Enter order"
+                          value={newVisaStep.order}
+                          onChange={(e) =>
+                            setNewVisaStep((prev) => ({
+                              ...prev,
+                              order: e.target.value,
+                            }))
+                          }
+                        />
+                      </CCol>
+
+                      <CCol md={2} className="d-flex align-items-end">
+                        <CButton
+                          color="primary"
+                          onClick={handleAddVisaStep}
+                          disabled={!newVisaStep.route || !newVisaStep.order}
+                        >
+                          <FaPlus className="me-1" />
+                          Add Step
+                        </CButton>
+                      </CCol>
+                    </CRow>
+
+                    {(formData.visaSteps || []).length === 0 ? (
+                      <div className="text-center py-3 text-muted">
+                        No visa steps added yet.
+                      </div>
+                    ) : (
+                      (formData.visaSteps || []).map((step, index) => (
+                        <CCard key={index} className="mb-3">
+                          <CCardBody>
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div>
+                                <h6 className="mb-1">{step.label}</h6>
+                                <div className="text-muted">Route: {step.route}</div>
+                                <div className="text-muted">Order: {step.order}</div>
+                              </div>
+                              <CButton
+                                color="danger"
+                                size="sm"
+                                onClick={() => handleRemoveVisaStep(index)}
+                              >
+                                <FaTrash />
+                              </CButton>
+                            </div>
+                          </CCardBody>
+                        </CCard>
+                      ))
+                    )}
+                  </CCardBody>
+                </CCard>
+
                 {/* VISA DETAILS SECTION */}
                 <CCard className="mb-4 mt-4">
                   <CCardHeader>
@@ -1789,9 +1922,7 @@ const Countries = () => {
                         <CAccordionBody>
                           <CRow className="g-3">
                             <CCol md={6}>
-                              <CFormLabel>
-                                Source Country ISO
-                              </CFormLabel>
+                              <CFormLabel>Source Country ISO</CFormLabel>
                               <CFormInput
                                 type="text"
                                 className="text-uppercase"
@@ -1806,9 +1937,7 @@ const Countries = () => {
                               />
                             </CCol>
                             <CCol md={6}>
-                              <CFormLabel>
-                                Destination Country ISO
-                              </CFormLabel>
+                              <CFormLabel>Destination Country ISO</CFormLabel>
                               <CFormInput
                                 type="text"
                                 className="text-uppercase"
@@ -1823,9 +1952,7 @@ const Countries = () => {
                               />
                             </CCol>
                             <CCol md={6}>
-                              <CFormLabel>
-                                Visa Type
-                              </CFormLabel>
+                              <CFormLabel>Visa Type</CFormLabel>
                               <CFormInput
                                 type="text"
                                 placeholder="e.g., Tourist, Business, Student"
@@ -1858,9 +1985,7 @@ const Countries = () => {
                               />
                             </CCol>
                             <CCol md={6}>
-                              <CFormLabel>
-                                Last Updated
-                              </CFormLabel>
+                              <CFormLabel>Last Updated</CFormLabel>
                               <CFormInput
                                 type="date"
                                 value={formData.visa_details?.type?.last_updated || ''}
@@ -1895,9 +2020,7 @@ const Countries = () => {
                         <CAccordionBody>
                           <CRow className="g-3">
                             <CCol md={6}>
-                              <CFormLabel>
-                                Entry Type
-                              </CFormLabel>
+                              <CFormLabel>Entry Type</CFormLabel>
                               <CFormSelect
                                 value={
                                   formData.visa_details?.type?.entry_classification?.type ||
@@ -1962,9 +2085,7 @@ const Countries = () => {
                         <CAccordionBody>
                           <CRow className="g-3">
                             <CCol md={6}>
-                              <CFormLabel>
-                                Passport Validity Required (months)
-                              </CFormLabel>
+                              <CFormLabel>Passport Validity Required (months)</CFormLabel>
                               <CFormInput
                                 type="number"
                                 min="0"
@@ -1981,9 +2102,7 @@ const Countries = () => {
                               />
                             </CCol>
                             <CCol md={6}>
-                              <CFormLabel>
-                                Blank Pages Required
-                              </CFormLabel>
+                              <CFormLabel>Blank Pages Required</CFormLabel>
                               <CFormInput
                                 type="number"
                                 min="0"
