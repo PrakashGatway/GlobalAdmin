@@ -49,7 +49,11 @@ const BlogForm = () => {
         status: 'Draft',
         isFeatured: false,
         faq: [],
-        country: ''
+        country: '',
+          extraMetadata: {
+    ctaTitle: '',
+    ctaDescription: '',
+  }
     })
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
@@ -61,7 +65,7 @@ const BlogForm = () => {
     const [countries, setCountries] = useState([])
 
 
-
+console.log(formData)
     const [faq, setFaq] = useState([
         {
             question: "",
@@ -70,6 +74,17 @@ const BlogForm = () => {
     ]);
 
     console.log("FAQ State:", faq);
+
+    const fetchcountry = async()=>{
+        try{
+            const res = await apiService.get("/countries?limit=50")
+            setCountries(res.data)
+
+        }
+        catch{
+            console.error("error..")
+        }
+    }
 
     // Add FAQ
     const addFaq = () => {
@@ -146,6 +161,7 @@ const BlogForm = () => {
         }
 
         fetchData()
+        fetchcountry()
     }, [id, isEditing])
 
     const handleImageChange = async (e) => {
@@ -397,6 +413,38 @@ const BlogForm = () => {
                                         /> */}
                                     </div>
 
+                                  
+
+
+                                    <div className="mb-3">
+  <CFormLabel htmlFor="ctaTitle">
+    CTA Title
+  </CFormLabel>
+
+  <CFormInput
+    id="ctaTitle"
+    name="extraMetadata.ctaTitle"
+    value={formData?.extraMetadata?.ctaTitle || ''}
+    onChange={handleChange}
+    placeholder="Enter CTA Title"
+  />
+</div>
+
+<div className="mb-3">
+  <CFormLabel htmlFor="ctaDescription">
+    CTA Description
+  </CFormLabel>
+
+  <CFormTextarea
+    id="ctaDescription"
+    name="extraMetadata.ctaDescription"
+    value={formData?.extraMetadata?.ctaDescription || ''}
+    onChange={handleChange}
+    rows={3}
+    placeholder="Enter CTA Description"
+  />
+</div>
+
                                     <div className="mb-4">
                                         <div className="flex items-center justify-between mb-3">
 
@@ -607,10 +655,10 @@ const BlogForm = () => {
 
                                                         {countries.map((country) => (
                                                             <option
-                                                                key={country?.label}
-                                                                value={country?.label}
+                                                                key={country?.name}
+                                                                value={country?.name}
                                                             >
-                                                                {country?.label}
+                                                                {country?.name}
                                                             </option>
                                                         ))}
                                                     </CFormSelect>
