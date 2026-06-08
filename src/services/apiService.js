@@ -96,6 +96,9 @@ export const apiService = {
   // PUT request
   put: (endpoint, body, config = {}) => apiClient.put(endpoint, body, config),
 
+  // PUT request
+  patch: (endpoint, body, config = {}) => apiClient.patch(endpoint, body, config),
+
   // DELETE request
   delete: (endpoint, config = {}) => apiClient.delete(endpoint, config),
 }

@@ -14,7 +14,7 @@ import {
   cilFile,
   cilBell,
 } from '@coreui/icons'
-import { CNavGroup, CNavItem } from '@coreui/react'
+import { CNavGroup, CNavGroupItems, CNavItem } from '@coreui/react'
 
 const adminRoutes = [
   {
@@ -138,6 +138,12 @@ const adminRoutes = [
     component: CNavItem,
     name: 'Countries',
     to: '/countries',
+    icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavGroupItems,
+    name: 'Visa Prosessing',
+    to: '/visa',
     icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
   },
   {

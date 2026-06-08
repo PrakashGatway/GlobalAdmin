@@ -1,44 +1,3 @@
-// import {
-//   getToken,
-// } from "firebase/messaging";
-
-// import { messaging } from "./firebase";
-
-// export const requestNotificationPermission = async () => {
-//     try {
-//       const permission = await Notification.requestPermission();
-
-//       if (permission === "granted") {
-
-//         const token = await getToken(
-//           messaging,
-//           {
-//             vapidKey:
-//               "BDyrqnEnHplqPQDrfienXIeY4eo49-eCp3Sq7kp78t1RXwPWnUpILuTdBJXY2Isu5fZNX6fDV1FhF6m7yP0Hr2s",
-//           }
-//         );
-
-//         console.log(
-//           "FCM TOKEN:",
-//           token
-//         );
-
-//         return token;
-
-//       } else {
-
-//         console.log(
-//           "Notification permission denied"
-//         );
-//       }
-
-//     } catch (error) {
-
-//       console.log(error);
-//     }
-//   };
-
-
 
 
 
@@ -72,10 +31,6 @@ export const requestNotificationPermission = async () => {
           }
         );
 
-        console.log(
-          "FCM TOKEN:",
-          token
-        );
 
           const fetchProfile = async () => {
             try {
