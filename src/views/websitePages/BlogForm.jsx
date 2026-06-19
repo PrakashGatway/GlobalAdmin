@@ -50,10 +50,11 @@ const BlogForm = () => {
         isFeatured: false,
         faq: [],
         country: '',
-          extraMetadata: {
-    ctaTitle: '',
-    ctaDescription: '',
-  }
+        author: "",
+        extraMetadata: {
+            ctaTitle: '',
+            ctaDescription: '',
+        }
     })
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
@@ -65,7 +66,7 @@ const BlogForm = () => {
     const [countries, setCountries] = useState([])
 
 
-console.log(formData)
+    console.log(formData)
     const [faq, setFaq] = useState([
         {
             question: "",
@@ -75,13 +76,13 @@ console.log(formData)
 
     console.log("FAQ State:", faq);
 
-    const fetchcountry = async()=>{
-        try{
+    const fetchcountry = async () => {
+        try {
             const res = await apiService.get("/countries?limit=50")
             setCountries(res.data)
 
         }
-        catch{
+        catch {
             console.error("error..")
         }
     }
@@ -142,6 +143,7 @@ console.log(formData)
                         isFeatured: blog.isFeatured || false,
                         coverImage: blog.coverImage || '',
                         blogType: blog.blogType || 'blog',
+                        author: blog.author || "",
                         seo: {
                             metaTitle: blog.seo?.metaTitle || '',
                             metaDescription: blog.seo?.metaDescription || '',
@@ -413,37 +415,51 @@ console.log(formData)
                                         /> */}
                                     </div>
 
-                                  
+
 
 
                                     <div className="mb-3">
-  <CFormLabel htmlFor="ctaTitle">
-    CTA Title
-  </CFormLabel>
+                                        <CFormLabel htmlFor="ctaTitle">
+                                            CTA Title
+                                        </CFormLabel>
 
-  <CFormInput
-    id="ctaTitle"
-    name="extraMetadata.ctaTitle"
-    value={formData?.extraMetadata?.ctaTitle || ''}
-    onChange={handleChange}
-    placeholder="Enter CTA Title"
-  />
-</div>
+                                        <CFormInput
+                                            id="ctaTitle"
+                                            name="extraMetadata.ctaTitle"
+                                            value={formData?.extraMetadata?.ctaTitle || ''}
+                                            onChange={handleChange}
+                                            placeholder="Enter CTA Title"
+                                        />
+                                    </div>
 
-<div className="mb-3">
-  <CFormLabel htmlFor="ctaDescription">
-    CTA Description
-  </CFormLabel>
+                                    <div className="mb-3">
+                                        <CFormLabel htmlFor="ctaTitle">
+                                            Author Name
+                                        </CFormLabel>
 
-  <CFormTextarea
-    id="ctaDescription"
-    name="extraMetadata.ctaDescription"
-    value={formData?.extraMetadata?.ctaDescription || ''}
-    onChange={handleChange}
-    rows={3}
-    placeholder="Enter CTA Description"
-  />
-</div>
+                                        <CFormInput
+                                            id="authorName"
+                                            name="author"
+                                            value={formData?.author || ''}
+                                            onChange={handleChange}
+                                            placeholder="Enter Author Name"
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <CFormLabel htmlFor="ctaDescription">
+                                            CTA Description
+                                        </CFormLabel>
+
+                                        <CFormTextarea
+                                            id="ctaDescription"
+                                            name="extraMetadata.ctaDescription"
+                                            value={formData?.extraMetadata?.ctaDescription || ''}
+                                            onChange={handleChange}
+                                            rows={3}
+                                            placeholder="Enter CTA Description"
+                                        />
+                                    </div>
 
                                     <div className="mb-4">
                                         <div className="flex items-center justify-between mb-3">
