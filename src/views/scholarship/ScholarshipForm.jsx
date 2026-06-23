@@ -449,6 +449,7 @@ const ScholarshipForm = ({
         title: '',
         slug: '',
         description: '',
+        shortDescription: '',
         subjects: [],
         country: '',
         university: '',
@@ -480,6 +481,7 @@ const ScholarshipForm = ({
                 title: scholarship.title || '',
                 slug: scholarship.slug || '',
                 description: scholarship.description || '',
+                shortDescription: scholarship.shortDescription || '',
                 subjects: subjectsArray.map(s => s._id || s),
                 country: scholarship.country?._id || scholarship.country || '',
                 university: scholarship.university?._id || scholarship.university || '',
@@ -664,9 +666,23 @@ const ScholarshipForm = ({
                         value={formData.description}
                         onChange={handleChange}
                         rows={3}
+                        maxLength={1000}
                         placeholder="Provide a comprehensive description of the scholarship including overview, objectives, and key highlights..."
                     />
                 </CCol>
+                
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">Short Description</CFormLabel>
+                    <CFormTextarea
+                        name="shortDescription"
+                        value={formData.shortDescription}
+                        onChange={handleChange}
+                        maxLength={150}
+                        rows={3}
+                        placeholder="Provide a comprehensive description of the scholarship including overview, objectives, and key highlights..."
+                    />
+                </CCol>
+
             </CRow>
 
             <CRow className="g-3 mb-4">
