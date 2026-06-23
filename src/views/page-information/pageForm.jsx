@@ -32,6 +32,8 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     subTitle: '',
     description: '',
     slug: '',
+    city: "",
+    state: "",
     pageType: '',
     // SEO fields
     metaTitle: '',
@@ -104,6 +106,8 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       subTitle: page.subTitle || '',
       description: page.description || '',
       slug: page.slug || '',
+      city: page.city || "",
+      state: page.state || "",
       pageType: page.pageType || 'general',
       metaTitle: seoData.metaTitle || '',
       metaDescription: seoData.metaDescription || '',
@@ -123,6 +127,8 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     // Store the current page ID
     previousPageIdRef.current = currentPageId
   }
+
+  console.log(page)
   
   // Handle new page creation (when page becomes null)
   if (!page && previousPageIdRef.current !== null) {
@@ -134,6 +140,8 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       subTitle: '',
       description: '',
       slug: '',
+      city: "",
+      state: "",
       pageType: defaultPageType,
       metaTitle: '',
       metaDescription: '',
@@ -464,9 +472,10 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
+<CRow className='g-3 mt-3'>
             {formData?.pageType === 'country' && (
-              <CRow className="g-3 mt-3">
-                <CCol md={12}>
+          
+                <CCol md={6}>
                   <CFormLabel htmlFor="country">Country</CFormLabel>
                   <CFormSelect
                     id="country"
@@ -485,8 +494,36 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                     Select the country this page is associated with
                   </div>
                 </CCol>
-              </CRow>
+          
             )}
+             <CCol md={6}>
+                <CFormLabel htmlFor="city">City</CFormLabel>
+                <CFormInput
+                  id="city"
+                  name="city"
+                  value={formData.city || ''}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter City"
+                />
+               
+              </CCol>
+
+            </CRow>
+
+            <CRow className='mt-4'>
+               <CCol md={6}>
+                <CFormLabel htmlFor="state">State</CFormLabel>
+                <CFormInput
+                  id="state"
+                  name="state"
+                  value={formData.state || ''}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Enter State"
+                />
+               
+              </CCol>
+            </CRow>
+            
 
             <CRow className="g-3 mt-3">
               <CCol md={6}>
