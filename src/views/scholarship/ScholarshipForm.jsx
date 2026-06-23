@@ -57,30 +57,46 @@ const KeyValueEditor = ({
     const initializedRef = useRef(false);
     const lastValueRef = useRef(null);
 
-    useEffect(() => {
-        // Convert object to stable signature
-        const signature = JSON.stringify(value || {});
+    // useEffect(() => {
+    //     // Convert object to stable signature
+    //     const signature = JSON.stringify(value || {});
 
-        // If already initialized with same data, do nothing
-        if (initializedRef.current && lastValueRef.current === signature) {
-            return;
+    //     // If already initialized with same data, do nothing
+    //     if (initializedRef.current && lastValueRef.current === signature) {
+    //         return;
+    //     }
+
+    //     const entries = Object.entries(value || {});
+    //     const initialRows = entries.length
+    //         ? entries.map(([key, val]) => ({
+    //             id: crypto.randomUUID(),
+    //             key,
+    //             value: val,
+    //         }))
+    //         : [{ id: crypto.randomUUID(), key: '', value: '' }];
+
+    //     setRows(initialRows);
+
+    //     initializedRef.current = true;
+    //     lastValueRef.current = signature;
+    // }, [value]);
+
+    useEffect(() => {
+    if (!value || Object.keys(value).length === 0) return;
+
+    setRows(prev => {
+        
+        if (prev.some(row => row.key || row.value)) {
+            return prev;
         }
 
-        const entries = Object.entries(value || {});
-        const initialRows = entries.length
-            ? entries.map(([key, val]) => ({
-                id: crypto.randomUUID(),
-                key,
-                value: val,
-            }))
-            : [{ id: crypto.randomUUID(), key: '', value: '' }];
-
-        setRows(initialRows);
-
-        initializedRef.current = true;
-        lastValueRef.current = signature;
-    }, [value]);
-
+        return Object.entries(value).map(([key, val], index) => ({
+            id: index,
+            key,
+            value: val,
+        }));
+    });
+}, []);
 
 
     const updateRow = (id, field, val) => {
@@ -144,8 +160,7 @@ const KeyValueEditor = ({
     };
 
     const isEmpty = rows.every(row => !row.key.trim() && !row.value.trim());
-    const completionPercentage = rows.length === 0 ? 0 :
-        Math.round((rows.filter(row => row.key.trim() && row.value.trim()).length / rows.length) * 100);
+    const completionPercentage = rows.length === 0 ? 0 : Math.round((rows.filter(row => row.key.trim() && row.value.trim()).length / rows.length) * 100);
 
     return (
         <CCard className="mb-3 border shadow-sm">
@@ -203,7 +218,7 @@ const KeyValueEditor = ({
                                                         placeholder={keyPlaceholder}
                                                         value={row.key}
                                                         onChange={(e) => updateRow(row.id, 'key', e.target.value)}
-                                                        onFocus={() => setEditingIndex(index)}
+                                                        // onFocus={() => setEditingIndex(index)}
                                                         onBlur={() => setEditingIndex(null)}
                                                         onKeyDown={(e) => handleKeyDown(e, row.id, 'key')}
                                                         size="sm"
@@ -218,7 +233,7 @@ const KeyValueEditor = ({
                                                             placeholder={valuePlaceholder}
                                                             value={row.value}
                                                             onChange={(e) => updateRow(row.id, 'value', e.target.value)}
-                                                            onFocus={() => setEditingIndex(index)}
+                                                            // onFocus={() => setEditingIndex(index)}
                                                             onBlur={() => setEditingIndex(null)}
                                                             onKeyDown={(e) => handleKeyDown(e, row.id, 'value')}
                                                             rows={Math.min(Math.ceil(row.value.length / 50), 3)}
