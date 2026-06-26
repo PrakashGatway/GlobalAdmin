@@ -24,6 +24,7 @@ import {
 } from '@coreui/react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
+import CKEditorComponent from '../page-information/Ckeditor';
 import {
     cilWarning,
     cilPlus,
@@ -82,21 +83,21 @@ const KeyValueEditor = ({
     // }, [value]);
 
     useEffect(() => {
-    if (!value || Object.keys(value).length === 0) return;
+        if (!value || Object.keys(value).length === 0) return;
 
-    setRows(prev => {
-        
-        if (prev.some(row => row.key || row.value)) {
-            return prev;
-        }
+        setRows(prev => {
 
-        return Object.entries(value).map(([key, val], index) => ({
-            id: index,
-            key,
-            value: val,
-        }));
-    });
-}, []);
+            if (prev.some(row => row.key || row.value)) {
+                return prev;
+            }
+
+            return Object.entries(value).map(([key, val], index) => ({
+                id: index,
+                key,
+                value: val,
+            }));
+        });
+    }, []);
 
 
     const updateRow = (id, field, val) => {
@@ -676,16 +677,24 @@ const ScholarshipForm = ({
 
                 <CCol md={12}>
                     <CFormLabel className="fw-semibold">Description</CFormLabel>
-                    <CFormTextarea
-                        name="description"
+                    <CKEditorComponent
                         value={formData.description}
-                        onChange={handleChange}
-                        rows={3}
-                        maxLength={1000}
-                        placeholder="Provide a comprehensive description of the scholarship including overview, objectives, and key highlights..."
+                        onChange={(value) => {
+                            setFormData((prev) => ({
+                                ...prev,
+                                description: value,
+                            }));
+
+                            if (formErrors.description) {
+                                setFormErrors((prev) => ({
+                                    ...prev,
+                                    description: "",
+                                }));
+                            }
+                        }}
                     />
                 </CCol>
-                
+
                 <CCol md={12}>
                     <CFormLabel className="fw-semibold">Short Description</CFormLabel>
                     <CFormTextarea
