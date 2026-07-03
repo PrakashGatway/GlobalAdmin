@@ -65,8 +65,6 @@ const BlogForm = () => {
     const [uploadingImage, setUploadingImage] = useState(false)
     const [countries, setCountries] = useState([])
 
-
-    console.log(formData)
     const [faq, setFaq] = useState([
         {
             question: "",

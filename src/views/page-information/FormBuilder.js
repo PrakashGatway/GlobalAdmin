@@ -411,7 +411,17 @@ const DynamicFormBuilder = ({
       case "richtext2":
         return (
           <div className="position-relative">
-            <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+            <CKEditorComponent
+              value={commonProps.value || ""}
+              onChange={(value) => {
+                commonProps.onChange({
+                  target: {
+                    value
+                  }
+                });
+              }}
+              placeholder="Type or paste your content here..."
+            />
           </div>
         )
 

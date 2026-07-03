@@ -48,9 +48,6 @@ export const getDefaultValues = (pageType = 'general') => {
     return {}
   }
   
-  console.log('Building default values for page type:', pageType)
-  console.log('Schema sections count:', schema.sections.length)
-  
   // Initialize each section with its fields and metadata
   schema.sections.forEach((section, index) => {
     // Create section object with metadata

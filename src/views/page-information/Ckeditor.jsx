@@ -310,12 +310,12 @@ const getBaseEditorConfig = () => ({
 	}
 });
 
-const CKEditorComponent = forwardRef(({ 
-	value = '', 
-	onChange, 
-	onReady, 
-	onFocus, 
-	onBlur, 
+const CKEditorComponent = forwardRef(({
+	value = '',
+	onChange,
+	onReady,
+	onFocus,
+	onBlur,
 	onError,
 	placeholder = 'Type or paste your content here!',
 	disabled = false,
@@ -359,7 +359,7 @@ const CKEditorComponent = forwardRef(({
 		}
 
 		const baseConfig = getBaseEditorConfig();
-		
+
 		// Merge custom config with base config
 		const mergedConfig = {
 			...baseConfig,
@@ -384,8 +384,37 @@ const CKEditorComponent = forwardRef(({
 	}
 
 	return (
-		<div className={`editor-container editor-container_classic-editor editor-container_include-style editor-container_include-fullscreen ${containerClassName}`}>
-			<div className="editor-container__editor">
+		<>
+		<style>{`
+			/* Fix CKEditor floating UI (Link, Image, Table, Dropdowns, etc.) */
+			.ck.ck-body-wrapper {
+				z-index: 999999 !important;
+			}
+
+			.ck.ck-balloon-panel {
+				z-index: 999999 !important;
+			}
+
+			.ck.ck-dropdown__panel {
+				z-index: 999999 !important;
+			}
+
+			.ck.ck-tooltip {
+				z-index: 999999 !important;
+			}
+
+			.ck.ck-reset_all {
+				z-index: 999999 !important;
+			}
+
+			.editor-container,
+			.editor-container__editor {
+				position: relative;
+				overflow: visible !important;
+			}
+		`}</style>
+		<div className={`relative editor-container editor-container_classic-editor editor-container_include-style editor-container_include-fullscreen ${containerClassName}`}>
+			<div className="editor-container__editor relative">
 				<CKEditor
 					editor={ClassicEditor}
 					config={editorConfig}
@@ -412,6 +441,8 @@ const CKEditorComponent = forwardRef(({
 				/>
 			</div>
 		</div>
+		</>
+
 	);
 });
 
