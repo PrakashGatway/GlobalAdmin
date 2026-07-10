@@ -331,7 +331,7 @@ const Countries = () => {
   const handleAddSection = () => {
     if (!newSection.section_key || !newSection.heading) return
 
-    const order = newSection.order || formData.sections.length + 1
+    const order = newSection.order //|| formData.sections.length + 1
     setFormData((prev) => ({
       ...prev,
       sections: [...prev.sections, { ...newSection, order }],
