@@ -462,6 +462,9 @@ const ScholarshipForm = ({
         howToApply: {},
         metaData: {},
         extraStatus: 'Active',
+        seoTitle: "",
+        seoDescription: "",
+        seoKeyword: ""
     });
 
     const [newSection, setNewSection] = useState({
@@ -503,6 +506,9 @@ const ScholarshipForm = ({
                 metaData: scholarship.metaData || {},
                 sections: scholarship?.extra_content?.sections || [],
                 extraStatus: scholarship.extraStatus || 'Active',
+                seoTitle : scholarship.seoTitle || "",
+                seoDescription : scholarship.seoDescription || "",
+                seoKeyword : scholarship.seoKeyword || "",
             });
         }
     }, [scholarship]);
@@ -693,6 +699,7 @@ const ScholarshipForm = ({
                     {formErrors.title && <div className="invalid-feedback d-block">{formErrors.title}</div>}
                 </CCol>
 
+
                 <CCol md={4}>
                     <CFormLabel className="fw-semibold">
                         Slug <span className="text-danger">*</span>
@@ -711,7 +718,7 @@ const ScholarshipForm = ({
                     {formErrors.slug && <div className="invalid-feedback d-block">{formErrors.slug}</div>}
                 </CCol>
 
-                <CCol md={12}>
+                {/*<CCol md={12}>
                     <CFormLabel className="fw-semibold">Description</CFormLabel>
                     <CKEditorComponent
                         value={formData.description}
@@ -729,7 +736,7 @@ const ScholarshipForm = ({
                             }
                         }}
                     />
-                </CCol>
+                </CCol>*/}
 
                 <CCol md={12}>
                     <CFormLabel className="fw-semibold">Short Description</CFormLabel>
@@ -740,6 +747,53 @@ const ScholarshipForm = ({
                         rows={3}
                         placeholder="Brief summary of the scholarship (150 characters max)"
                         maxLength={150}
+                    />
+                </CCol>
+            </CRow>
+
+
+            <CRow className="g-3 mb-4">
+                <CCol md={8}>
+                    <CFormLabel className="fw-semibold">
+                       SEO Title <span className="text-danger">*</span>
+                    </CFormLabel>
+                    <CInputGroup>
+                        <CInputGroupText>
+                            <CIcon icon={cilPencil} />
+                        </CInputGroupText>
+                        <CFormInput
+                            name="seoTitle"
+                            value={formData.seoTitle}
+                            onChange={handleChange}
+                            placeholder="e.g., International Excellence Scholarship"
+                            invalid={!!formErrors.title}
+                            required
+                        />
+                    </CInputGroup>
+                    {formErrors.title && <div className="invalid-feedback d-block">{formErrors.title}</div>}
+                </CCol>
+
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">SEO Description</CFormLabel>
+                    <CFormTextarea
+                        name='seoDescription'
+                        value={formData.seoDescription}
+                        onChange={handleChange}
+                        rows={3}
+                        placeholder="Brief summary of the scholarship (150 characters max)"
+                        maxLength={150}
+                    />
+                </CCol>
+
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">SEO Keyword</CFormLabel>
+                    <CFormInput
+                        name="seoKeyword"
+                        value={formData.seoKeyword}
+                            onChange={handleChange}
+                            placeholder="e.g., International Excellence Scholarship"
+                            // invalid={!!formErrors.title}
+                            required
                     />
                 </CCol>
             </CRow>

@@ -292,7 +292,7 @@ const Scholarships = () => {
         try {
             let res;
             if (editingScholarship) {
-                res = await scholarshipService.updateScholarship(`${editingScholarship._id},${editingScholarship?.extra_content || null}`, data);
+                res = await scholarshipService.updateScholarship(`${editingScholarship._id},${editingScholarship?.extra_content?._id || null}`, data);
                 if (res.success) setSuccess('Scholarship updated successfully!');
             } else {
                 res = await scholarshipService.createScholarship(data);
