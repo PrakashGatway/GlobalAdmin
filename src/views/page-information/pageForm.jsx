@@ -81,7 +81,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   }
 
   useEffect(() => {
-    if (formData?.pageType === "country") {
+    if (formData?.pageType === "country" || formData?.pageType === "university") {
       fetchCountries()
     }
   }, [formData?.pageType])
@@ -473,7 +473,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
             </CRow>
 
 <CRow className='g-3 mt-3'>
-            {formData?.pageType === 'country' && (
+            {(formData?.pageType === 'country' || formData?.pageType === 'university') && (
           
                 <CCol md={6}>
                   <CFormLabel htmlFor="country">Country</CFormLabel>
@@ -496,6 +496,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 </CCol>
           
             )}
+
              <CCol md={6}>
                 <CFormLabel htmlFor="city">City</CFormLabel>
                 <CFormInput
