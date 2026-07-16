@@ -497,7 +497,8 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
           
             )}
 
-             <CCol md={6}>
+             {(formData?.pageType !== 'university') && 
+              <CCol md={6}>
                 <CFormLabel htmlFor="city">City</CFormLabel>
                 <CFormInput
                   id="city"
@@ -508,10 +509,11 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 />
                
               </CCol>
+              }
 
             </CRow>
 
-            <CRow className='mt-4'>
+           {(formData?.pageType === 'university') && <CRow className='mt-4'>
                <CCol md={6}>
                 <CFormLabel htmlFor="state">State</CFormLabel>
                 <CFormInput
@@ -523,7 +525,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 />
                
               </CCol>
-            </CRow>
+            </CRow>}
             
 
             <CRow className="g-3 mt-3">
