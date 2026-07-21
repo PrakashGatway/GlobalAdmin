@@ -483,8 +483,244 @@ const OverviewSection = ({ data = {}, onChange }) => {
     );
 };
 
+const ContentSection = ({ data = {}, onChange }) => {
+    const handleChange = (field, value) => {
+        onChange({ ...data, [field]: value });
+    };
+
+    return (
+        <div className="p-3">
+            <CRow className="g-3">
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">Overview title</CFormLabel>
+                    <CFormInput
+                        value={data.title || ''}
+                        onChange={(value) => handleChange('title', event.target.value)}
+                        placeholder="Write an overview title..."
+                    />
+                </CCol>
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">Overview Content</CFormLabel>
+                    <CKEditorComponent
+                        value={data.content || ''}
+                        onChange={(value) => handleChange('content', value)}
+                        placeholder="Write an overview of the scholarship..."
+                    />
+                </CCol>
+            </CRow>
+        </div>
+    );
+};
+
 // Why Choose Section Component
 const WhyChooseSection = ({ data = {}, onChange }) => {
+    const [cards, setCards] = useState(data.cards || []);
+    const [editingCardIndex, setEditingCardIndex] = useState(null);
+    const [newCard, setNewCard] = useState({ title: '', subtitle: '', iconName: '' });
+
+    useEffect(() => {
+        if (data.cards) {
+            setCards(data.cards);
+        }
+    }, [data.cards]);
+
+    const handleCardChange = (index, field, value) => {
+        const updatedCards = cards.map((card, i) =>
+            i === index ? { ...card, [field]: value } : card
+        );
+        setCards(updatedCards);
+        onChange({ ...data, cards: updatedCards });
+    };
+
+    const addCard = () => {
+        if (!newCard.title.trim()) return;
+        const updatedCards = [...cards, newCard];
+        setCards(updatedCards);
+        onChange({ ...data, cards: updatedCards });
+        setNewCard({ title: '', subtitle: '', iconName: '' });
+    };
+
+    const removeCard = (index) => {
+        const updatedCards = cards.filter((_, i) => i !== index);
+        setCards(updatedCards);
+        onChange({ ...data, cards: updatedCards });
+    };
+
+    const moveCardUp = (index) => {
+        if (index === 0) return;
+        const updatedCards = [...cards];
+        [updatedCards[index - 1], updatedCards[index]] = [updatedCards[index], updatedCards[index - 1]];
+        setCards(updatedCards);
+        onChange({ ...data, cards: updatedCards });
+    };
+
+    const moveCardDown = (index) => {
+        if (index === cards.length - 1) return;
+        const updatedCards = [...cards];
+        [updatedCards[index], updatedCards[index + 1]] = [updatedCards[index + 1], updatedCards[index]];
+        setCards(updatedCards);
+        onChange({ ...data, cards: updatedCards });
+    };
+
+    return (
+        <div className="p-3">
+            <CRow className="g-3 mb-4">
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">Section Title</CFormLabel>
+                    <CFormInput
+                        value={data.title || ''}
+                        onChange={(e) => onChange({ ...data, title: e.target.value })}
+                        placeholder="Why Choose This Scholarship?"
+                    />
+                </CCol>
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">Section Subtitle</CFormLabel>
+                    <CKEditorComponent
+                        value={data.subtitle || ""}
+                        placeholder="Brief subtitle for the section"
+                        onChange={(value) =>
+                            onChange({
+                                ...data,
+                                subtitle: value,
+                            })
+                        }
+                    />
+                </CCol>
+            </CRow>
+
+            <div className="mb-4">
+                <h6 className="fw-semibold mb-3">Cards</h6>
+                {cards.map((card, index) => (
+                    <CCard key={index} className="mb-3 border">
+                        <CCardBody>
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                <div className="d-flex align-items-center gap-2">
+                                    <CBadge color="secondary" className="me-2">{index + 1}</CBadge>
+                                    <strong>{card.title || 'Untitled Card'}</strong>
+                                </div>
+                                <div className="d-flex gap-2">
+                                    <CButton
+                                        size="sm"
+                                        color="secondary"
+                                        variant="outline"
+                                        onClick={() => moveCardUp(index)}
+                                        disabled={index === 0}
+                                    >
+                                        <CIcon icon={cilArrowTop} />
+                                    </CButton>
+                                    <CButton
+                                        size="sm"
+                                        color="secondary"
+                                        variant="outline"
+                                        onClick={() => moveCardDown(index)}
+                                        disabled={index === cards.length - 1}
+                                    >
+                                        <CIcon icon={cilArrowBottom} />
+                                    </CButton>
+                                    <CButton
+                                        size="sm"
+                                        color="danger"
+                                        variant="ghost"
+                                        onClick={() => removeCard(index)}
+                                    >
+                                        <CIcon icon={cilTrash} />
+                                    </CButton>
+                                </div>
+                            </div>
+                            <CRow className="g-3">
+                                <CCol md={6}>
+                                    <CFormLabel>Card Title</CFormLabel>
+                                    <CFormInput
+                                        value={card.title || ''}
+                                        onChange={(e) => handleCardChange(index, 'title', e.target.value)}
+                                        placeholder="Card title"
+                                    />
+                                </CCol>
+                                <CCol md={6}>
+                                    <CFormLabel>Icon Name</CFormLabel>
+                                    <CFormInput
+                                        value={card.iconName || ''}
+                                        onChange={(e) => handleCardChange(index, 'iconName', e.target.value)}
+                                        placeholder="Card icon"
+                                    />
+                                </CCol>
+                                <CCol md={12}>
+                                    <CFormLabel>Card Subtitle</CFormLabel>
+                                    <CKEditorComponent
+                                        value={card.subtitle || ""}
+                                        placeholder="Card subtitle"
+                                        onChange={(data) => handleCardChange(index, "subtitle", data)}
+                                    />
+                                </CCol>
+
+                            </CRow>
+                        </CCardBody>
+                    </CCard>
+                ))}
+
+                {/* Add New Card */}
+                <CCard className="border-dashed">
+                    <CCardBody>
+                        <h6 className="fw-semibold mb-3">Add New Card</h6>
+                        <CRow className="g-3">
+                            <CCol md={6}>
+                                <CFormInput
+                                    placeholder="Card Title"
+                                    value={newCard.title}
+                                    onChange={(e) => setNewCard({ ...newCard, title: e.target.value })}
+                                />
+                            </CCol>
+                            <CCol md={5}>
+
+                                <CFormInput
+                                    placeholder="Card icon"
+                                    value={newCard.iconName}
+                                    onChange={(e) => setNewCard({ ...newCard, iconName: e.target.value })}
+                                />
+                            </CCol>
+                            <CCol md={11}>
+                                <CKEditorComponent
+                                    value={newCard.subtitle}
+                                    placeholder="Card Subtitle"
+                                    onChange={(data) =>
+                                        setNewCard((prev) => ({
+                                            ...prev,
+                                            subtitle: data,
+                                        }))
+                                    }
+                                />
+                            </CCol>
+
+                            <CCol md={1}>
+                                <CButton
+                                    color="primary"
+                                    onClick={addCard}
+                                    disabled={!newCard.title.trim()}
+                                    className="w-100"
+                                >
+                                    <CIcon icon={cilPlus} />
+                                </CButton>
+                            </CCol>
+                        </CRow>
+                    </CCardBody>
+                </CCard>
+            </div>
+
+            <CRow className="g-3">
+                <CCol md={12}>
+                    <CFormLabel className="fw-semibold">Additional Content</CFormLabel>
+                    <CKEditorComponent
+                        value={data.additionalContent || ''}
+                        onChange={(value) => onChange({ ...data, additionalContent: value })}
+                        placeholder="Any additional content for this section..."
+                    />
+                </CCol>
+            </CRow>
+        </div>
+    );
+};
+
+const StepsSection = ({ data = {}, onChange }) => {
     const [cards, setCards] = useState(data.cards || []);
     const [editingCardIndex, setEditingCardIndex] = useState(null);
     const [newCard, setNewCard] = useState({ title: '', subtitle: '', iconName: '' });
@@ -793,7 +1029,7 @@ const DocumentsSection = ({ data = {}, onChange }) => {
                     <CCard key={docIndex} className="mb-3 border">
                         <CCardBody>
                             <div className="d-flex justify-content-between align-items-start mb-3">
-                            
+
                                 <CButton
                                     size="sm"
                                     color="danger"
@@ -893,6 +1129,8 @@ const ExtraSectionsManager = ({ sections = [], onChange, onSectionChange }) => {
         { value: 'overview', label: 'Overview', icon: cilInfo },
         { value: 'whyChoose', label: 'Why Choose', icon: cilStar },
         { value: 'documents', label: 'Documents', icon: cilStar },
+        { value: 'content', label: 'Content Section', icon: cilStar },
+        { value: 'StepsSection', label: 'Steps Section', icon: cilStar },
     ];
 
 
@@ -970,9 +1208,23 @@ const ExtraSectionsManager = ({ sections = [], onChange, onSectionChange }) => {
                         onChange={(data) => updateSectionData(index, data)}
                     />
                 );
+            case 'StepsSection':
+                return (
+                    <StepsSection
+                        data={section.data || {}}
+                        onChange={(data) => updateSectionData(index, data)}
+                    />
+                );
             case 'documents':
                 return (
                     <DocumentsSection
+                        data={section.data || {}}
+                        onChange={(data) => updateSectionData(index, data)}
+                    />
+                );
+            case 'content':
+                return (
+                    <ContentSection
                         data={section.data || {}}
                         onChange={(data) => updateSectionData(index, data)}
                     />
@@ -1237,7 +1489,7 @@ const ScholarshipForm = ({
         if (!formData.slug.trim()) errors.slug = 'Slug is required';
         if (formData.subjects.length === 0) errors.subjects = 'At least one subject is required';
         if (!formData.country) errors.country = 'Country is required';
-        if (!formData.university) errors.university = 'University is required';
+        // if (!formData.university) errors.university = 'University is required';
         if (formData.level.length === 0) errors.level = 'At least one level is required';
 
         if (Object.keys(errors).length > 0) {
@@ -1422,7 +1674,7 @@ const ScholarshipForm = ({
                     </CFormSelect>
                     {formErrors.country && <div className="invalid-feedback d-block">{formErrors.country}</div>}
                 </CCol>
-
+                {/* 
                 <CCol md={6}>
                     <CFormLabel className="fw-semibold">
                         University <span className="text-danger">*</span>
@@ -1442,7 +1694,7 @@ const ScholarshipForm = ({
                         ))}
                     </CFormSelect>
                     {formErrors.university && <div className="invalid-feedback d-block">{formErrors.university}</div>}
-                </CCol>
+                </CCol> */}
             </CRow>
 
             {/* Subjects - React Select Multi-select */}
