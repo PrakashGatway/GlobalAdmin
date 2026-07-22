@@ -22,6 +22,7 @@ import {
     CTooltip,
     CProgress,
     CCardHeader,
+    CSpinner,
 } from '@coreui/react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
@@ -46,6 +47,7 @@ import {
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import uploadService from '../../services/uploadService';
 
 /* ---------- Enhanced Key Value Editor (AUTO-REMOVE FIXED) ---------- */
 const KeyValueEditor = ({
@@ -1393,10 +1395,17 @@ const ScholarshipForm = ({
         extraStatus: 'Active',
         seoTitle: "",
         seoDescription: "",
-        seoKeyword: ""
+        seoKeyword: "",
+        cover_photo: '',
+        cta: {
+            title: "",
+            description: "",
+        },
     });
 
     const [formErrors, setFormErrors] = useState({});
+    const [imagePreview, setImagePreview] = useState('')
+    const [uploadingImage, setUploadingImage] = useState(false)
 
     useEffect(() => {
         if (scholarship) {
@@ -1406,6 +1415,7 @@ const ScholarshipForm = ({
                 slug: scholarship.slug || '',
                 description: scholarship.description || '',
                 shortDescription: scholarship.shortDescription || '',
+                cover_photo: scholarship.cover_photo || '',
                 subjects: subjectsArray.map(s => s._id || s),
                 country: scholarship.country?._id || scholarship.country || '',
                 university: scholarship.university?._id || scholarship.university || '',
@@ -1430,9 +1440,54 @@ const ScholarshipForm = ({
                 seoTitle: scholarship.seoTitle || "",
                 seoDescription: scholarship.seoDescription || "",
                 seoKeyword: scholarship.seoKeyword || "",
+                cta: scholarship.cta || {
+                    title: "",
+                    description: "",
+                }
             });
         }
     }, [scholarship]);
+
+
+    const handleCTAChange = (e) => {
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            cta: {
+                ...prev.cta,
+                [name]: value,
+            },
+        }));
+    };
+
+    const handleLogoUpload = async (e, key) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        if (!file.type.startsWith('image/')) {
+            alert('Only image files are allowed')
+            return
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Image size must be < 2MB')
+            return
+        }
+        const reader = new FileReader()
+        reader.onloadend = () => setImagePreview(reader.result)
+        reader.readAsDataURL(file)
+        setUploadingImage(true)
+        try {
+            const res = await uploadService.uploadImage(file)
+            if (res.success) {
+                setFormData(prev => ({ ...prev, [key]: res.data.url }))
+            }
+        } catch (err) {
+            alert(err.message || 'Upload failed')
+        } finally {
+            setUploadingImage(false)
+        }
+    }
 
     // Auto-generate slug from title
     useEffect(() => {
@@ -1604,6 +1659,36 @@ const ScholarshipForm = ({
                         maxLength={150}
                     />
                 </CCol>
+                <CCol md={12}>
+                    <CFormLabel>Cover Image</CFormLabel>
+                    <CFormInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleLogoUpload(e, 'cover_photo')}
+                        disabled={uploadingImage}
+                    />
+                    {uploadingImage && <CSpinner size="sm" className="ms-2" />}
+                    <small className="text-muted">Max size: 5MB (PNG, JPG, JPEG)</small>
+                    {(formData.cover_photo) && (
+                        <CCol md={6}>
+                            <CFormLabel>Cover Preview</CFormLabel>
+                            <div className="mt-2">
+                                <img
+                                    src={formData?.cover_photo}
+                                    alt="cover image"
+                                    style={{
+                                        height: '100px',
+                                        objectFit: 'contain',
+                                        backgroundColor: '#f8f9fa',
+                                        padding: '10px',
+                                        border: '1px solid #dee2e6',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                            </div>
+                        </CCol>
+                    )}
+                </CCol>
             </CRow>
 
             {/* SEO Information */}
@@ -1636,7 +1721,6 @@ const ScholarshipForm = ({
                         onChange={handleChange}
                         rows={3}
                         placeholder="Brief summary of the scholarship (150 characters max)"
-                        maxLength={150}
                     />
                 </CCol>
 
@@ -1841,6 +1925,46 @@ const ScholarshipForm = ({
                     />
                 </CCol>
             </CRow>
+
+            {/* CTA Section */}
+            <CCard className="mb-4">
+                <CCardHeader>
+                    <h5 className="mb-0">Call To Action (CTA)</h5>
+                </CCardHeader>
+
+                <CCardBody>
+                    <CRow className="g-3">
+
+                        <CCol md={12}>
+                            <CFormLabel className="fw-semibold">
+                                CTA Title
+                            </CFormLabel>
+
+                            <CFormInput
+                                name="title"
+                                value={formData.cta.title}
+                                onChange={handleCTAChange}
+                                placeholder="Ready to Apply for this Scholarship?"
+                            />
+                        </CCol>
+
+                        <CCol md={12}>
+                            <CFormLabel className="fw-semibold">
+                                CTA Description
+                            </CFormLabel>
+
+                            <CFormTextarea
+                                rows={4}
+                                name="description"
+                                value={formData.cta.description}
+                                onChange={handleCTAChange}
+                                placeholder="Start your application today and let our experts guide you through the admission process."
+                            />
+                        </CCol>
+
+                    </CRow>
+                </CCardBody>
+            </CCard>
 
             {/* Extra Sections */}
             <ExtraSectionsManager
