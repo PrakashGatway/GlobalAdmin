@@ -13,6 +13,8 @@ import Gallery from './views/websitePages/Gallery'
 import Scholarships from './views/scholarship/Scholarship'
 import { useAuth } from './context/AuthContext'
 import AdminNotifications from './views/notify/NotificationPage'
+import AllCourses from "./views/all-courses/AllCourses"
+
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserList = React.lazy(() => import('./views/user-management/UserList'))
@@ -26,6 +28,7 @@ const ApplicationHistory = React.lazy(() => import('./views/application-history/
 const PageInformation = React.lazy(() => import('./views/page-information/PageInformation'))
 const PaymentManagement = React.lazy(() => import('./views/payment/Payment'))
 const Visa = React.lazy(() => import('./views/visa/Visa'))
+
 
 
 const adminRoutes = [
@@ -71,7 +74,8 @@ const managerRoutes = [
   { path: '/courses', name: 'Courses', element: Courses },
   { path: '/courses/categories', name: 'Courses Categories', element: CourseCategories },
   { path: '/subjects', name: 'Subjects', element: Subjects },
-  { path: '/scholarship', name: 'Scholarships', element: Scholarships }
+  { path: '/scholarship', name: 'Scholarships', element: Scholarships },
+  {path: "/all-courses", name: "All Courses", element: AllCourses }
 ]
 
 const routes = {

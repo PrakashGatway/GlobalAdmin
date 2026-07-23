@@ -34,6 +34,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     slug: '',
     city: "",
     state: "",
+    isCity: "No",
     pageType: '',
     // SEO fields
     metaTitle: '',
@@ -122,6 +123,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       cardImage: page.cardImage || '',
       country: page?.country && page?.country || null,
       content: page.sections || {},
+      isCity: page.isCity
     })
     
     // Store the current page ID
@@ -153,6 +155,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       navbarTitle: '',
       navbarImage: '',
       cardImage: '',
+      isCity: "No",
       country: null,
       content: getDefaultValues(defaultPageType),
     })
@@ -525,7 +528,25 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 />
                
               </CCol>
-            </CRow>}
+            </CRow>
+
+            <CRow className='mt-4'>
+            <CCol md={6}>
+                <CFormLabel htmlFor="isCity">is City Page</CFormLabel>
+                <CFormSelect
+                  id="isCity"
+                  name="isCity"
+                  value={formData.isCity}
+                  onChange={handleBasicInfoChange}
+                >
+                
+                  <option value="Yes">Yes</option>
+                  <option selected value="No">No</option>
+                </CFormSelect>
+              
+              </CCol></CRow>
+
+          
             
 
             <CRow className="g-3 mt-3">
