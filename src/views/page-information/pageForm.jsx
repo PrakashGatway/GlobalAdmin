@@ -59,7 +59,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   const [formErrors, setFormErrors] = useState({})
   const pageSchema = getPageSchema(pageType)
   const [countries, setCountries] = useState([])
-  
+
   // Add ref to track if initial load has been done
   const previousPageIdRef = useRef(null)
 
@@ -71,7 +71,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       if (res.success) {
         const countriesData = res.data || []
         setCountries(countriesData)
-        
+
         setTimeout(() => {
           console.log('After 1 second - countries state:', countries)
         }, 1000)
@@ -88,87 +88,87 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   }, [formData?.pageType])
 
   // Fixed useEffect to prevent resetting form on every render
- useEffect(() => {
-  // Get current page ID
-  const currentPageId = page?._id || null
-  
-  // Check if this is a new page or different page
-  const isNewPage = !page
-  const isDifferentPage = currentPageId !== previousPageIdRef.current
-  
-  if (page && (isDifferentPage || previousPageIdRef.current === null)) {
-    console.log('Setting page data for:', page.title || page._id)
-    
-    const seoData = page.seoMeta || {}
-    
-    setPageType(page.pageType || 'general')
-    setFormData({
-      title: page.title || '',
-      subTitle: page.subTitle || '',
-      description: page.description || '',
-      slug: page.slug || '',
-      city: page.city || "",
-      state: page.state || "",
-      pageType: page.pageType || 'general',
-      metaTitle: seoData.metaTitle || '',
-      metaDescription: seoData.metaDescription || '',
-      metaKeywords: seoData.metaKeywords || '',
-      canonicalUrl: seoData.canonicalUrl || page.canonicalUrl || '',
-      status: page.status || 'Draft',
-      isFeatured: page.isFeatured || false,
-      isFooter: page.isFooter || false,
-      isNavbar: page.isNavbar || false,
-      navbarTitle: page.navbarTitle || '',
-      navbarImage: page.navbarImage || '',
-      cardImage: page.cardImage || '',
-      country: page?.country && page?.country || null,
-      content: page.sections || {},
-      isCity: page.isCity
-    })
-    
-    // Store the current page ID
-    previousPageIdRef.current = currentPageId
-  }
+  useEffect(() => {
+    // Get current page ID
+    const currentPageId = page?._id || null
 
-  console.log(page)
-  
-  // Handle new page creation (when page becomes null)
-  if (!page && previousPageIdRef.current !== null) {
-   
-    const defaultPageType = 'general'
-    setPageType(defaultPageType)
-    setFormData({
-      title: '',
-      subTitle: '',
-      description: '',
-      slug: '',
-      city: "",
-      state: "",
-      pageType: defaultPageType,
-      metaTitle: '',
-      metaDescription: '',
-      metaKeywords: '',
-      canonicalUrl: '',
-      status: 'Draft',
-      isFeatured: false,
-      isNavbar: false,
-      navbarTitle: '',
-      navbarImage: '',
-      cardImage: '',
-      isCity: "No",
-      country: null,
-      content: getDefaultValues(defaultPageType),
-    })
-    
-    previousPageIdRef.current = null
-  }
-}, [page]) // Keep dependency on page
+    // Check if this is a new page or different page
+    const isNewPage = !page
+    const isDifferentPage = currentPageId !== previousPageIdRef.current
+
+    if (page && (isDifferentPage || previousPageIdRef.current === null)) {
+      console.log('Setting page data for:', page.title || page._id)
+
+      const seoData = page.seoMeta || {}
+
+      setPageType(page.pageType || 'general')
+      setFormData({
+        title: page.title || '',
+        subTitle: page.subTitle || '',
+        description: page.description || '',
+        slug: page.slug || '',
+        city: page.city || "",
+        state: page.state || "",
+        pageType: page.pageType || 'general',
+        metaTitle: seoData.metaTitle || '',
+        metaDescription: seoData.metaDescription || '',
+        metaKeywords: seoData.metaKeywords || '',
+        canonicalUrl: seoData.canonicalUrl || page.canonicalUrl || '',
+        status: page.status || 'Draft',
+        isFeatured: page.isFeatured || false,
+        isFooter: page.isFooter || false,
+        isNavbar: page.isNavbar || false,
+        navbarTitle: page.navbarTitle || '',
+        navbarImage: page.navbarImage || '',
+        cardImage: page.cardImage || '',
+        country: page?.country && page?.country || null,
+        content: page.sections || {},
+        isCity: page.isCity
+      })
+
+      // Store the current page ID
+      previousPageIdRef.current = currentPageId
+    }
+
+    console.log(page)
+
+    // Handle new page creation (when page becomes null)
+    if (!page && previousPageIdRef.current !== null) {
+
+      const defaultPageType = 'general'
+      setPageType(defaultPageType)
+      setFormData({
+        title: '',
+        subTitle: '',
+        description: '',
+        slug: '',
+        city: "",
+        state: "",
+        pageType: defaultPageType,
+        metaTitle: '',
+        metaDescription: '',
+        metaKeywords: '',
+        canonicalUrl: '',
+        status: 'Draft',
+        isFeatured: false,
+        isNavbar: false,
+        navbarTitle: '',
+        navbarImage: '',
+        cardImage: '',
+        isCity: "No",
+        country: null,
+        content: getDefaultValues(defaultPageType),
+      })
+
+      previousPageIdRef.current = null
+    }
+  }, [page]) // Keep dependency on page
 
   const handleBasicInfoChange = (e) => {
     const { name, value, type, checked } = e.target
-    
+
     console.log('Input changed:', name, value)
-    
+
     setFormData(prev => {
       const newData = {
         ...prev,
@@ -221,7 +221,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
       ...prev,
       content: updatedContent
     }))
-    
+
     console.log('Sections updated:', updatedSections)
   }
 
@@ -263,7 +263,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
     }
 
     const { content, metaTitle, metaDescription, metaKeywords, canonicalUrl, ...rest } = formData
-    
+
     const submitData = {
       ...rest,
       sections: content,
@@ -297,7 +297,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
   return (
     <CForm onSubmit={handleSubmit}>
       {error && <CAlert color="danger" className="mb-4">{error}</CAlert>}
-      
+
       <CNav variant="tabs" className="mb-3">
         <CNavItem>
           <CNavLink
@@ -333,7 +333,7 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
         </CNavItem>
       </CNav>
 
-      
+
 
       <div style={{ maxWidth: "1400px" }} className='mx-auto'>
         {/* General Info Tab */}
@@ -475,9 +475,9 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
               </CCol>
             </CRow>
 
-<CRow className='g-3 mt-3'>
-            {(formData?.pageType === 'country' || formData?.pageType === 'university') && (
-          
+            <CRow className='g-3 mt-3'>
+              {(formData?.pageType === 'country' || formData?.pageType === 'university') && (
+
                 <CCol md={6}>
                   <CFormLabel htmlFor="country">Country</CFormLabel>
                   <CFormSelect
@@ -497,57 +497,56 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                     Select the country this page is associated with
                   </div>
                 </CCol>
-          
-            )}
 
-             {(formData?.pageType !== 'university') && 
-              <CCol md={6}>
-                <CFormLabel htmlFor="city">City</CFormLabel>
-                <CFormInput
-                  id="city"
-                  name="city"
-                  value={formData.city || ''}
-                  onChange={handleBasicInfoChange}
-                  placeholder="Enter City"
-                />
-               
-              </CCol>
+              )}
+
+              {(formData?.pageType !== 'university') &&
+                <CCol md={6}>
+                  <CFormLabel htmlFor="city">City</CFormLabel>
+                  <CFormInput
+                    id="city"
+                    name="city"
+                    value={formData.city || ''}
+                    onChange={handleBasicInfoChange}
+                    placeholder="Enter City"
+                  />
+
+                </CCol>
               }
 
             </CRow>
 
-           {(formData?.pageType === 'university') && <CRow className='mt-4'>
-               <CCol md={6}>
-                <CFormLabel htmlFor="state">State</CFormLabel>
-                <CFormInput
-                  id="state"
-                  name="state"
-                  value={formData.state || ''}
-                  onChange={handleBasicInfoChange}
-                  placeholder="Enter State"
-                />
-               
-              </CCol>
-            </CRow>
+            {formData?.pageType === "university" && (
+              <>
+                <CRow className="mt-4">
+                  <CCol md={6}>
+                    <CFormLabel htmlFor="state">State</CFormLabel>
+                    <CFormInput
+                      id="state"
+                      name="state"
+                      value={formData.state || ""}
+                      onChange={handleBasicInfoChange}
+                      placeholder="Enter State"
+                    />
+                  </CCol>
+                </CRow>
 
-            <CRow className='mt-4'>
-            <CCol md={6}>
-                <CFormLabel htmlFor="isCity">is City Page</CFormLabel>
-                <CFormSelect
-                  id="isCity"
-                  name="isCity"
-                  value={formData.isCity}
-                  onChange={handleBasicInfoChange}
-                >
-                
-                  <option value="Yes">Yes</option>
-                  <option selected value="No">No</option>
-                </CFormSelect>
-              
-              </CCol></CRow>
-
-          
-            
+                <CRow className="mt-4">
+                  <CCol md={6}>
+                    <CFormLabel htmlFor="isCity">Is City Page</CFormLabel>
+                    <CFormSelect
+                      id="isCity"
+                      name="isCity"
+                      value={formData.isCity}
+                      onChange={handleBasicInfoChange}
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </CFormSelect>
+                  </CCol>
+                </CRow>
+              </>
+            )}
 
             <CRow className="g-3 mt-3">
               <CCol md={6}>
@@ -575,11 +574,11 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 </div>
                 {formData.cardImage && (
                   <div className="mt-2">
-                    <img 
-                      src={formData.cardImage} 
-                      alt="Card preview" 
-                      width="120" 
-                      className="img-thumbnail" 
+                    <img
+                      src={formData.cardImage}
+                      alt="Card preview"
+                      width="120"
+                      className="img-thumbnail"
                     />
                     <CButton
                       size="sm"
@@ -618,11 +617,11 @@ const PageForm = ({ page, onSubmit, onCancel, error, submitting }) => {
                 </div>
                 {formData.navbarImage && (
                   <div className="mt-2">
-                    <img 
-                      src={formData.navbarImage} 
-                      alt="Navbar logo preview" 
-                      width="120" 
-                      className="img-thumbnail" 
+                    <img
+                      src={formData.navbarImage}
+                      alt="Navbar logo preview"
+                      width="120"
+                      className="img-thumbnail"
                     />
                     <CButton
                       size="sm"
