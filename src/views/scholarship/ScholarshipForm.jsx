@@ -1044,6 +1044,14 @@ const DocumentsSection = ({ data = {}, onChange }) => {
 
                             <CRow className="g-3 mb-3">
                                 <CCol md={12}>
+                                    <CFormLabel>Document Icon</CFormLabel>
+                                    <CFormInput
+                                        value={doc.icon || ''}
+                                        onChange={(e) => handleDocumentChange(docIndex, 'icon', e.target.value)}
+                                        placeholder="e.g.,Doucments"
+                                    />
+                                </CCol>
+                                <CCol md={12}>
                                     <CFormLabel>Document Title</CFormLabel>
                                     <CKEditorComponent
                                         value={doc.title || ''}
@@ -1051,41 +1059,16 @@ const DocumentsSection = ({ data = {}, onChange }) => {
                                         placeholder="e.g., Academic Transcripts"
                                     />
                                 </CCol>
-                            </CRow>
+                                 <CCol md={12}>
+                                    <CFormLabel>Document Description</CFormLabel>
+                                    <CKEditorComponent
+                                        value={doc.description || ''}
+                                        onChange={(e) => handleDocumentChange(docIndex, 'description', e)}
+                                        placeholder="e.g., Academic Transcripts"
+                                    />
+                                </CCol>
 
-                            {/* <div>
-                                <CFormLabel>Required Points</CFormLabel>
-                                {doc.points.map((point, pointIndex) => (
-                                    <CInputGroup key={pointIndex} className="mb-2">
-                                        <CInputGroupText>
-                                            <span className="small fw-semibold">{pointIndex + 1}</span>
-                                        </CInputGroupText>
-                                        <CFormInput
-                                            value={point}
-                                            onChange={(e) => handlePointChange(docIndex, pointIndex, e.target.value)}
-                                            placeholder="e.g., Official transcripts from all previous institutions"
-                                        />
-                                        <CButton
-                                            color="danger"
-                                            variant="outline"
-                                            onClick={() => removePoint(docIndex, pointIndex)}
-                                            disabled={doc.points.length <= 1}
-                                        >
-                                            <CIcon icon={cilTrash} />
-                                        </CButton>
-                                    </CInputGroup>
-                                ))}
-                                <CButton
-                                    size="sm"
-                                    color="secondary"
-                                    variant="outline"
-                                    onClick={() => addPoint(docIndex)}
-                                    className="mt-2"
-                                >
-                                    <CIcon icon={cilPlus} className="me-1" />
-                                    Add Point
-                                </CButton>
-                            </div> */}
+                            </CRow>
                         </CCardBody>
                     </CCard>
                 ))}
