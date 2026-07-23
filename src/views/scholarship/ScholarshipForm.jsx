@@ -1423,7 +1423,7 @@ const ScholarshipForm = ({
                 seoTitle: scholarship.seoTitle || "",
                 seoDescription: scholarship.seoDescription || "",
                 seoKeyword: scholarship.seoKeyword || "",
-                cta: scholarship.cta || {
+                cta: scholarship?.extra_content?.cta || {
                     title: "",
                     description: "",
                 }
