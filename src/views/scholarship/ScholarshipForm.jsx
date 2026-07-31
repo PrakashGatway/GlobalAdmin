@@ -1059,7 +1059,7 @@ const DocumentsSection = ({ data = {}, onChange }) => {
                                         placeholder="e.g., Academic Transcripts"
                                     />
                                 </CCol>
-                                 <CCol md={12}>
+                                <CCol md={12}>
                                     <CFormLabel>Document Description</CFormLabel>
                                     <CKEditorComponent
                                         value={doc.description || ''}
@@ -1633,14 +1633,20 @@ const ScholarshipForm = ({
 
                 <CCol md={12}>
                     <CFormLabel className="fw-semibold">Short Description</CFormLabel>
-                    <CFormTextarea
+                    <CKEditorComponent
+                        value={formData.shortDescription || ''}
+                        placeholder={"Write a short description of the scholarship..."}
+                        onChange={(data) => handleChange({ target: { name: 'shortDescription', value: data } })}
+                        className="shadow-none"
+                    />
+                    {/* <CFormTextarea
                         name="shortDescription"
                         value={formData.shortDescription}
                         onChange={handleChange}
                         rows={3}
                         placeholder="Brief summary of the scholarship (150 characters max)"
                         maxLength={150}
-                    />
+                    /> */}
                 </CCol>
                 <CCol md={12}>
                     <CFormLabel>Cover Image</CFormLabel>
