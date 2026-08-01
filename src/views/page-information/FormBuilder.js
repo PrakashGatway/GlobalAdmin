@@ -111,7 +111,6 @@ const DynamicFormBuilder = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
-  console.log(schema)
   // Build sections from schema and formData
   // In DynamicFormBuilder.jsx, update the useEffect
   // In DynamicFormBuilder.jsx, update the useEffect that builds sections:
@@ -362,7 +361,7 @@ const DynamicFormBuilder = ({
   const renderField = (section, field) => {
     const value = field.value || ''
     const error = errors[`${section.id}.${field.name}`]
-
+console.log(field.value,"value")
     const commonProps = {
       name: field.name,
       value: value,
@@ -619,6 +618,7 @@ const DynamicFormBuilder = ({
                       </CAccordionHeader>
                       <CAccordionBody>
                         <CRow className="g-3">
+                          {console.log(section.fields,"section.fields")}
                           {section.fields.map((field) => (
                             <CCol
                               key={field.name}
@@ -692,6 +692,8 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
   useEffect(() => {
     setItems(value)
   }, [value])
+
+  console.log(items,"items")
 
   const handleAddItem = () => {
     const newItem = {}
