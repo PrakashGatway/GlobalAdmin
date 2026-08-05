@@ -361,7 +361,7 @@ const DynamicFormBuilder = ({
   const renderField = (section, field) => {
     const value = field.value || ''
     const error = errors[`${section.id}.${field.name}`]
-console.log(field.value,"value")
+    console.log(field.value, "value")
     const commonProps = {
       name: field.name,
       value: value,
@@ -618,7 +618,7 @@ console.log(field.value,"value")
                       </CAccordionHeader>
                       <CAccordionBody>
                         <CRow className="g-3">
-                          {console.log(section.fields,"section.fields")}
+                          {console.log(section.fields, "section.fields")}
                           {section.fields.map((field) => (
                             <CCol
                               key={field.name}
@@ -693,7 +693,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
     setItems(value)
   }, [value])
 
-  console.log(items,"items")
+  console.log(items, "items")
 
   const handleAddItem = () => {
     const newItem = {}
@@ -768,12 +768,29 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
         )
 
 
+      // case "richtext2":
+      //   return (
+      //     <div className="position-relative">
+      //       <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+      //     </div>
+      //   );
+
       case "richtext2":
         return (
           <div className="position-relative">
-            <TinyEditor header={true} initialValue={commonProps.value || ""} onChange={(value) => { commonProps.onChange({ target: { value } }); }} />
+            <CKEditorComponent
+              value={commonProps.value || ""}
+              onChange={(value) => {
+                commonProps.onChange({
+                  target: {
+                    value
+                  }
+                });
+              }}
+              placeholder="Type or paste your content here..."
+            />
           </div>
-        );
+        )
       case "file":
         return (
           <>
@@ -898,7 +915,7 @@ const RepeaterField = ({ field, value = [], onChange, disabled }) => {
                   {field.fields.map((itemField) => (
                     <CCol
                       key={itemField.name}
-                      md={itemField.type === 'textarea' || itemField.type === 'richtext' ? 12 : 6}
+                      md={itemField.type === 'textarea' || itemField.type === 'richtext' || itemField.type === 'richtext2' ? 12 : 6}
                     >
                       <CFormLabel>
                         {itemField.label}
