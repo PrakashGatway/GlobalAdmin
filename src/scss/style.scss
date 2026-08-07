@@ -9,6 +9,14 @@ body {
   background-color: var(--cui-tertiary-bg);
 }
 
+.faq-question {
+  font-size: 14px !important;
+}
+
+.faq-question * {
+  font-size: 14px !important;
+}
+
 .line-clamp {
   display: -webkit-box;
   -webkit-line-clamp: 1;   /* 👈 number of lines */

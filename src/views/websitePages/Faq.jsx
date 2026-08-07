@@ -31,6 +31,13 @@ import {
     CFormLabel,
     CSpinner,
     CFormTextarea,
+    CNav,
+    CNavItem,
+    CNavLink,
+    CTabContent,
+    CTabPane,
+    CRow as CContainerRow,
+    CCol as CContainerCol,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
@@ -41,7 +48,10 @@ import {
     cilFilter,
     cilFilterX,
     cilChevronBottom,
-    cilChevronTop
+    cilChevronTop,
+    cilFolder,
+    cilFolderOpen,
+    cilFile
 } from '@coreui/icons'
 
 import apiService from '../../services/apiService'
@@ -50,6 +60,9 @@ import CKEditorComponent from '../page-information/Ckeditor'
 
 const getFaqs = (params) =>
     apiService.get('/faqs', { params }).then(res => res)
+
+const getFaqsTypes = () =>
+    apiService.get('/faqs/types').then(res => res)
 
 const createFaq = (data) =>
     apiService.post('/faqs', data).then(res => res)
@@ -70,6 +83,9 @@ const FAQ = () => {
     const [deleteId, setDeleteId] = useState(null)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showFilters, setShowFilters] = useState(false)
+    const [activeRoute, setActiveRoute] = useState('all')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [routes, setRoutes] = useState([])
 
     const [formData, setFormData] = useState({
         question: '',
@@ -85,8 +101,6 @@ const FAQ = () => {
         type: '',
         status: '',
         isPublished: '',
-        referenceModel: '',
-        referenceId: '',
         page: 1,
         limit: 20,
     })
@@ -95,29 +109,48 @@ const FAQ = () => {
     const [totalPages, setTotalPages] = useState(1)
 
     // ================= FETCH =================
-   const fetchFaqs = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
-        const res = await getFaqs(filters)
+    const fetchFaqs = useCallback(async () => {
+        setLoading(true)
+        setError('')
+        try {
+            // If a specific route is selected, filter by type
+            const params = { ...filters }
+            if (activeRoute !== 'all') {
+                params.type = activeRoute
+            }
 
-        if (res.success) {
-            setFaqs(res.data || [])
-            setTotal(res.total || 0) // ✅ FIX
-            setTotalPages(Math.ceil((res.total || 0) / filters.limit) || 1) // ✅ FIX
-           
+            const res = await getFaqs(params)
+
+            if (res.success) {
+                setFaqs(res.data || [])
+                setTotal(res.total || 0)
+                setTotalPages(Math.ceil((res.total || 0) / filters.limit) || 1)
+            }
+        } catch (err) {
+            setError(err.message || 'Failed to fetch FAQs')
+        } finally {
+            setLoading(false)
         }
-
-    } catch (err) {
-        setError(err.message || 'Failed to fetch FAQs')
-    } finally {
-        setLoading(false)
-    }
-}, [filters])
+    }, [filters, activeRoute])
 
     useEffect(() => {
         fetchFaqs()
     }, [fetchFaqs])
+
+    useEffect(() => {
+        const fetchTypes = async () => {
+            try {
+                const types = await getFaqsTypes()
+
+                if (types.success) {
+                    setRoutes(types.data || [])
+                }
+            } catch (err) {
+                console.error('Failed to fetch FAQ types:', err)
+            }
+        }
+        fetchTypes()
+    }, [])
 
     // ================= HANDLERS =================
     const handleFilterChange = (name, value) => {
@@ -130,11 +163,10 @@ const FAQ = () => {
             type: '',
             status: '',
             isPublished: '',
-            referenceModel: '',
-            referenceId: '',
             page: 1,
             limit: 20,
         })
+        setSearchTerm('')
     }
 
     const handlePageChange = (page) => {
@@ -228,36 +260,39 @@ const FAQ = () => {
         }
     }
 
+    const handleAddFAQ = (routeType = 'General') => {
+        setEditing(null)
+        resetForm()
+        setFormData(prev => ({ ...prev, type: routeType }))
+        setShowModal(true)
+    }
+
     const activeFilterCount = Object.keys(filters).filter(
         key => !['page', 'limit'].includes(key) && filters[key]
     ).length
-
-    const referenceModels = [
-        { value: '', label: 'None' },
-        { value: 'Course', label: 'Course' },
-        { value: 'Program', label: 'Program' },
-        { value: 'University', label: 'University' },
-        { value: 'Service', label: 'Service' }
-    ]
-
-    const faqTypes = [
-        'General',
-        'About',
-        'Contact',
-        'Course',
-        'University',
-        'Scholarship',
-        'Visa',
-        'Admission',
-        'Application',
-        'Other',
-    ]
 
     const statusOptions = [
         { value: 'Active', label: 'Active' },
         { value: 'Inactive', label: 'Inactive' },
         { value: 'Draft', label: 'Draft' }
     ]
+
+    // Get FAQ count by route
+    const getRouteCount = (routeId) => {
+        if (routeId === 'all') return total
+        return faqs.filter(faq => faq.type === routeId).length
+    }
+
+    // Filter FAQs based on search term
+    const getFilteredFaqs = () => {
+        if (!searchTerm) return faqs
+        return faqs.filter(faq =>
+            faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }
+
+    const displayedFaqs = getFilteredFaqs()
 
     // ================= UI =================
     return (
@@ -270,9 +305,20 @@ const FAQ = () => {
                     <CCardHeader className="d-flex justify-content-between align-items-center">
                         <div>
                             <h5 className="mb-0">Frequently Asked Questions</h5>
-                            <small className="text-muted">Total: {total}</small>
+                            <small className="text-muted">Total: {total} FAQs</small>
                         </div>
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 mt-2 mt-md-0">
+                            <CInputGroup style={{ maxWidth: '200px' }}>
+                                <CInputGroupText>
+                                    <CIcon icon={cilMagnifyingGlass} />
+                                </CInputGroupText>
+                                <CFormInput
+                                    placeholder="Search FAQs..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </CInputGroup>
+
                             <CButton
                                 color="secondary"
                                 variant="outline"
@@ -288,11 +334,7 @@ const FAQ = () => {
 
                             <CButton
                                 color="primary"
-                                onClick={() => {
-                                    setEditing(null)
-                                    resetForm()
-                                    setShowModal(true)
-                                }}
+                                onClick={() => handleAddFAQ(activeRoute !== 'all' ? activeRoute : 'General')}
                             >
                                 <CIcon icon={cilPlus} className="me-2" /> Add FAQ
                             </CButton>
@@ -329,21 +371,6 @@ const FAQ = () => {
                                         ))}
                                     </CFormSelect>
                                 </CCol>
-                                {/* 
-                                <CCol md={3}>
-                                    <CFormLabel>Reference Model</CFormLabel>
-                                    <CFormSelect
-                                        value={filters.referenceModel}
-                                        onChange={e => handleFilterChange('referenceModel', e.target.value)}
-                                    >
-                                        <option value="">All</option>
-                                        {referenceModels.map(model => (
-                                            <option key={model.value} value={model.value}>
-                                                {model.label}
-                                            </option>
-                                        ))}
-                                    </CFormSelect>
-                                </CCol> */}
 
                                 <CCol md={12} className="d-flex justify-content-between">
                                     <div className="d-flex gap-3">
@@ -354,13 +381,6 @@ const FAQ = () => {
                                                 handleFilterChange('isPublished', e.target.checked ? 'true' : '')
                                             }
                                         />
-                                        {/* <CFormCheck
-                                            label="With Reference Only"
-                                            checked={filters.referenceId === 'has'}
-                                            onChange={e =>
-                                                handleFilterChange('referenceId', e.target.checked ? 'has' : '')
-                                            }
-                                        /> */}
                                     </div>
 
                                     <CButton color="danger" variant="outline" onClick={clearFilters}>
@@ -372,43 +392,90 @@ const FAQ = () => {
                         </CCardBody>
                     )}
 
+                    {/* FOLDER STRUCTURE - ROUTE NAVIGATION */}
+                    <CCardBody className="border-bottom bg-light">
+                        <CNav variant="tabs" className="flex-wrap">
+                            {routes.map(route => (
+                                <CNavItem key={route.type}>
+                                    <CNavLink
+                                        active={activeRoute === route.type}
+                                        onClick={() => {
+                                            setActiveRoute(route.type)
+                                            setFilters(prev => ({ ...prev, page: 1 }))
+                                        }}
+                                        className="d-flex align-items-center gap-2"
+                                    >
+                                        {route.type}
+                                        <CBadge
+                                            color={activeRoute === route.type ? 'primary' : 'secondary'}
+                                            className="ms-1"
+                                        >
+                                            {(route.count)}
+                                        </CBadge>
+                                    </CNavLink>
+                                </CNavItem>
+                            ))}
+                        </CNav>
+                    </CCardBody>
+
                     {/* TABLE */}
                     <CCardBody>
                         {loading ? (
                             <div className="text-center py-5">
                                 <CSpinner />
                             </div>
-                        ) : faqs.length === 0 ? (
-                            <div className="text-center py-5 text-muted">
-                                No FAQs found
+                        ) : displayedFaqs.length === 0 ? (
+                            <div className="text-center py-5">
+                                <CIcon icon={cilFolderOpen} size="xl" className="text-muted mb-3" />
+                                <div className="text-muted">
+                                    {searchTerm ? 'No FAQs match your search' : 'No FAQs found in this category'}
+                                </div>
+                                {activeRoute !== 'all' && (
+                                    <CButton
+                                        color="primary"
+                                        variant="outline"
+                                        className="mt-3"
+                                        onClick={() => handleAddFAQ(activeRoute)}
+                                    >
+                                        <CIcon icon={cilPlus} className="me-2" />
+                                        Add FAQ to {activeRoute}
+                                    </CButton>
+                                )}
                             </div>
                         ) : (
                             <>
-                                <CTable >
+                                <CTable responsive>
                                     <CTableHead>
                                         <CTableRow>
-                                            <CTableHeaderCell>Order</CTableHeaderCell>
+                                            <CTableHeaderCell style={{ width: '60px' }}>#</CTableHeaderCell>
                                             <CTableHeaderCell>Question</CTableHeaderCell>
-                                            <CTableHeaderCell>Type</CTableHeaderCell>
-                                            <CTableHeaderCell>Status</CTableHeaderCell>
-                                            {/* <CTableHeaderCell>Reference</CTableHeaderCell> */}
-                                            <CTableHeaderCell>Actions</CTableHeaderCell>
+                                            <CTableHeaderCell style={{ width: '120px' }}>Route</CTableHeaderCell>
+                                            <CTableHeaderCell style={{ width: '150px' }}>Status</CTableHeaderCell>
+                                            <CTableHeaderCell style={{ width: '150px' }}>Actions</CTableHeaderCell>
                                         </CTableRow>
                                     </CTableHead>
 
                                     <CTableBody>
-                                        {faqs.map((faq, index) => (
+                                        {displayedFaqs.map((faq, index) => (
                                             <CTableRow key={faq._id}>
-                                                <CTableDataCell>{index + 1}</CTableDataCell>
                                                 <CTableDataCell>
-                                                    <div className="fw-semibold" dangerouslySetInnerHTML={{__html:faq.question}}/>
-                                                    <small className="text-muted" dangerouslySetInnerHTML={{__html :faq.answer.substring(0, 100)}}/>
+                                                    {(filters.page - 1) * filters.limit + index + 1}
                                                 </CTableDataCell>
                                                 <CTableDataCell>
-                                                    <CBadge color="info">{faq.type}</CBadge>
+                                                    <div
+                                                        className="fw-semibold faq-question"
+                                                        dangerouslySetInnerHTML={{ __html: faq.question }}
+                                                    />
+                                                    <small className="text-muted d-block" dangerouslySetInnerHTML={{ __html: faq.answer.substring(0, 80) + '...' }} />
                                                 </CTableDataCell>
                                                 <CTableDataCell>
-                                                    <div className="d-flex flex-row gap-1">
+                                                    <CBadge color="info" className="text-uppercase">
+                                                        <CIcon icon={cilFolder} className="me-1" size="sm" />
+                                                        {faq.type}
+                                                    </CBadge>
+                                                </CTableDataCell>
+                                                <CTableDataCell>
+                                                    <div className="d-flex flex-wrap gap-1">
                                                         <CBadge color={
                                                             faq.status === 'Active' ? 'success' :
                                                                 faq.status === 'Draft' ? 'warning' : 'secondary'
@@ -420,18 +487,8 @@ const FAQ = () => {
                                                         </CBadge>
                                                     </div>
                                                 </CTableDataCell>
-                                                {/* <CTableDataCell>
-                                                    {faq.referenceModel ? (
-                                                        <div>
-                                                            <small className="text-muted">{faq.referenceModel}</small>
-                                                            <div>{faq.referenceId || 'N/A'}</div>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-muted">-</span>
-                                                    )}
-                                                </CTableDataCell> */}
                                                 <CTableDataCell>
-                                                    <div className="d-flex gap-1">
+                                                    <div className="d-flex gap-1 flex-wrap">
                                                         <CButton
                                                             size="sm"
                                                             color={faq.isPublished ? 'secondary' : 'primary'}
@@ -471,7 +528,7 @@ const FAQ = () => {
 
                                 {/* PAGINATION */}
                                 {totalPages > 1 && (
-                                    <CCardFooter className="d-flex justify-content-between align-items-center">
+                                    <CCardFooter className="d-flex justify-content-between align-items-center flex-wrap">
                                         <span>
                                             Showing {(filters.page - 1) * filters.limit + 1}–
                                             {Math.min(filters.page * filters.limit, total)} of {total}
@@ -483,15 +540,27 @@ const FAQ = () => {
                                             >
                                                 Prev
                                             </CPaginationItem>
-                                            {[...Array(totalPages)].map((_, i) => (
-                                                <CPaginationItem
-                                                    key={i}
-                                                    active={filters.page === i + 1}
-                                                    onClick={() => handlePageChange(i + 1)}
-                                                >
-                                                    {i + 1}
-                                                </CPaginationItem>
-                                            ))}
+                                            {[...Array(Math.min(totalPages, 5))].map((_, i) => {
+                                                let pageNum;
+                                                if (totalPages <= 5) {
+                                                    pageNum = i + 1;
+                                                } else if (filters.page <= 3) {
+                                                    pageNum = i + 1;
+                                                } else if (filters.page >= totalPages - 2) {
+                                                    pageNum = totalPages - 4 + i;
+                                                } else {
+                                                    pageNum = filters.page - 2 + i;
+                                                }
+                                                return (
+                                                    <CPaginationItem
+                                                        key={i}
+                                                        active={filters.page === pageNum}
+                                                        onClick={() => handlePageChange(pageNum)}
+                                                    >
+                                                        {pageNum}
+                                                    </CPaginationItem>
+                                                );
+                                            })}
                                             <CPaginationItem
                                                 disabled={filters.page === totalPages}
                                                 onClick={() => handlePageChange(filters.page + 1)}
@@ -511,6 +580,12 @@ const FAQ = () => {
                     <CModalHeader>
                         <CModalTitle>
                             {editing ? 'Edit FAQ' : 'Add FAQ'}
+                            {!editing && formData.type && (
+                                <CBadge color="info" className="ms-2">
+                                    <CIcon icon={cilFolder} className="me-1" />
+                                    {formData.type}
+                                </CBadge>
+                            )}
                         </CModalTitle>
                     </CModalHeader>
                     <CModalBody>
@@ -520,14 +595,7 @@ const FAQ = () => {
                                 <CKEditorComponent
                                     value={formData.question}
                                     onChange={(value) => setFormData(prev => ({ ...prev, question: value }))}
-
                                 />
-                                {/* <CFormInput
-                                    value={formData.question}
-                                    onChange={e => setFormData({ ...formData, question: e.target.value })}
-                                    placeholder="Enter question..."
-                                    required
-                                /> */}
                             </CCol>
 
                             <CCol xs={12}>
@@ -536,36 +604,16 @@ const FAQ = () => {
                                     value={formData.answer}
                                     onChange={(value) => setFormData(prev => ({ ...prev, answer: value }))}
                                 />
-                                {/* <CFormTextarea
-                                    value={formData.answer}
-                                    onChange={e => setFormData({ ...formData, answer: e.target.value })}
-                                    placeholder="Enter answer..."
-                                    rows={4}
-                                    required
-                                /> */}
                             </CCol>
 
                             <CCol md={6}>
-                                <CFormLabel>Route</CFormLabel>
-
+                                <CFormLabel>Route / Category *</CFormLabel>
                                 <CFormInput
+                                    placeholder="Search questions..."
                                     value={formData.type}
                                     onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                    placeholder="Enter route..."
-                                    required
                                 />
                             </CCol>
-
-                            {/* <CCol md={6}>
-                                <CFormLabel>Order</CFormLabel>
-                                <CFormInput
-                                    type="number"
-                                    value={formData.order}
-                                    onChange={e => setFormData({...formData, order: e.target.value})}
-                                    min="0"
-                                />
-                            </CCol> */}
-
                             <CCol md={6}>
                                 <CFormLabel>Status</CFormLabel>
                                 <CFormSelect
@@ -587,30 +635,6 @@ const FAQ = () => {
                                     onChange={e => setFormData({ ...formData, isPublished: e.target.checked })}
                                 />
                             </CCol>
-                            {/* 
-                            <CCol md={6}>
-                                <CFormLabel>Reference Model</CFormLabel>
-                                <CFormSelect
-                                    value={formData.referenceModel}
-                                    onChange={e => setFormData({...formData, referenceModel: e.target.value})}
-                                >
-                                    {referenceModels.map(model => (
-                                        <option key={model.value} value={model.value}>
-                                            {model.label}
-                                        </option>
-                                    ))}
-                                </CFormSelect>
-                            </CCol> */}
-
-                            {/* <CCol md={6}>
-                                <CFormLabel>Reference ID</CFormLabel>
-                                <CFormInput
-                                    value={formData.referenceId}
-                                    onChange={e => setFormData({...formData, referenceId: e.target.value})}
-                                    placeholder="Enter reference ID..."
-                                    disabled={!formData.referenceModel}
-                                />
-                            </CCol> */}
                         </CRow>
                     </CModalBody>
                     <CModalFooter>
