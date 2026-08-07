@@ -1,57 +1,85 @@
-import { useRef, useState, useMemo, useEffect } from 'react';
-import { Editor } from '@tinymce/tinymce-react';
-
-
+import { useRef, useState, useMemo, useEffect } from 'react'
+import { Editor } from '@tinymce/tinymce-react'
 
 const TinyEditor = ({ initialValue = '', onChange, disabled = false, header = true }) => {
-    const editorRef = useRef(null);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+  const editorRef = useRef(null)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
-    const toggleTheme = () => {
-        setIsDarkMode((prev) => !prev);
-    };
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev)
+  }
 
-    const initConfig = useMemo(() => {
-        return {
-            height: 300,
-            width: '100%',
-            zindex: 9999999,
-            placeholder: 'Start typing your content here...',
+  const initConfig = useMemo(() => {
+    return {
+      height: 300,
+      width: '100%',
+      zindex: 9999999,
+      placeholder: 'Start typing your content here...',
 
-            menubar: true, // ← This enables top menu bar
-            menu: {
-                file: { title: 'File', items: 'newdocument restoredraft | preview | print' },
-                edit: { title: 'Edit', items: 'undo redo | cut copy paste | selectall | searchreplace' },
-                view: { title: 'View', items: 'code | visualaid visualchars | fullscreen' },
-                insert: { title: 'Insert', items: 'image link media template pagebreak hr | charmap emoticons | anchor table' },
-                format: { title: 'Format', items: 'bold italic underline strikethrough | superscript subscript | align | fontfamily fontsize blocks | forecolor backcolor | removeformat' },
-                tools: { title: 'Tools', items: 'spellchecker spellcheckerlanguage | a11ycheck code' },
-                table: { title: 'Table', items: 'inserttable | cell row column | tableprops deletetable' },
-                help: { title: 'Help', items: 'help' }
-            },
+      menubar: true, // ← This enables top menu bar
+      menu: {
+        file: { title: 'File', items: 'newdocument restoredraft | preview | print' },
+        edit: { title: 'Edit', items: 'undo redo | cut copy paste | selectall | searchreplace' },
+        view: { title: 'View', items: 'code | visualaid visualchars | fullscreen' },
+        insert: {
+          title: 'Insert',
+          items: 'image link media template pagebreak hr | charmap emoticons | anchor table',
+        },
+        format: {
+          title: 'Format',
+          items:
+            'bold italic underline strikethrough | superscript subscript | align | fontfamily fontsize blocks | forecolor backcolor | removeformat',
+        },
+        tools: { title: 'Tools', items: 'spellchecker spellcheckerlanguage | a11ycheck code' },
+        table: { title: 'Table', items: 'inserttable | cell row column | tableprops deletetable' },
+        help: { title: 'Help', items: 'help' },
+      },
 
-            // ✅ Plugins (all essential ones)
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'wordcount', 'help',
-                'emoticons', 'hr', 'pagebreak', 'nonbreaking', 'quickbars',
-                'save', 'directionality', 'visualchars', 'paste'
-            ],
-            toolbar: header ? `
+      // ✅ Plugins (all essential ones)
+      plugins: [
+        'advlist',
+        'autolink',
+        'lists',
+        'link',
+        'image',
+        'charmap',
+        'preview',
+        'anchor',
+        'searchreplace',
+        'visualblocks',
+        'code',
+        'fullscreen',
+        'insertdatetime',
+        'media',
+        'table',
+        'wordcount',
+        'help',
+        'emoticons',
+        'hr',
+        'pagebreak',
+        'nonbreaking',
+        'quickbars',
+        'save',
+        'directionality',
+        'visualchars',
+        'paste',
+      ],
+      toolbar: header
+        ? `
         undo redo | cut copy paste | selectall | save | print | code | fullscreen | help |
         bold italic underline strikethrough | superscript subscript |
         alignleft aligncenter alignright alignjustify | outdent indent |
         bullist numlist | table | link image media | formatpainter removeformat |
         forecolor backcolor | emoticons | hr pagebreak
-      ` : `undo redo | cut copy paste | selectall | save | print | code | fullscreen|bold italic underline | table`,
-            toolbar_mode: 'wrap',
-            skin: isDarkMode ? 'oxide-dark' : 'oxide',
-            content_css: isDarkMode ? 'dark' : 'default',
-            branding: false,
-            statusbar: true,
-            resize: true,
-            content_style: `
+      `
+        : `undo redo | cut copy paste | selectall | save | print | code | fullscreen|bold italic underline | table`,
+        toolbar_mode: 'wrap',
+        skin: isDarkMode ? 'oxide-dark' : 'oxide',
+        content_css: isDarkMode ? 'dark' : 'default',
+        branding: false,
+        statusbar: true,
+        resize: true,
+        content_style: `
         body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
           font-size: 16px;
@@ -70,64 +98,64 @@ const TinyEditor = ({ initialValue = '', onChange, disabled = false, header = tr
         .mce-content-body[data-mce-placeholder] { opacity: 0.5; }
       `,
 
-            image_title: true,
-            automatic_uploads: false,
-            file_picker_types: 'image',
-            file_picker_callback: (callback, value, meta) => {
-                const input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
+      image_title: true,
+      automatic_uploads: false,
+      file_picker_types: 'image',
+      file_picker_callback: (callback, value, meta) => {
+        const input = document.createElement('input')
+        input.setAttribute('type', 'file')
+        input.setAttribute('accept', 'image/*')
 
-                input.addEventListener('change', (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
+        input.addEventListener('change', (e) => {
+          const file = e.target.files?.[0]
+          if (!file) return
 
-                    const reader = new FileReader();
-                    reader.addEventListener('load', () => {
-                        const id = 'blobid' + new Date().getTime();
-                        const blobCache = editorRef.current.editorUpload.blobCache;
-                        const base64 = (reader.result).split(',')[1];
-                        const blobInfo = blobCache.create(id, file, base64);
-                        blobCache.add(blobInfo);
-                        callback(blobInfo.blobUri(), { title: file.name });
-                    });
-                    reader.readAsDataURL(file);
-                });
+          const reader = new FileReader()
+          reader.addEventListener('load', () => {
+            const id = 'blobid' + new Date().getTime()
+            const blobCache = editorRef.current.editorUpload.blobCache
+            const base64 = reader.result.split(',')[1]
+            const blobInfo = blobCache.create(id, file, base64)
+            blobCache.add(blobInfo)
+            callback(blobInfo.blobUri(), { title: file.name })
+          })
+          reader.readAsDataURL(file)
+        })
 
-                input.click();
-            },
+        input.click()
+      },
 
-            quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
-            quickbars_insert_toolbar: 'image media table hr',
+      quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
+      quickbars_insert_toolbar: 'image media table hr',
 
-            setup: (editor) => {
-                editorRef.current = editor;
+      setup: (editor) => {
+        editorRef.current = editor
 
-                editor.ui.registry.addButton('themeToggle', {
-                    text: isDarkMode ? 'Light Mode' : 'Dark Mode',
-                    tooltip: 'Toggle Dark/Light Mode',
-                    onAction: toggleTheme,
-                });
-            },
-        };
-    }, [isDarkMode]); // ← Re-init config when theme changes
+        editor.ui.registry.addButton('themeToggle', {
+          text: isDarkMode ? 'Light Mode' : 'Dark Mode',
+          tooltip: 'Toggle Dark/Light Mode',
+          onAction: toggleTheme,
+        })
+      },
+    }
+  }, [isDarkMode]) // ← Re-init config when theme changes
 
-    return (
-        <div
-            style={{
-                position: 'relative',
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                overflow: 'visible', // ← 🔴 THIS IS CRITICAL: prevent clipping menus
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                maxWidth: '100%',
-                margin: '0 auto',
-                backgroundColor: isDarkMode ? '#121212' : '#fff',
-                fontFamily: 'sans-serif',
-            }}
-        >
-            <style>
-                {`
+  return (
+    <div
+      style={{
+        position: 'relative',
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        overflow: 'visible', // ← 🔴 THIS IS CRITICAL: prevent clipping menus
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        maxWidth: '100%',
+        margin: '0 auto',
+        backgroundColor: isDarkMode ? '#121212' : '#fff',
+        fontFamily: 'sans-serif',
+      }}
+    >
+      <style>
+        {`
         .tox-tinymce-aux, .tox .tox-menu, .tox .tox-dialog, .tox .tox-pop, .tox .tox-notification {
           z-index: 99999 !important;
         }
@@ -142,9 +170,9 @@ const TinyEditor = ({ initialValue = '', onChange, disabled = false, header = tr
       `}
             </style>
             <Editor
-                // apiKey="4euds1y9bett392xgru7z0puauv422tdjrrn1ilvxn0gqolv"
+                apiKey="4euds1y9bett392xgru7z0puauv422tdjrrn1ilvxn0gqolv"
                 // apiKey="uuqztwa1orob9to2ks6cqnzeqb4d45uzl4daqevsxmopbv8y"
-                apiKey="er8po1ugmbdf9yk6cp8mtc6sc4i0r3p7ch449tmpc4ixeg5v"
+                // apiKey="er8po1ugmbdf9yk6cp8mtc6sc4i0r3p7ch449tmpc4ixeg5v"
                 //  apiKey="l4qgr6sy1p9dh0avnwki17s0jwa8a3t76imusey6nab2t0jn"
                 //  apiKey= "r1nqin6z4ykej3ci95hvkal6a478m4uaphj8m6mlkipopz17"
                 value={initialValue && initialValue}
@@ -156,4 +184,4 @@ const TinyEditor = ({ initialValue = '', onChange, disabled = false, header = tr
     );
 };
 
-export default TinyEditor;
+export default TinyEditor
