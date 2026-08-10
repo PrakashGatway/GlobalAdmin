@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   // If explicitly set via environment variable, use that
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL
