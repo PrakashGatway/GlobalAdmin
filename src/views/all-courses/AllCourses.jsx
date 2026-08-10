@@ -47,7 +47,7 @@ const TEMPLATES = {
     fields: {
       title: { type: 'text', label: 'Title', placeholder: 'Enter section title' },
       content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' },
-      cards: { 
+      cards: {
         type: 'array',
         label: 'Cards',
         fields: {
@@ -56,6 +56,13 @@ const TEMPLATES = {
           icon: { type: 'text', label: 'Icon', placeholder: 'Icon class or URL' }
         }
       }
+    }
+  },
+  content: {
+    name: 'Content',
+    fields: {
+      title: { type: 'text', label: 'Title', placeholder: 'Enter section title' },
+      content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' }
     }
   },
   cta: {
@@ -151,12 +158,12 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
     try {
       const res = await uploadService.uploadImage(file)
       clearInterval(progressInterval)
-      
+
       if (res.success) {
         setUploadProgress(100)
         onChange(res.data.url)
         toast.success('Image uploaded successfully!')
-        
+
         // Reset progress after a delay
         setTimeout(() => {
           setUploadProgress(0)
@@ -185,7 +192,7 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
     e.preventDefault()
     e.stopPropagation()
     setDragOver(false)
-    
+
     const file = e.dataTransfer.files[0]
     if (file) {
       handleFileUpload(file)
@@ -220,9 +227,8 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
       </CFormLabel>
 
       <div
-        className={`position-relative border rounded-3 p-4 text-center ${
-          dragOver ? 'border-primary bg-primary bg-opacity-10' : 'border-dashed'
-        }`}
+        className={`position-relative border rounded-3 p-4 text-center ${dragOver ? 'border-primary bg-primary bg-opacity-10' : 'border-dashed'
+          }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -256,9 +262,9 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
                 aspectRatio: aspectRatio,
               }}
             />
-            
+
             {/* Image overlay with actions */}
-            <div 
+            <div
               className="position-absolute top-0 end-0 p-2 d-flex gap-2"
               onClick={(e) => e.stopPropagation()}
             >
@@ -293,8 +299,8 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
             {/* Upload progress overlay */}
             {uploading && (
               <div className="position-absolute top-50 start-50 translate-middle w-75">
-                <CProgress 
-                  value={uploadProgress} 
+                <CProgress
+                  value={uploadProgress}
                   color="primary"
                   className="mb-2"
                   style={{ height: '6px' }}
@@ -311,8 +317,8 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
               <div className="text-center">
                 <CSpinner color="primary" size="lg" className="mb-3" />
                 <div className="mb-2">
-                  <CProgress 
-                    value={uploadProgress} 
+                  <CProgress
+                    value={uploadProgress}
                     color="primary"
                     style={{ height: '6px', width: '200px' }}
                     className="mx-auto"
@@ -436,13 +442,13 @@ export default function CourseManagement() {
       content: {
         sections: []
       },
-      
+
       faqSection: {
         title: '',
         subtitle: '',
         items: [{ question: '', answer: '' }]
       },
-      
+
       roadmap: {
         title: '',
         subtitle: '',
@@ -450,10 +456,10 @@ export default function CourseManagement() {
       },
       simillarCourses: [{ title: '', description: '' }],
       ctaSection: [{ title: '', description: '' }],
-      seoInfo: { 
-        metaTitle: '', 
-        metaDescription: '', 
-        metaKeywords: '' 
+      seoInfo: {
+        metaTitle: '',
+        metaDescription: '',
+        metaKeywords: ''
       }
     }
   })
@@ -524,7 +530,7 @@ export default function CourseManagement() {
       setEditingId(null)
       setFormData({ topcourse: [] })
       toast.success(`Course ${editingId ? 'updated' : 'created'} successfully!`)
-      
+
       // Refetch courses list
       fetchCourses()
     } catch (error) {
@@ -596,7 +602,7 @@ export default function CourseManagement() {
       const course = result.data
 
       setEditingId(course._id)
-      
+
       if (course.topcourse) {
         setFormData(prev => ({
           ...prev,
@@ -966,7 +972,7 @@ export default function CourseManagement() {
                   <CFormLabel htmlFor="uniSlug" className="fw-semibold">
                     University Slug <span className="text-danger">*</span>
                   </CFormLabel>
-                  
+
                   <Select
                     id="uniSlug"
                     placeholder="Search or select university..."
@@ -1306,7 +1312,7 @@ export default function CourseManagement() {
                           />
                         </CCol>
                       </CRow>
-                      
+
                       <h6 className="mb-3">FAQ Items</h6>
                       {faqFields.map((field, index) => (
                         <div key={field.id} className="p-3 bg-light rounded mb-3">
@@ -1378,7 +1384,7 @@ export default function CourseManagement() {
                           />
                         </CCol>
                       </CRow>
-                      
+
                       <h6 className="mb-3">Roadmap Steps</h6>
                       {roadmapFields.map((field, index) => (
                         <div key={field.id} className="p-3 bg-light rounded mb-3">
@@ -1469,17 +1475,17 @@ export default function CourseManagement() {
 
             {/* Form Actions */}
             <div className="d-flex justify-content-end gap-2 mt-4 pt-4 border-top">
-              <CButton 
-                color="secondary" 
-                variant="outline" 
+              <CButton
+                color="secondary"
+                variant="outline"
                 onClick={handleCancel}
                 disabled={isLoading || isSubmitting}
               >
                 Cancel
               </CButton>
-              <CButton 
-                color="primary" 
-                type="submit" 
+              <CButton
+                color="primary"
+                type="submit"
                 disabled={isLoading || isSubmitting}
               >
                 {isLoading || isSubmitting ? (
