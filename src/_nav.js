@@ -136,6 +136,12 @@ const adminRoutes = [
   },
   {
     component: CNavItem,
+    name: 'All Courses',
+    to: '/all-courses',
+    icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Countries',
     to: '/countries',
     icon: <CIcon icon={cilFlagAlt} customClassName="nav-icon" />,
@@ -207,7 +213,7 @@ const managerRoutes = [
         name: 'Scholarships',
         to: '/scholarship',
       },
-       
+
     ],
   },
   {
@@ -261,7 +267,7 @@ const managerRoutes = [
       }
     ],
   },
-    {
+  {
     component: CNavItem,
     name: 'Countries',
     to: '/countries',
@@ -273,13 +279,13 @@ const managerRoutes = [
     to: '/universities',
     icon: <CIcon icon={cilEducation} customClassName="nav-icon" />,
   },
-   {
-        component: CNavItem,
-        name: 'All Courses',
-        to: '/all-courses',
+  {
+    component: CNavItem,
+    name: 'All Courses',
+    to: '/all-courses',
     icon: <CIcon icon={cilBook} customClassName="nav-icon" />,
 
-      },
+  },
 
 ]
 

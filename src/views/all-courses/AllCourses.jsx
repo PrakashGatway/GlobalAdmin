@@ -29,6 +29,7 @@ import "@coreui/coreui/dist/css/coreui.min.css";
 import toast from "react-hot-toast";
 import TinyEditor from "../page-information/Editor";
 import CKEditorComponent from "../page-information/Ckeditor";
+import { getApiBaseUrl } from "../../services/apiService";
 
 // Mock data
 const MOCK_COURSES = [
@@ -95,114 +96,115 @@ export default function CourseManagement() {
     name: "details",
   });
 
-const onSubmit = async (data) => {
-  try {
-    const url = editingId 
-      ? `http://localhost:4000/courses/${editingId}`  // Edit endpoint
-      : "http://localhost:4000/courses/";              // Create endpoint
-      
-    const method = editingId ? "PUT" : "POST";
 
-    const response = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-        // Add auth token if needed:
-        // "Authorization": `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(data),
-    });
+  const apiUrl = getApiBaseUrl();
+  const exactApiUrl = `${apiUrl}/accommodation`;
 
-    if (!response.ok) {
-      throw new Error(`Failed to ${editingId ? 'update' : 'create'} course`);
+  const onSubmit = async (data) => {
+    try {
+      const url = editingId
+        ? `${exactApiUrl}/courses/${editingId}`  // Edit endpoint
+        : `${exactApiUrl}/courses`;              // Create endpoint
+
+      const method = editingId ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          // Add auth token if needed:
+          // "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${editingId ? 'update' : 'create'} course`);
+      }
+
+      const result = await response.json();
+      setView("list");
+      reset();
+      setEditingId(null);
+
+      toast.success(`Course ${editingId ? 'updated' : 'created'} successfully!`);
+      // Optional: Show success toast/notification here
+
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      // Optional: Show error message to user
+      alert(error.message || "Something went wrong!");
+    }
+  };
+
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(`${exactApiUrl}/courses`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch courses");
+        }
+        const data = await response.json();
+        setCourses(data.courses || []);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
     }
 
-    const result = await response.json();
-    
-    // ✅ Success: Go back to list view
-    setView("list");
-    reset();
-    setEditingId(null);
-
-    toast.success(`Course ${editingId ? 'updated' : 'created'} successfully!`);
-    // Optional: Show success toast/notification here
-    
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    // Optional: Show error message to user
-    alert(error.message || "Something went wrong!");
-  }
-};
+    fetchCourses();
+  }, [])
 
 
-useEffect(()=>{
-const fetchCourses = async () => {
-  try {
-    const response = await fetch("http://localhost:4000/courses/");
-    if (!response.ok) {
-      throw new Error("Failed to fetch courses");
+
+  const handleEdit = async (id) => {
+    try {
+      const response = await fetch(`${exactApiUrl}/courses/${id}`);
+      const result = await response.json();
+
+      const course = result.data.course;
+
+      setEditingId(course._id);
+
+      reset(course);
+
+      setActiveTab("basic");
+      setView("form");
+    } catch (err) {
+      console.log(err);
     }
-    const data = await response.json();
-    setCourses(data.data.courses || []); 
-  } catch (error) {
-    console.error("Error fetching courses:", error);
-  }
-}
-
-fetchCourses();
-},[])
-
-console.log("Fetched courses:", courses);
-
-
- const handleEdit = async (id) => {
-  try {
-    const response = await fetch(`http://localhost:4000/courses/${id}`);
-    const result = await response.json();
-
-    const course = result.data.course;
-
-    setEditingId(course._id);
-
-    reset(course);
-
-    setActiveTab("basic");
-    setView("form");
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
   const handleCreateNew = () => {
     setEditingId(null);
-      reset({
-    title: "",
-    description: "",
-    slug: "",
-    coverImage: "",
-    uniSlug: "",
-    tutionFees: "",
-    shortName: "",
-    tags: [],
-    status: "draft",
-    level: "",
-    duration: "",
-    mode: "",
-    details: [{ key: "", value: "" }],
-    simillarCourses: {
+    reset({
       title: "",
       description: "",
-    },
-    ctaSection: {
-      title: "",
-      description: "",
-    },
-    seoInfo: {
-      metaTitle: "",
-      metaDescription: "",
-      metaKeywords: "",
-    },
-  });
+      slug: "",
+      coverImage: "",
+      uniSlug: "",
+      tutionFees: "",
+      shortName: "",
+      tags: [],
+      status: "draft",
+      level: "",
+      duration: "",
+      mode: "",
+      details: [{ key: "", value: "" }],
+      simillarCourses: {
+        title: "",
+        description: "",
+      },
+      ctaSection: {
+        title: "",
+        description: "",
+      },
+      seoInfo: {
+        metaTitle: "",
+        metaDescription: "",
+        metaKeywords: "",
+      },
+    });
 
     reset();
     setActiveTab("basic");
@@ -215,20 +217,20 @@ console.log("Fetched courses:", courses);
     !setEditingId(null);
   };
 
-  const handleDelete = async(id) =>{
-    try{
-        const response = await fetch(`http://localhost:4000/courses/${id}`, {
-            method: "DELETE"
-        });
-        if (!response.ok) {
-            throw new Error("Failed to delete course");
-        }
-        // Remove the deleted course from the list
-        setCourses(courses.filter(course => course._id !== id));
-        toast.success("Course deleted successfully!");
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${exactApiUrl}/courses/${id}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete course");
+      }
+      // Remove the deleted course from the list
+      setCourses(courses.filter(course => course._id !== id));
+      toast.success("Course deleted successfully!");
     } catch (error) {
-        console.error("Error deleting course:", error);
-        toast.error("Failed to delete course.");
+      console.error("Error deleting course:", error);
+      toast.error("Failed to delete course.");
     }
   }
 
@@ -297,7 +299,7 @@ console.log("Fetched courses:", courses);
                       >
                         Edit
                       </CButton>
-                      <CButton onClick={()=> handleDelete(course._id)} color="danger" variant="outline" size="sm">
+                      <CButton onClick={() => handleDelete(course._id)} color="danger" variant="outline" size="sm">
                         Delete
                       </CButton>
                     </CTableDataCell>
@@ -343,7 +345,7 @@ console.log("Fetched courses:", courses);
 
         <CCardBody className="p-4">
           <CForm onSubmit={handleSubmit(onSubmit)}>
-            
+
             {/* BASIC INFO TAB */}
             {activeTab === "basic" && (
               <CRow className="g-3">
@@ -492,55 +494,55 @@ console.log("Fetched courses:", courses);
                       + Add Detail
                     </CButton>
                   </div>
-                  
-                <div className="space-y-3">
-  {fields.map((field, index) => (
-    <div key={field.id} className="mb-4 p-3 bg-light rounded border">
 
-      <CFormInput
-        className="mb-3"
-        placeholder="Key (e.g., Start Date)"
-        {...register(`details.${index}.key`, { required: true })}
-      />
+                  <div className="space-y-3">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="mb-4 p-3 bg-light rounded border">
 
-    <CCol md={12}>
-  <input
-    type="hidden"
-    {...register(`details.${index}.value`, { required: true })}
-  />
+                        <CFormInput
+                          className="mb-3"
+                          placeholder="Key (e.g., Start Date)"
+                          {...register(`details.${index}.key`, { required: true })}
+                        />
 
- <CCol md={12}>
-  <Controller
-    name={`details.${index}.value`}
-    control={control}
-    rules={{ required: true }}
-    render={({ field }) => (
-      <CKEditorComponent
-        value={field.value || ""}
-        onChange={(value) => {
-          field.onChange(value);
-        }}
-      />
-    )}
-  />
-</CCol>
-</CCol>
-      
+                        <CCol md={12}>
+                          <input
+                            type="hidden"
+                            {...register(`details.${index}.value`, { required: true })}
+                          />
 
-      <div className="mt-3 text-end">
-        <CButton
-          color="danger"
-          variant="outline"
-          size="sm"
-          onClick={() => remove(index)}
-        >
-          Remove
-        </CButton>
-      </div>
+                          <CCol md={12}>
+                            <Controller
+                              name={`details.${index}.value`}
+                              control={control}
+                              rules={{ required: true }}
+                              render={({ field }) => (
+                                <CKEditorComponent
+                                  value={field.value || ""}
+                                  onChange={(value) => {
+                                    field.onChange(value);
+                                  }}
+                                />
+                              )}
+                            />
+                          </CCol>
+                        </CCol>
 
-    </div>
-  ))}
-</div>
+
+                        <div className="mt-3 text-end">
+                          <CButton
+                            color="danger"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => remove(index)}
+                          >
+                            Remove
+                          </CButton>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
 
                   <div className="mt-4 pt-4 border-top">
                     <CFormLabel className="fw-semibold">Tags (comma separated)</CFormLabel>

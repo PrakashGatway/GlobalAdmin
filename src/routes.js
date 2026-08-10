@@ -33,7 +33,7 @@ const Visa = React.lazy(() => import('./views/visa/Visa'))
 
 const adminRoutes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/visa', name: "Visa", element : Visa},
+  { path: '/visa', name: "Visa", element: Visa },
   { path: '/user-management', name: 'User Management', element: UserList },
   { path: '/universities', name: 'Universities', element: Universities },
   { path: '/courses', name: 'Courses', element: Courses },
@@ -55,7 +55,8 @@ const adminRoutes = [
   { path: '/gallery', name: 'Gallery', element: Gallery },
   { path: '/scholarship', name: 'Scholarships', element: Scholarships },
   { path: '/profile', name: 'Profile Settings', element: ProfileSettings },
-  { path: '/notification', name: 'Notification', element: AdminNotifications }
+  { path: '/notification', name: 'Notification', element: AdminNotifications },
+  { path: "/all-courses", name: "All Courses", element: AllCourses }
 ]
 
 const managerRoutes = [
@@ -75,7 +76,7 @@ const managerRoutes = [
   { path: '/courses/categories', name: 'Courses Categories', element: CourseCategories },
   { path: '/subjects', name: 'Subjects', element: Subjects },
   { path: '/scholarship', name: 'Scholarships', element: Scholarships },
-  {path: "/all-courses", name: "All Courses", element: AllCourses }
+  { path: "/all-courses", name: "All Courses", element: AllCourses }
 ]
 
 const routes = {
