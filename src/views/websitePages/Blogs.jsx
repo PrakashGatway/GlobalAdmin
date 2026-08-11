@@ -321,7 +321,7 @@ const Blogs = () => {
                                                 <CTableRow key={blog._id} className="">
                                                     <CTableDataCell>
                                                         <div className="fw-semibold">{blog.title}</div>
-                                                        <div className="text-muted small mt-1">{blog.shortDescription}</div>
+                                                        {/* <div className="text-muted small mt-1">{blog.shortDescription}</div> */}
                                                     </CTableDataCell>
                                                     
                                                     <CTableDataCell>

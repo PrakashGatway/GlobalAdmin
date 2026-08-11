@@ -349,14 +349,12 @@ const BlogForm = () => {
 
                                     <div className="mb-3">
                                         <CFormLabel htmlFor="shortDescription">Short Description</CFormLabel>
-                                        <CFormTextarea
-                                            id="shortDescription"
-                                            name="shortDescription"
+                                        <CKEditorComponent
                                             value={formData.shortDescription}
-                                            onChange={handleChange}
-                                            rows={2}
+                                            onChange={(value) => handleChange({target: {name: 'shortDescription', value: value}})}
                                             placeholder="Brief summary of the blog"
                                         />
+                                        
                                     </div>
 
                                     <div className="mb-3">

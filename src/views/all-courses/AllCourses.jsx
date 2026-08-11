@@ -43,7 +43,7 @@ import CIcon from '@coreui/icons-react'
 // ==================== TEMPLATE DEFINITIONS ====================
 const TEMPLATES = {
   intro: {
-    name: 'Introduction',
+    name: 'ContentWithCard',
     fields: {
       title: { type: 'text', label: 'Title', placeholder: 'Enter section title' },
       content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' },
@@ -65,16 +65,16 @@ const TEMPLATES = {
       content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' }
     }
   },
-  cta: {
-    name: 'Call to Action',
-    fields: {
-      title: { type: 'text', label: 'Title', placeholder: 'Enter CTA title' },
-      subtitle: { type: 'textarea', label: 'Subtitle', placeholder: 'Enter CTA subtitle' },
-      img: { type: 'text', label: 'Image URL', placeholder: 'https://example.com/image.jpg' }
-    }
-  },
+  // cta: {
+  //   name: 'Call to Action',
+  //   fields: {
+  //     title: { type: 'text', label: 'Title', placeholder: 'Enter CTA title' },
+  //     subtitle: { type: 'textarea', label: 'Subtitle', placeholder: 'Enter CTA subtitle' },
+  //     img: { type: 'text', label: 'Image URL', placeholder: 'https://example.com/image.jpg' }
+  //   }
+  // },
   topProgram: {
-    name: 'Top Program',
+    name: 'CardLayout',
     fields: {
       title: { type: 'text', label: 'Title', placeholder: 'Enter program section title' },
       subtitle: { type: 'textarea', label: 'Subtitle', placeholder: 'Enter program subtitle' },
@@ -83,7 +83,23 @@ const TEMPLATES = {
         label: 'Programs',
         fields: {
           title: { type: 'text', label: 'Program Title', placeholder: 'Enter program name' },
-          subtitle: { type: 'textarea', label: 'Program Subtitle', placeholder: 'Enter program description' }
+          subtitle: { type: 'editor', label: 'Program Subtitle', placeholder: 'Enter program description' }
+        }
+      }
+    }
+  },
+  roadmap: {
+    name: 'Roadmap',
+    fields: {
+      title: { type: 'text', label: 'Title', placeholder: 'Enter section title' },
+      subtitle: { type: 'textarea', label: 'Subtitle', placeholder: 'Enter section subtitle' },
+      steps: {
+        type: 'array',
+        label: 'Steps',
+        fields: {
+          step: { type: 'text', label: 'Step Number', placeholder: 'Enter step number' },
+          title: { type: 'text', label: 'Step Title', placeholder: 'Enter step title' },
+          description: { type: 'editor', label: 'Description', placeholder: 'Enter step description' }
         }
       }
     }
@@ -442,20 +458,14 @@ export default function CourseManagement() {
       content: {
         sections: []
       },
-
       faqSection: {
         title: '',
         subtitle: '',
         items: [{ question: '', answer: '' }]
       },
-
-      roadmap: {
-        title: '',
-        subtitle: '',
-        steps: [{ step: '', title: '', description: '', icon: '' }]
-      },
-      simillarCourses: [{ title: '', description: '' }],
-      ctaSection: [{ title: '', description: '' }],
+      simillarCourses: { title: '', description: '' },
+      ctaSection: { title: '', description: '' },
+      intro: { title: '', description: '' },
       seoInfo: {
         metaTitle: '',
         metaDescription: '',
@@ -472,26 +482,6 @@ export default function CourseManagement() {
   const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
     control,
     name: 'faqSection.items'
-  })
-
-  const { fields: destinationFields, append: appendDestination, remove: removeDestination } = useFieldArray({
-    control,
-    name: 'relatedDestination.items'
-  })
-
-  const { fields: roadmapFields, append: appendRoadmap, remove: removeRoadmap } = useFieldArray({
-    control,
-    name: 'roadmap.steps'
-  })
-
-  const { fields: simillarFields, append: appendSimillar, remove: removeSimillar } = useFieldArray({
-    control,
-    name: 'simillarCourses'
-  })
-
-  const { fields: ctaFields, append: appendCta, remove: removeCta } = useFieldArray({
-    control,
-    name: 'ctaSection'
   })
 
   const apiUrl = getApiBaseUrl();
@@ -646,18 +636,9 @@ export default function CourseManagement() {
         subtitle: '',
         items: [{ question: '', answer: '' }]
       },
-      relatedDestination: {
-        title: '',
-        subtitle: '',
-        items: [{ name: '', description: '', image: '', link: '' }]
-      },
-      roadmap: {
-        title: '',
-        subtitle: '',
-        steps: [{ step: '', title: '', description: '', icon: '' }]
-      },
-      simillarCourses: [{ title: '', description: '' }],
-      ctaSection: [{ title: '', description: '' }],
+      simillarCourses: { title: '', description: '' },
+      ctaSection: { title: '', description: '' },
+      intro: { title: '', description: '' },
       seoInfo: {
         metaTitle: '',
         metaDescription: '',
@@ -769,8 +750,8 @@ export default function CourseManagement() {
   const tabs = [
     { id: 'basic', label: 'Basic Info' },
     { id: 'seo', label: 'SEO' },
-    { id: 'content', label: 'Content Details' },
-    { id: 'sections', label: 'Other Sections' },
+    { id: 'sections', label: 'Fixed Sections' },
+    { id: 'content', label: 'Extra Sections' },
   ]
 
   // ==================== LIST VIEW ====================
@@ -1288,6 +1269,40 @@ export default function CourseManagement() {
             {activeTab === 'sections' && (
               <CRow className="g-4">
 
+                <CCol xs={12}>
+                  <CCard className="mb-4">
+                    <CCardHeader>
+                      <h5 className="mb-0">Introduction</h5>
+                    </CCardHeader>
+                    <CCardBody>
+                      <CRow className="g-3 mb-4">
+                        <CCol xs={12}>
+                          <CFormLabel>Title</CFormLabel>
+                          <CFormInput
+                            placeholder="e.g., Call now"
+                            {...register('intro.title')}
+                          />
+                        </CCol>
+                        <CCol xs={12}>
+                          <CFormLabel>Description</CFormLabel>
+                          <Controller
+                            name="intro.description"
+                            control={control}
+                            defaultValue=""
+                            render={({ field }) => (
+                              <CKEditorComponent
+                                value={field.value || ''}
+                                onChange={field.onChange}
+                              />
+                            )}
+                          />
+                         
+                        </CCol>
+                      </CRow>
+                    </CCardBody>
+                  </CCard>
+                </CCol>
+
                 {/* F&Q Section */}
                 <CCol xs={12}>
                   <CCard className="mb-4">
@@ -1360,83 +1375,62 @@ export default function CourseManagement() {
                   </CCard>
                 </CCol>
 
-                {/* Roadmap Section */}
                 <CCol xs={12}>
                   <CCard className="mb-4">
                     <CCardHeader>
-                      <h5 className="mb-0">Roadmap Section</h5>
+                      <h5 className="mb-0">Cta Section</h5>
                     </CCardHeader>
                     <CCardBody>
                       <CRow className="g-3 mb-4">
                         <CCol xs={12}>
-                          <CFormLabel>Section Title</CFormLabel>
+                          <CFormLabel>Cta Title</CFormLabel>
                           <CFormInput
-                            placeholder="e.g., Your Study Journey"
-                            {...register('roadmap.title')}
+                            placeholder="e.g., Call now"
+                            {...register('ctaSection.title')}
                           />
                         </CCol>
                         <CCol xs={12}>
-                          <CFormLabel>Section Subtitle</CFormLabel>
-                          <CFormTextarea
-                            rows={2}
-                            placeholder="Brief description of the roadmap"
-                            {...register('roadmap.subtitle')}
+                          <CFormLabel>CTA Subtitle</CFormLabel>
+                           <Controller
+                            name="ctaSection.description"
+                            control={control}
+                            defaultValue=""
+                            render={({ field }) => (
+                              <CKEditorComponent
+                                value={field.value || ''}
+                                onChange={field.onChange}
+                              />
+                            )}
                           />
                         </CCol>
                       </CRow>
+                    </CCardBody>
+                  </CCard>
+                </CCol>
 
-                      <h6 className="mb-3">Roadmap Steps</h6>
-                      {roadmapFields.map((field, index) => (
-                        <div key={field.id} className="p-3 bg-light rounded mb-3">
-                          <CRow className="g-3">
-                            <CCol xs={12}>
-                              <CFormLabel>Step Number</CFormLabel>
-                              <CFormInput
-                                placeholder="e.g., 1, 2, 3..."
-                                {...register(`roadmap.steps.${index}.step`)}
-                              />
-                            </CCol>
-                            <CCol xs={12}>
-                              <CFormLabel>Title</CFormLabel>
-                              <CFormInput
-                                placeholder="e.g., Choose Your Course"
-                                {...register(`roadmap.steps.${index}.title`)}
-                              />
-                            </CCol>
-                            <CCol xs={12}>
-                              <CFormLabel>Description</CFormLabel>
-                              <CFormTextarea
-                                rows={2}
-                                placeholder="Detailed description of this step"
-                                {...register(`roadmap.steps.${index}.description`)}
-                              />
-                            </CCol>
-                            <CCol xs={12}>
-                              <CFormLabel>Icon</CFormLabel>
-                              <CFormInput
-                                placeholder="Icon class or URL"
-                                {...register(`roadmap.steps.${index}.icon`)}
-                              />
-                            </CCol>
-                          </CRow>
-                          <CButton
-                            color="danger"
-                            variant="outline"
-                            size="sm"
-                            className="mt-2"
-                            onClick={() => removeRoadmap(index)}
-                          >
-                            Remove Step
-                          </CButton>
-                        </div>
-                      ))}
-                      <CButton
-                        color="primary"
-                        size="sm"
-                        onClick={() => appendRoadmap({ step: '', title: '', description: '', icon: '' })}
-                      >
-                        + Add Roadmap Step
-                      </CButton>
+                <CCol xs={12}>
+                  <CCard className="mb-4">
+                    <CCardHeader>
+                      <h5 className="mb-0">simillarCourses Section</h5>
+                    </CCardHeader>
+                    <CCardBody>
+                      <CRow className="g-3 mb-4">
+                        <CCol xs={12}>
+                          <CFormLabel>Title</CFormLabel>
+                          <CFormInput
+                            placeholder="e.g., Call now"
+                            {...register('simillarCourses.title')}
+                          />
+                        </CCol>
+                        <CCol xs={12}>
+                          <CFormLabel>Subtitle</CFormLabel>
+                          <CFormTextarea
+                            rows={2}
+                            placeholder="Brief description of the cta section"
+                            {...register('simillarCourses.description')}
+                          />
+                        </CCol>
+                      </CRow>
                     </CCardBody>
                   </CCard>
                 </CCol>
