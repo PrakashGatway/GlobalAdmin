@@ -29,11 +29,20 @@ import {
   CInputGroup,
   CInputGroupText,
   CAlert,
+  CCollapse,
 } from '@coreui/react'
 import '@coreui/coreui/dist/css/coreui.min.css'
 import toast from 'react-hot-toast'
 import CKEditorComponent from '../page-information/Ckeditor'
-import { FaPlus, FaTrash, FaGripVertical, FaUpload, FaImage, FaTimes, FaCheck } from 'react-icons/fa'
+import {
+  FaPlus,
+  FaTrash,
+  FaGripVertical,
+  FaUpload,
+  FaImage,
+  FaTimes,
+  FaCheck,
+} from 'react-icons/fa'
 import apiService, { getApiBaseUrl } from '../../services/apiService'
 import Select from 'react-select'
 import uploadService from '../../services/uploadService'
@@ -52,18 +61,22 @@ const TEMPLATES = {
         label: 'Cards',
         fields: {
           title: { type: 'text', label: 'Card Title', placeholder: 'Enter card title' },
-          description: { type: 'textarea', label: 'Description', placeholder: 'Enter card description' },
-          icon: { type: 'text', label: 'Icon', placeholder: 'Icon class or URL' }
-        }
-      }
-    }
+          description: {
+            type: 'textarea',
+            label: 'Description',
+            placeholder: 'Enter card description',
+          },
+          icon: { type: 'text', label: 'Icon', placeholder: 'Icon class or URL' },
+        },
+      },
+    },
   },
   content: {
     name: 'Content',
     fields: {
       title: { type: 'text', label: 'Title', placeholder: 'Enter section title' },
-      content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' }
-    }
+      content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' },
+    },
   },
   // cta: {
   //   name: 'Call to Action',
@@ -83,10 +96,14 @@ const TEMPLATES = {
         label: 'Programs',
         fields: {
           title: { type: 'text', label: 'Program Title', placeholder: 'Enter program name' },
-          subtitle: { type: 'editor', label: 'Program Subtitle', placeholder: 'Enter program description' }
-        }
-      }
-    }
+          subtitle: {
+            type: 'editor',
+            label: 'Program Subtitle',
+            placeholder: 'Enter program description',
+          },
+        },
+      },
+    },
   },
   roadmap: {
     name: 'Roadmap',
@@ -99,10 +116,14 @@ const TEMPLATES = {
         fields: {
           step: { type: 'text', label: 'Step Number', placeholder: 'Enter step number' },
           title: { type: 'text', label: 'Step Title', placeholder: 'Enter step title' },
-          description: { type: 'editor', label: 'Description', placeholder: 'Enter step description' }
-        }
-      }
-    }
+          description: {
+            type: 'editor',
+            label: 'Description',
+            placeholder: 'Enter step description',
+          },
+        },
+      },
+    },
   },
   otherdata: {
     name: 'Other Data',
@@ -113,15 +134,21 @@ const TEMPLATES = {
         label: 'Data Items',
         fields: {
           title: { type: 'text', label: 'Item Title', placeholder: 'Enter item title' },
-          content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' }
-        }
-      }
-    }
-  }
+          content: { type: 'editor', label: 'Content', placeholder: 'Write your content here...' },
+        },
+      },
+    },
+  },
 }
 
 // ==================== IMAGE UPLOAD COMPONENT ====================
-const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, aspectRatio = "16/9" }) => {
+const ImageUploader = ({
+  value,
+  onChange,
+  label = 'Cover Image',
+  maxSize = 5,
+  aspectRatio = '16/9',
+}) => {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [preview, setPreview] = useState(value || '')
@@ -162,7 +189,7 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
 
     // Simulate progress (since uploadService might not provide progress)
     const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
+      setUploadProgress((prev) => {
         if (prev >= 90) {
           clearInterval(progressInterval)
           return 90
@@ -238,13 +265,12 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
 
   return (
     <div className="mb-3">
-      <CFormLabel className="fw-semibold">
-        {label}
-      </CFormLabel>
+      <CFormLabel className="fw-semibold">{label}</CFormLabel>
 
       <div
-        className={`position-relative border rounded-3 p-4 text-center ${dragOver ? 'border-primary bg-primary bg-opacity-10' : 'border-dashed'
-          }`}
+        className={`position-relative border rounded-3 p-4 text-center ${
+          dragOver ? 'border-primary bg-primary bg-opacity-10' : 'border-dashed'
+        }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -350,12 +376,8 @@ const ImageUploader = ({ value, onChange, label = "Cover Image", maxSize = 5, as
                 <h6 className="fw-semibold">
                   {dragOver ? 'Drop image here' : 'Click or drag image to upload'}
                 </h6>
-                <p className="text-muted small mb-2">
-                  Supported formats: JPG, PNG, WebP, GIF
-                </p>
-                <p className="text-muted small mb-0">
-                  Maximum file size: {maxSize}MB
-                </p>
+                <p className="text-muted small mb-2">Supported formats: JPG, PNG, WebP, GIF</p>
+                <p className="text-muted small mb-0">Maximum file size: {maxSize}MB</p>
                 <div className="mt-3">
                   <CButton
                     color="primary"
@@ -456,12 +478,12 @@ export default function CourseManagement() {
       duration: '',
       mode: '',
       content: {
-        sections: []
+        sections: [],
       },
       faqSection: {
         title: '',
         subtitle: '',
-        items: [{ question: '', answer: '' }]
+        items: [{ question: '', answer: '' }],
       },
       simillarCourses: { title: '', description: '' },
       ctaSection: { title: '', description: '' },
@@ -469,23 +491,32 @@ export default function CourseManagement() {
       seoInfo: {
         metaTitle: '',
         metaDescription: '',
-        metaKeywords: ''
-      }
-    }
+        metaKeywords: '',
+      },
+    },
   })
 
-  const { fields: sectionFields, append: appendSection, remove: removeSection, move: moveSection } = useFieldArray({
+  const {
+    fields: sectionFields,
+    append: appendSection,
+    remove: removeSection,
+    move: moveSection,
+  } = useFieldArray({
     control,
-    name: 'content.sections'
+    name: 'content.sections',
   })
 
-  const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
+  const {
+    fields: faqFields,
+    append: appendFaq,
+    remove: removeFaq,
+  } = useFieldArray({
     control,
-    name: 'faqSection.items'
+    name: 'faqSection.items',
   })
 
-  const apiUrl = getApiBaseUrl();
-  const exactApiUrl = `${apiUrl}/accommodation`;
+  const apiUrl = getApiBaseUrl()
+  const exactApiUrl = `${apiUrl}/accommodation`
 
   const onSubmit = async (data) => {
     setIsLoading(true)
@@ -495,9 +526,7 @@ export default function CourseManagement() {
         topcourse: formData.topcourse || [],
       }
 
-      const url = editingId
-        ? `${exactApiUrl}/courses/${editingId}`
-        : `${exactApiUrl}/courses`
+      const url = editingId ? `${exactApiUrl}/courses/${editingId}` : `${exactApiUrl}/courses`
 
       const method = editingId ? 'PUT' : 'POST'
 
@@ -531,37 +560,35 @@ export default function CourseManagement() {
     }
   }
 
-  const [search, setSearch] = useState("");
-  const [uniData, setUniData] = useState([]);
-  const [selectedUni, setSelectedUni] = useState(null);
+  const [search, setSearch] = useState('')
+  const [uniData, setUniData] = useState([])
+  const [selectedUni, setSelectedUni] = useState(null)
 
-  async function university(searchValue = "") {
+  async function university(searchValue = '') {
     try {
       const api = await apiService.get(
-        `/universities?page=1&limit=8&sort_by=name&name=${encodeURIComponent(
-          searchValue
-        )}`
-      );
+        `/universities?page=1&limit=8&sort_by=name&name=${encodeURIComponent(searchValue)}`,
+      )
 
-      console.log(api.result || []);
-      setUniData(api.result || []);
+      console.log(api.result || [])
+      setUniData(api.result || [])
     } catch (error) {
-      console.error("University error", error);
-      setUniData([]);
+      console.error('University error', error)
+      setUniData([])
     }
   }
 
   useEffect(() => {
-    university("");
-  }, []);
+    university('')
+  }, [])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      university(search);
-    }, 400);
+      university(search)
+    }, 400)
 
-    return () => clearTimeout(timer);
-  }, [search]);
+    return () => clearTimeout(timer)
+  }, [search])
 
   const fetchCourses = async () => {
     setFetchLoading(true)
@@ -594,9 +621,9 @@ export default function CourseManagement() {
       setEditingId(course._id)
 
       if (course.topcourse) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          topcourse: course.topcourse
+          topcourse: course.topcourse,
         }))
       }
 
@@ -629,12 +656,12 @@ export default function CourseManagement() {
       duration: '',
       mode: '',
       content: {
-        sections: []
+        sections: [],
       },
       faqSection: {
         title: '',
         subtitle: '',
-        items: [{ question: '', answer: '' }]
+        items: [{ question: '', answer: '' }],
       },
       simillarCourses: { title: '', description: '' },
       ctaSection: { title: '', description: '' },
@@ -657,7 +684,9 @@ export default function CourseManagement() {
   }
 
   const handleDelete = async (id) => {
-    const isConfirmed = window.confirm('Are you sure you want to delete this course? This action cannot be undone.')
+    const isConfirmed = window.confirm(
+      'Are you sure you want to delete this course? This action cannot be undone.',
+    )
     if (!isConfirmed) return
 
     setIsLoading(true)
@@ -680,25 +709,25 @@ export default function CourseManagement() {
 
   const handleAddtop = () => {
     if (newtop.trim()) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        topcourse: [...(prev.topcourse || []), newtop.trim()]
+        topcourse: [...(prev.topcourse || []), newtop.trim()],
       }))
       setNewtop('')
     }
   }
 
   const handleRemovetop = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      topcourse: (prev.topcourse || []).filter((_, i) => i !== index)
+      topcourse: (prev.topcourse || []).filter((_, i) => i !== index),
     }))
   }
 
   const handleUpdatetop = (index, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      topcourse: (prev.topcourse || []).map((item, i) => i === index ? value : item)
+      topcourse: (prev.topcourse || []).map((item, i) => (i === index ? value : item)),
     }))
   }
 
@@ -709,11 +738,11 @@ export default function CourseManagement() {
 
     // Create default data structure based on template
     const defaultData = {}
-    Object.keys(template.fields).forEach(fieldName => {
+    Object.keys(template.fields).forEach((fieldName) => {
       const field = template.fields[fieldName]
       if (field.type === 'array') {
         const defaultItem = {}
-        Object.keys(field.fields).forEach(subFieldName => {
+        Object.keys(field.fields).forEach((subFieldName) => {
           defaultItem[subFieldName] = ''
         })
         defaultData[fieldName] = [defaultItem]
@@ -729,10 +758,19 @@ export default function CourseManagement() {
       type: selectedTemplate,
       name: sectionName || template.name,
       order: sectionFields.length + 1,
-      data: defaultData
+      data: defaultData,
     })
 
     setSectionName('')
+  }
+
+  const [openSections, setOpenSections] = useState({})
+
+  const toggleSection = (id) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
   }
 
   const moveSectionUp = (index) => {
@@ -783,7 +821,9 @@ export default function CourseManagement() {
                     <CTableHeaderCell className="text-center px-4 py-3 fw-semibold">
                       Course Title
                     </CTableHeaderCell>
-                    <CTableHeaderCell className="px-4 py-3 fw-semibold">University</CTableHeaderCell>
+                    <CTableHeaderCell className="px-4 py-3 fw-semibold">
+                      University
+                    </CTableHeaderCell>
                     <CTableHeaderCell className="px-4 py-3 fw-semibold">Level</CTableHeaderCell>
                     <CTableHeaderCell className="px-4 py-3 fw-semibold">Status</CTableHeaderCell>
                     <CTableHeaderCell className="px-4 py-3 fw-semibold">Updated</CTableHeaderCell>
@@ -960,42 +1000,40 @@ export default function CourseManagement() {
                     isSearchable
                     isClearable
                     defaultValue={(() => {
-                      const currentSlug = watch('uniSlug');
+                      const currentSlug = watch('uniSlug')
                       if (currentSlug) {
-                        const found = uniData.find((ele) => ele.slug === currentSlug);
+                        const found = uniData.find((ele) => ele.slug === currentSlug)
                         if (found) {
                           return {
                             value: found.slug,
-                            label: found.name
-                          };
+                            label: found.name,
+                          }
                         }
                       }
-                      return null;
+                      return null
                     })()}
                     options={uniData.map((ele) => ({
                       value: ele.slug,
                       label: ele.name,
                     }))}
                     onInputChange={(value, actionMeta) => {
-                      if (actionMeta.action === "input-change") {
-                        setSearch(value);
-                        university(value);
+                      if (actionMeta.action === 'input-change') {
+                        setSearch(value)
+                        university(value)
                       }
-                      return value;
+                      return value
                     }}
                     onChange={(selectedOption) => {
-                      setValue("uniSlug", selectedOption?.value || "", {
+                      setValue('uniSlug', selectedOption?.value || '', {
                         shouldValidate: true,
-                      });
+                      })
                     }}
-                    className={errors.uniSlug ? "is-invalid" : "fw-semibold"}
+                    className={errors.uniSlug ? 'is-invalid' : 'fw-semibold'}
                     classNamePrefix="university"
                   />
 
                   {errors.uniSlug && (
-                    <div className="invalid-feedback d-block">
-                      University slug is required
-                    </div>
+                    <div className="invalid-feedback d-block">University slug is required</div>
                   )}
                 </CCol>
 
@@ -1006,7 +1044,7 @@ export default function CourseManagement() {
                   <CFormSelect
                     id="level"
                     invalid={!!errors.level}
-                    {...register("level", { required: true })}
+                    {...register('level', { required: true })}
                   >
                     <option value="">Select Level</option>
                     <option value="Undergraduate">Undergraduate</option>
@@ -1015,7 +1053,9 @@ export default function CourseManagement() {
                     <option value="Certificate">Certificate</option>
                     <option value="Diploma">Diploma</option>
                   </CFormSelect>
-                  {errors.level && <div className="invalid-feedback d-block">Level is required</div>}
+                  {errors.level && (
+                    <div className="invalid-feedback d-block">Level is required</div>
+                  )}
                 </CCol>
 
                 <CCol md={6}>
@@ -1157,107 +1197,193 @@ export default function CourseManagement() {
                 ) : (
                   sectionFields.map((section, index) => {
                     const template = TEMPLATES[section.type]
+
                     if (!template) return null
 
+                    const isOpen = openSections[section.id] ?? false
+
                     return (
-                      <CCard key={section.id} className="mb-3 border">
-                        <CCardHeader className="bg-light d-flex justify-content-between align-items-center py-2">
-                          <div className="d-flex align-items-center gap-3">
-                            <FaGripVertical className="text-muted" style={{ cursor: 'move' }} />
-                            <span className="fw-semibold">Order {section.order}</span>
+                      <CCard key={section.id} className="mb-2 border shadow-sm">
+                        {/* Header */}
+                        <CCardHeader
+                          className={`
+          d-flex
+          justify-content-between
+          align-items-center
+          py-2
+          px-3
+          ${isOpen ? 'bg-light' : 'bg-white'}
+        `}
+                          style={{
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => toggleSection(section.id)}
+                        >
+                          {/* Left */}
+                          <div className="d-flex align-items-center gap-2">
+                            {/* Drag icon */}
+                            <FaGripVertical
+                              className="text-muted"
+                              style={{
+                                cursor: 'move',
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+
+                            {/* Order */}
+                            <span className="fw-semibold small">{section.order}.</span>
+
                             <span className="text-muted">|</span>
-                            <span>{section.name || template.name}</span>
-                            <CBadge color="info" className="ms-2">
+
+                            {/* Name */}
+                            <span className="fw-semibold">{section.name || template.name}</span>
+
+                            <CBadge color="info" className="ms-1">
                               {template.name}
                             </CBadge>
                           </div>
-                          <div className="d-flex gap-1">
+
+                          {/* Right */}
+                          <div
+                            className="d-flex align-items-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {/* Move Up */}
                             <CButton
                               color="link"
                               size="sm"
-                              className="text-decoration-none"
+                              className="text-decoration-none p-1"
                               onClick={() => moveSectionUp(index)}
                               disabled={index === 0}
+                              title="Move up"
                             >
                               ↑
                             </CButton>
+
+                            {/* Move Down */}
                             <CButton
                               color="link"
                               size="sm"
-                              className="text-decoration-none"
+                              className="text-decoration-none p-1"
                               onClick={() => moveSectionDown(index)}
                               disabled={index === sectionFields.length - 1}
+                              title="Move down"
                             >
                               ↓
                             </CButton>
+
+                            {/* Delete */}
                             <CButton
                               color="danger"
                               variant="outline"
                               size="sm"
+                              className="p-1 px-2"
                               onClick={() => removeSection(index)}
+                              title="Remove section"
                             >
-                              <FaTrash />
+                              <FaTrash size={12} />
+                            </CButton>
+
+                            {/* Accordion icon */}
+                            <CButton
+                              color="secondary"
+                              variant="ghost"
+                              size="sm"
+                              className="px-4 py-2"
+                              onClick={() => toggleSection(section.id)}
+                              title={isOpen ? 'Collapse' : 'Expand'}
+                            >
+                              {isOpen ? '▲' : '▼'}
                             </CButton>
                           </div>
                         </CCardHeader>
-                        <CCardBody>
-                          {/* Dynamically render fields based on template */}
-                          {Object.keys(template.fields).map((fieldName) => {
-                            const field = template.fields[fieldName]
-                            const fieldPath = `content.sections.${index}.data.${fieldName}`
 
-                            if (field.type === 'array') {
-                              return (
-                                <DynamicArrayField
-                                  key={fieldName}
-                                  control={control}
-                                  register={register}
-                                  fieldName={fieldName}
-                                  field={field}
-                                  fieldPath={fieldPath}
-                                  sectionIndex={index}
-                                />
-                              )
-                            } else if (field.type === 'editor') {
-                              return (
-                                <div key={fieldName} className="mb-3">
-                                  <CFormLabel className="fw-semibold">{field.label}</CFormLabel>
-                                  <Controller
-                                    name={fieldPath}
+                        {/* Content */}
+                        <CCollapse visible={isOpen}>
+                          <CCardBody className="p-3">
+                            {Object.keys(template.fields).map((fieldName) => {
+                              const field = template.fields[fieldName]
+
+                              const fieldPath = `content.sections.${index}.data.${fieldName}`
+
+                              {
+                                /* Array */
+                              }
+                              if (field.type === 'array') {
+                                return (
+                                  <DynamicArrayField
+                                    key={fieldName}
                                     control={control}
-                                    render={({ field: controllerField }) => (
-                                      <CKEditorComponent
-                                        value={controllerField.value || ''}
-                                        onChange={controllerField.onChange}
-                                      />
-                                    )}
+                                    register={register}
+                                    fieldName={fieldName}
+                                    field={field}
+                                    fieldPath={fieldPath}
+                                    sectionIndex={index}
                                   />
-                                </div>
-                              )
-                            } else if (field.type === 'textarea') {
+                                )
+                              }
+
+                              {
+                                /* Editor */
+                              }
+                              if (field.type === 'editor') {
+                                return (
+                                  <div key={fieldName} className="mb-3">
+                                    <CFormLabel className="fw-semibold small mb-1">
+                                      {field.label}
+                                    </CFormLabel>
+
+                                    <Controller
+                                      name={fieldPath}
+                                      control={control}
+                                      render={({ field: controllerField }) => (
+                                        <CKEditorComponent
+                                          value={controllerField.value || ''}
+                                          onChange={controllerField.onChange}
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                )
+                              }
+
+                              {
+                                /* Textarea */
+                              }
+                              if (field.type === 'textarea') {
+                                return (
+                                  <div key={fieldName} className="mb-3">
+                                    <CFormLabel className="fw-semibold small mb-1">
+                                      {field.label}
+                                    </CFormLabel>
+
+                                    <CFormTextarea
+                                      rows={3}
+                                      placeholder={field.placeholder}
+                                      {...register(fieldPath)}
+                                    />
+                                  </div>
+                                )
+                              }
+
+                              {
+                                /* Default input */
+                              }
                               return (
                                 <div key={fieldName} className="mb-3">
-                                  <CFormLabel className="fw-semibold">{field.label}</CFormLabel>
-                                  <CFormTextarea
-                                    rows={3}
-                                    placeholder={field.placeholder}
-                                    {...register(fieldPath)}
-                                  />
-                                </div>
-                              )
-                            } else {
-                              return (
-                                <div key={fieldName} className="mb-3">
-                                  <CFormLabel className="fw-semibold">{field.label}</CFormLabel>
+                                  <CFormLabel className="fw-semibold small mb-1">
+                                    {field.label}
+                                  </CFormLabel>
+
                                   <CFormInput
                                     placeholder={field.placeholder}
                                     {...register(fieldPath)}
                                   />
                                 </div>
                               )
-                            }
-                          })}
-                        </CCardBody>
+                            })}
+                          </CCardBody>
+                        </CCollapse>
                       </CCard>
                     )
                   })
@@ -1268,7 +1394,6 @@ export default function CourseManagement() {
             {/* SECTIONS TAB */}
             {activeTab === 'sections' && (
               <CRow className="g-4">
-
                 <CCol xs={12}>
                   <CCard className="mb-4">
                     <CCardHeader>
@@ -1278,10 +1403,7 @@ export default function CourseManagement() {
                       <CRow className="g-3 mb-4">
                         <CCol xs={12}>
                           <CFormLabel>Title</CFormLabel>
-                          <CFormInput
-                            placeholder="e.g., Call now"
-                            {...register('intro.title')}
-                          />
+                          <CFormInput placeholder="e.g., Call now" {...register('intro.title')} />
                         </CCol>
                         <CCol xs={12}>
                           <CFormLabel>Description</CFormLabel>
@@ -1296,7 +1418,6 @@ export default function CourseManagement() {
                               />
                             )}
                           />
-                         
                         </CCol>
                       </CRow>
                     </CCardBody>
@@ -1391,7 +1512,7 @@ export default function CourseManagement() {
                         </CCol>
                         <CCol xs={12}>
                           <CFormLabel>CTA Subtitle</CFormLabel>
-                           <Controller
+                          <Controller
                             name="ctaSection.description"
                             control={control}
                             defaultValue=""
@@ -1477,18 +1598,16 @@ export default function CourseManagement() {
               >
                 Cancel
               </CButton>
-              <CButton
-                color="primary"
-                type="submit"
-                disabled={isLoading || isSubmitting}
-              >
+              <CButton color="primary" type="submit" disabled={isLoading || isSubmitting}>
                 {isLoading || isSubmitting ? (
                   <>
                     <CSpinner size="sm" className="me-2" />
                     {editingId ? 'Saving Changes...' : 'Creating Course...'}
                   </>
+                ) : editingId ? (
+                  'Save Changes'
                 ) : (
-                  editingId ? 'Save Changes' : 'Create Course'
+                  'Create Course'
                 )}
               </CButton>
             </div>
@@ -1502,7 +1621,7 @@ export default function CourseManagement() {
 function DynamicArrayField({ control, register, fieldName, field, fieldPath, sectionIndex }) {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: fieldPath
+    name: fieldPath,
   })
 
   return (
@@ -1514,7 +1633,7 @@ function DynamicArrayField({ control, register, fieldName, field, fieldPath, sec
           size="sm"
           onClick={() => {
             const newItem = {}
-            Object.keys(field.fields).forEach(key => {
+            Object.keys(field.fields).forEach((key) => {
               newItem[key] = ''
             })
             append(newItem)
@@ -1562,10 +1681,7 @@ function DynamicArrayField({ control, register, fieldName, field, fieldPath, sec
                 return (
                   <CCol key={subFieldName} md={10}>
                     <CFormLabel className="fw-semibold">{subField.label}</CFormLabel>
-                    <CFormInput
-                      placeholder={subField.placeholder}
-                      {...register(subFieldPath)}
-                    />
+                    <CFormInput placeholder={subField.placeholder} {...register(subFieldPath)} />
                   </CCol>
                 )
               }
